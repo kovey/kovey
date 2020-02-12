@@ -15,6 +15,7 @@ namespace Kovey\Rpc\Server;
 
 use Kovey\Rpc\Protocol\Json;
 use Kovey\Rpc\Protocol\ProtocolInterface;
+use Kovey\Components\Exception\BusiException;
 
 class Server
 {
@@ -88,7 +89,7 @@ class Server
 				$result = array(
 					'err' => sprintf('%s in %s on line %s', $error['message'], $error['file'], $error['line']),
 					'type' => 'fatal',
-					'code' => 1,
+					'code' => 1000,
 					'packet' => $packet->getClear()
 				);
 
@@ -115,9 +116,9 @@ class Server
 		try {
 			call_user_func($this->events['initPool'], $this);
 		} catch (\Exception $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
 		} catch (\Throwable $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
 		}
     }
 
@@ -145,10 +146,10 @@ class Server
 			call_user_func($this->events['pipeMessage'], $data['p'] ?? '', $data['m'] ?? '', $data['a'] ?? array());
         } catch (\Throwable $e) {
 			echo $e->getMessage() . "\n" .
-				$e->getTraceAsString();
+				$e->getTraceAsString() . "\n";
 		} catch (\Exception $e) {
 			echo $e->getMessage() . "\n" .
-				$e->getTraceAsString();
+				$e->getTraceAsString() . "\n";
 		}
     }
 
@@ -163,7 +164,7 @@ class Server
 			$this->send(array(
 				'err' => 'parse data error',
 				'type' => 'exception',
-				'code' => 1,
+				'code' => 1000,
 				'packet' => $data
 			), $fd);
             $serv->close($fd);
@@ -186,7 +187,7 @@ class Server
 				$this->send(array(
 					'err' => 'handler events is not register',
 					'type' => 'exception',
-					'code' => 1,
+					'code' => 1000,
 					'packet' => $packet->getClear()
 				), $fd);
 				return;
@@ -198,18 +199,26 @@ class Server
 			if ($result['code'] > 0) {
 				$result['packet'] = $packet->getClear();
 			}
+		} catch (BusiException $e) {
+            $result = array(
+                'err' => $e->getMessage(),
+                'type' => 'busi_exception',
+                'code' => $e->getCode(),
+                'packet' => $packet->getClear()
+            );
         } catch (\Exception $e) {
             $result = array(
                 'err' => $e->getMessage() . "\n" . $e->getTraceAsString(),
                 'type' => 'exception',
-                'code' => 1,
+                'code' => 1000,
                 'packet' => $packet->getClear()
             );
         } catch (\Throwable $e) {
+			echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
             $result = array(
                 'err' => $e->getMessage() . "\n" . $e->getTraceAsString(),
                 'type' => 'exception',
-                'code' => 1,
+                'code' => 1000,
                 'packet' => $packet->getClear()
             );
         }
@@ -240,9 +249,9 @@ class Server
 				'minute' => date('YmdHi', $reqTime),
 			));
 		} catch (\Exception $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
 		} catch (\Throwable $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
 		}
 	}
 

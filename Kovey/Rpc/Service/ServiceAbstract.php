@@ -48,10 +48,8 @@ abstract class ServiceAbstract
 			throw new Exception('resopone is error.', 1000, 'requset_error');
 		}
 
-		if ($result['code'] > 0) {
-			if ($result['type'] != 'success') {
-				throw new Exception($result['err'], 1001, $result['type']);
-			}
+		if ($result['type'] !== 'success') {
+			throw new Exception($result['err'], $result['code'], $result['type']);
 		}
 
 		return $result['result'];

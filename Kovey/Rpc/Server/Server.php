@@ -16,6 +16,7 @@ namespace Kovey\Rpc\Server;
 use Kovey\Rpc\Protocol\Json;
 use Kovey\Rpc\Protocol\ProtocolInterface;
 use Kovey\Components\Exception\BusiException;
+use Kovey\Components\Logger\Logger;
 
 class Server
 {
@@ -27,9 +28,12 @@ class Server
 
 	private $allowEevents;
 
+	private $isRunDocker;
+
     public function __construct(Array $conf)
     {
         $this->conf = $conf;
+		$this->isRunDocker = ($this->conf['run_docker'] ?? 'Off') === 'On';
         $this->serv = new \Swoole\Server($this->conf['host'], $this->conf['port']);
         $this->serv->set(array(
             'open_length_check' => true,
@@ -39,7 +43,7 @@ class Server
             'package_body_offset' => Json::BODY_OFFSET,
 			'enable_coroutine' => true,
 			'worker_num' => $this->conf['worker_num'],
-            'daemonize' => true,
+            'daemonize' => !$this->isRunDocker,
             'pid_file' => $this->conf['pid_file'],
             'log_file' => $this->conf['log_file'],
         ));
@@ -48,6 +52,10 @@ class Server
 		$logDir = dirname($this->conf['log_file']);
 		if (!is_dir($logDir)) {
 			mkdir($logDir, 0777, true);
+		}
+		$pidDir = dirname($this->conf['pid_file']);
+		if (!is_dir($pidDir)) {
+			mkdir($pidDir, 0777, true);
 		}
 
 		$this->initAllowEvents()
@@ -116,9 +124,17 @@ class Server
 		try {
 			call_user_func($this->events['initPool'], $this);
 		} catch (\Exception $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			}
 		} catch (\Throwable $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			}
 		}
     }
 
@@ -145,11 +161,19 @@ class Server
 
 			call_user_func($this->events['pipeMessage'], $data['p'] ?? '', $data['m'] ?? '', $data['a'] ?? array());
         } catch (\Throwable $e) {
-			echo $e->getMessage() . "\n" .
-				$e->getTraceAsString() . "\n";
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" .
+					$e->getTraceAsString() . "\n";
+			}
 		} catch (\Exception $e) {
-			echo $e->getMessage() . "\n" .
-				$e->getTraceAsString() . "\n";
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" .
+					$e->getTraceAsString() . "\n";
+			}
 		}
     }
 
@@ -207,6 +231,11 @@ class Server
                 'packet' => $packet->getClear()
             );
         } catch (\Exception $e) {
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			}
             $result = array(
                 'err' => $e->getMessage() . "\n" . $e->getTraceAsString(),
                 'type' => 'exception',
@@ -214,7 +243,11 @@ class Server
                 'packet' => $packet->getClear()
             );
         } catch (\Throwable $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			}
             $result = array(
                 'err' => $e->getMessage() . "\n" . $e->getTraceAsString(),
                 'type' => 'exception',
@@ -249,9 +282,17 @@ class Server
 				'minute' => date('YmdHi', $reqTime),
 			));
 		} catch (\Exception $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			}
 		} catch (\Throwable $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+			}
 		}
 	}
 

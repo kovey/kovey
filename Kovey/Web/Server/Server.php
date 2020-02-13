@@ -14,6 +14,7 @@
 namespace Kovey\Web\Server;
 
 use Swoole\Http\Response;
+use Kovey\Components\Logger\Logger;
 
 class Server
 {
@@ -27,9 +28,12 @@ class Server
 
 	private $staticDir;
 
+	private $isRunDocker;
+
 	public function __construct(Array $config)
 	{
 		$this->config = $config;
+		$this->isRunDocker = ($this->config['run_docker'] ?? 'Off') === 'On';
         $this->serv = new \Swoole\Http\Server($this->config['host'], intval($this->config['port']));
 		$this->events = array();
 		$this->eventsTypes = array(
@@ -64,8 +68,13 @@ class Server
 			mkdir($logDir, 0777, true);
 		}
 
+		$logDir = dirname($this->config['pid_file']);
+		if (!is_dir($logDir)) {
+			mkdir($logDir, 0777, true);
+		}
+
         $this->serv->set(array(
-            'daemonize' => true,
+            'daemonize' => !$this->isRunDocker,
 			'http_compression' => true,
 			'enable_static_handler' => true,
 			'document_root' => APPLICATION_PATH . $this->config['document_root'],
@@ -138,9 +147,17 @@ class Server
 				call_user_func($this->events['console'], $data);
 			});
         } catch (\Throwable $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			}
 		} catch (\Exception $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			}
 		}
     }
 
@@ -189,7 +206,11 @@ class Server
 		try {
 			$result = call_user_func($this->events['workflow'], $request);
 		} catch (\Exception $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			}
 
 			$result = array(
 				'httpCode' => 500,
@@ -200,7 +221,11 @@ class Server
 				'cookie' => array()
 			);
 		} catch (\Throwable $e) {
-			echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . "\n" . $e->getTraceAsString();
+			}
 			$result = array(
 				'httpCode' => 500,
 				'header' => array(

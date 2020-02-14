@@ -153,11 +153,9 @@ class Where
 			return $sql;
 		}
 
-		$pos = Util::strposall($sql, '?');
-		foreach ($pos as $i => $p) {
-			$sql = substr_replace($sql, $this->data[$i], $p, 1);
+		foreach ($this->data as $needle) {
+			$sql = substr_replace($sql, $needle, strpos($sql, '?'), 1);
 		}
-
 		return $sql;
 	}
 }

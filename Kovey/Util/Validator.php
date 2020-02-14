@@ -134,7 +134,9 @@ class Validator
 				return false;
 			}
 		} else {
-			if (!isset($this->data[$key])) {
+			if (!isset($this->data[$key])
+				|| (!is_numeric($this->data[$key]) && empty($this->data[$key]))
+			) {
 				return true;
 			}
 		}

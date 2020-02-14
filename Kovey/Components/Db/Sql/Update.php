@@ -146,9 +146,8 @@ class Update implements SqlInterface
 			return $sql;
 		}
 
-		$pos = Util::strposall($sql, '?');
-		foreach ($pos as $i => $p) {
-			$sql = substr_replace($sql, $data[$i], $p, 1);
+		foreach ($data as $needle) {
+			$sql = substr_replace($sql, $needle, strpos($sql, '?'), 1);
 		}
 
 		return $sql;

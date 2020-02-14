@@ -340,9 +340,8 @@ class Select implements SqlInterface
 			return $sql;
 		}
 
-		$pos = Util::strposall($sql, '?');
-		foreach ($pos as $index => $p) {
-			$sql = substr_replace($sql, $data[$index], $p, 1);
+		foreach ($data as $needle) {
+			$sql = substr_replace($sql, $needle, strpos($sql, '?'), 1);
 		}
 
 		return $sql;

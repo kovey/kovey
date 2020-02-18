@@ -30,6 +30,8 @@ class Insert implements SqlInterface
 
     private $orignalData = array();
 
+	private $isParsed = false;
+
     public function __construct($table)
     {
 		$info = explode('.', $table);
@@ -57,6 +59,11 @@ class Insert implements SqlInterface
 
     public function parseData()
     {
+		if ($this->isParsed) {
+			return;
+		}
+
+		$this->isParsed = true;
         foreach ($this->orignalData as $name => $val) {
             $this->fields[] = $this->format($name);
             $this->data[] = $val;

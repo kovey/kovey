@@ -18,14 +18,39 @@ use Kovey\Util\Util;
 
 class BatchInsert implements SqlInterface
 {
+	/**
+	 * @description 表名
+	 *
+	 * @var string
+	 */
     private $table;
 
+	/**
+	 * @description 插入的字段名称
+	 *
+	 * @var Array
+	 */
     private $fields = array();
 
+	/**
+	 * @description 插入的值
+	 *
+	 * @var Array
+	 */
     private $values = array();
 
+	/**
+	 * @description 最终合并的数据
+	 *
+	 * @var Array
+	 */
     private $data = array();
 
+	/**
+	 * @description SQL语法
+	 *
+	 * @var string
+	 */
     const SQL_FORMAT = 'INSERT INTO %s (%s) VALUES %s';
 
     public function __construct($table)
@@ -38,6 +63,13 @@ class BatchInsert implements SqlInterface
 		$this->table = implode('.', $info);
     }
 
+	/**
+	 * @description 添加插入语句
+	 *
+	 * @param Insert $insert
+	 *
+	 * @return BatchInsert
+	 */
 	public function add(Insert $insert)
 	{
 		$insert->parseData();
@@ -47,6 +79,8 @@ class BatchInsert implements SqlInterface
 		if (empty($this->fields)) {
 			$this->fields = $insert->getFields();
 		}
+
+		return $this;
 	}
 
 	private function format($name)

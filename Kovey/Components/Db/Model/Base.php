@@ -19,8 +19,24 @@ use Kovey\Components\Db\DbInterface;
 
 abstract class Base
 {
+	/**
+	 * @description 表名称
+	 *
+	 * @var string
+	 */
 	protected $tableName;
 
+	/**
+	 * @description 插入数据
+	 *
+	 * @param Array $data
+	 *
+	 * @param DbInterface $db
+	 *
+	 * @return string
+	 *
+	 * @throws Exception
+	 */
 	public function insert(Array $data, DbInterface $db)
 	{
 		$insert = new Insert($this->tableName);
@@ -31,6 +47,19 @@ abstract class Base
 		return $db->insert($insert);
 	}
 
+	/**
+	 * @description 更新数据
+	 *
+	 * @param Array $data
+	 *
+	 * @param Array $condition
+	 *
+	 * @param DbInterface $db
+	 *
+	 * @return int
+	 *
+	 * @throws Exception
+	 */
 	public function update(Array $data, Array $condition, DbInterface $db)
 	{
 		$update = new Update($this->tableName);
@@ -42,6 +71,19 @@ abstract class Base
 		return $db->update($update);
 	}
 
+	/**
+	 * @description 获取一行数据
+	 *
+	 * @param Array $condition
+	 *
+	 * @param Array $columns
+	 *
+	 * @param DbInterface $db
+	 *
+	 * @return Array
+	 *
+	 * @throws Exception
+	 */
 	public function fetchRow(Array $condition, Array $columns, DbInterface $db)
 	{
 		if (empty($columns)) {
@@ -51,6 +93,19 @@ abstract class Base
 		return $db->fetchRow($this->tableName, $condition, $columns);
 	}
 
+	/**
+	 * @description 获取所有数据
+	 *
+	 * @param Array $condition
+	 *
+	 * @param Array  $columns
+	 *
+	 * @param DbInterface $db
+	 *
+	 * @return Array
+	 *
+	 * @throws Exception
+	 */
 	public function fetchAll(Array $condition, Array $columns, DbInterface $db)
 	{
 		if (empty($columns)) {

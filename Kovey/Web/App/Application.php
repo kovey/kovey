@@ -53,6 +53,8 @@ class Application
 
 	private static $instance = null;
 
+	private $events;
+
 	public static function getInstance(Array $config = array())
 	{
 		if (self::$instance == null) {
@@ -68,6 +70,7 @@ class Application
 		$this->plugins = array();
 		$this->pools = array();
 		$this->defaultMiddlewares = array();
+		$this->events = array();
 	}
 
 	private function __clone()
@@ -297,7 +300,14 @@ class Application
 			call_user_func($this->events['view'], $obj, $template);
 		}
 
-		$content = $obj->$action();
+		$content = '';
+
+		if (isset($this->events['run_action'])) {
+			$content = call_user_func($this->events['run_action'], $obj, $action);
+		} else {
+			$content = $obj->$action();
+		}
+
 		if ($obj->isViewDisabled()) {
 			$res->setBody($content);
 			$res->status(200);

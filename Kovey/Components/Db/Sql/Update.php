@@ -36,6 +36,8 @@ class Update implements SqlInterface
 
     private $equalData = array();
 
+	private $isParsed = false;
+
     public function __construct($table)
     {
         $this->where = new Where();
@@ -60,6 +62,11 @@ class Update implements SqlInterface
 
     protected function parseData()
     {
+		if ($this->isParsed) {
+			return $this;
+		}
+
+		$this->isParsed = true;
         foreach ($this->equalData as $name => $val) {
             $this->fields[] = $this->format($name) . '=?';
             $this->data[] = $val;

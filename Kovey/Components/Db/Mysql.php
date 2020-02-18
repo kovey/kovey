@@ -187,6 +187,9 @@ class Mysql implements DbInterface
 			if ($this->isDisconneted()) {
 				$this->connect();
 				$sth = $this->connection->prepare($sql);
+				if (!$sth) {
+					throw new \Exception('prepare sql fail: ' . $this->getError());
+				}
 			} else {
 				throw new \Exception('prepare sql fail: ' . $this->getError());
 			}

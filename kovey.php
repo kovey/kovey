@@ -18,6 +18,13 @@ if (!extension_loaded('swoole')) {
 	exit;
 }
 
+/**
+ * @description 修改进程名称，macos不允许修改进程名称
+ *
+ * @param string $name
+ *
+ * @return null
+ */
 function ko_change_process_name($name)
 {
 	if (ko_os_is_macos()) {
@@ -27,33 +34,52 @@ function ko_change_process_name($name)
     swoole_set_process_name($name);
 }
 
+/**
+ * @description 判断当前系统是否是mac
+ *
+ * @return bool
+ */
 function ko_os_is_macos()
 {
 	return stristr(PHP_OS, 'DAR') !== false;
 }
 
+/**
+ * @description 判断系统是否是linux
+ *
+ * @return bool
+ */
 function ko_os_is_linux()
 {
 	return stristr(PHP_OS, 'LINUX') !== false;
 }
 
+/**
+ * @description 判断系统是否是windows
+ *
+ * @return bool
+ */
 function ko_os_is_windows()
 {
 	return !ko_os_is_macos() && stristr(PHP_OS, 'WIN') !== false;
 }
 
+// 定义框架路径
 if (!defined('KOVEY_FRAMEWORK_PATH')) {
 	define('KOVEY_FRAMEWORK_PATH', __DIR__);
 }
 
+// 定义RPC路径
 if (!defined('KOVEY_RPC_ROOT')) {
     define('KOVEY_RPC_ROOT', __DIR__);
 }
 
+// 定义配置ROW
 if (!defined('KOVEY_RPC_CONFIG_ROWS')) {
 	define('KOVEY_RPC_CONFIG_ROWS', 1024);
 }
 
+// 如果未定义应用路径，则默认为上级目录
 if (!defined('APPLICATION_PATH')) {
 	define('APPLICATION_PATH', __DIR__ . '/..');
 }

@@ -15,8 +15,18 @@ namespace Kovey\Components\Cache;
 
 class Redis
 {
+	/**
+	 * @description REDIS链接
+	 *
+	 * @var \Swoole\Coroutine\Redis
+	 */
 	private $connection;
 
+	/**
+	 * @description 配置
+	 *
+	 * @var Array
+	 */
 	private $config;
 
 	public function __construct(Array $config)
@@ -28,6 +38,11 @@ class Redis
 		));
 	}
 
+	/**
+	 * @description 连接REDIS服务器
+	 *
+	 * @return bool
+	 */
 	public function connect()
 	{
 		if (!$this->connection->connect($this->config['host'], $this->config['port'])) {
@@ -37,6 +52,15 @@ class Redis
 		return $this->connection->select($this->config['db']);
 	}
 
+	/**
+	 * @description 调用REDIS方法, 参考PHPREDIS扩展
+	 *
+	 * @param string $name
+	 *
+	 * @param Array $params
+	 *
+	 * @return mixed
+	 */
 	public function __call($name, $params)
 	{
 		if (!$this->connection->connected) {
@@ -46,6 +70,11 @@ class Redis
 		return $this->connection->$name(...$params);
 	}
 
+	/**
+	 * @description 获取错误
+	 *
+	 * @return string
+	 */
 	public function getError()
 	{
 		return sprintf('[%s]%s', $this->connection->errCode, $this->connection->errMsg);

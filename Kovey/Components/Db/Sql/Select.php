@@ -260,8 +260,13 @@ class Select implements SqlInterface
         return $tmp;
     }
 
-    public function limit($page, $size = 10)
-    {
+    public function limit($page, $size = 0)
+	{
+		if ($size <= 0) {
+			$this->limit = sprintf(' LIMIT %s', $page);
+			return $this;
+		}
+
         $this->limit = sprintf(' LIMIT %s,%s', intval(($page - 1) * $size), intval($size));
         return $this;
     }

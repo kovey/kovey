@@ -55,6 +55,8 @@ class Application
 
 	private $events;
 
+	private $globals;
+
 	public static function getInstance(Array $config = array())
 	{
 		if (self::$instance == null) {
@@ -71,10 +73,22 @@ class Application
 		$this->pools = array();
 		$this->defaultMiddlewares = array();
 		$this->events = array();
+		$this->globals = array();
 	}
 
 	private function __clone()
 	{}
+
+	public function registerGlobal($name, $val)
+	{
+		$this->globals[$name] = $val;
+		return $this;
+	}
+
+	public function getGlobal($name)
+	{
+		return $this->globals[$name] ?? null;
+	}
 
 	public function registerAutoload(Autoload $autoload)
 	{

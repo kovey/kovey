@@ -46,10 +46,13 @@ class Application
 
 	private $events;
 
+	private $globals;
+
 	private function __construct()
 	{
 		$this->pools = array();
 		$this->events = array();
+		$this->globals = array();
 	}
 
 	private function __clone()
@@ -62,6 +65,17 @@ class Application
 		}
 
 		return self::$instance;
+	}
+
+	public function registerGlobal($name, $val)
+	{
+		$this->globals[$name] = $val;
+		return $this;
+	}
+
+	public function getGlobal($name)
+	{
+		return $this->globals[$name] ?? null;
 	}
 
 	public function on($event, $callable)

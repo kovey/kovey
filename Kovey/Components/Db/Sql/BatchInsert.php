@@ -74,7 +74,7 @@ class BatchInsert implements SqlInterface
 	{
 		$insert->parseData();
 
-		$this->data = array_merge($insert->getBindData());
+		$this->data = array_merge($this->data, $insert->getBindData());
 		$this->values[] = sprintf('(%s)', implode(',', $insert->getValues()));
 		if (empty($this->fields)) {
 			$this->fields = $insert->getFields();

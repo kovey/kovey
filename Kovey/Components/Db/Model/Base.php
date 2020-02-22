@@ -15,6 +15,7 @@ namespace Kovey\Components\Db\Model;
 
 use Kovey\Components\Db\Sql\Insert;
 use Kovey\Components\Db\Sql\Update;
+use Kovey\Components\Db\Sql\BatchInsert;
 use Kovey\Components\Db\DbInterface;
 
 abstract class Base
@@ -113,5 +114,35 @@ abstract class Base
 		}
 
 		return $db->fetchAll($this->tableName, $condition, $columns);
+	}
+
+	/**
+	 * @description 批量插入
+	 *
+	 * @param Array $rows
+	 *
+	 * @param DbInterface $db
+	 *
+	 * @return bool
+	 *
+	 * @throws Exception
+	 */
+	public function batchInsert(Array $rows, DbInterface $db)
+	{
+		if (empty($rows)) {
+			throw new \Exception('rows can not empty');
+		}
+
+		$batchInsert = new BatchInsert($this->tableName);
+		foreach ($rows as $row) {
+			$insert = new Insert($this->tableName);
+			foreach ($row as $key => $val) {
+				$insert->$key = $val;
+			}
+
+			$batchInsert->add($insert);
+		}
+
+		return $db->batchInsert($batchInsert);
 	}
 }

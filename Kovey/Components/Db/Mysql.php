@@ -72,7 +72,34 @@ class Mysql implements DbInterface
 
     public function query($sql)
     {
-        return $this->connection->query($sql);
+		if (!$this->connection->connected) {
+			$this->connect();
+		}
+
+		$begin = microtime(true);
+        $result = $this->connection->query($sql);
+		if (!$result) {
+			if (!$this->isDisconneted()) {
+				$this->connect();
+			}
+
+			$result = $this->connection->query($sql);
+		}
+
+		if (!$result) {
+			throw new \Exception('query fail: ' . $this->getError());
+		}
+
+		if ($result === true) {
+			$result = $this->connection->fetchAll();
+		}
+
+		$end = microtime(true);
+		if ($this->isDev) {
+			DbLogger::write($sqlObj->toString(), $end - $begin);
+		}
+
+		return $result;
     }
 
     public function commit()
@@ -82,11 +109,20 @@ class Mysql implements DbInterface
 
     public function beginTransaction()
     {
-		if (!$this->connection->connected || $this->isDisconneted()) {
+		if (!$this->connection->connected) {
 			$this->connect();
 		}
 
-        $this->connection->begin();
+		if (!$this->connection->begin()) {
+			if ($this->isDisconneted()) {
+				$this->connect();
+				return $this->connection->begin();
+			}
+
+			return false;
+		}
+
+		return true;
     }
 
     public function rollBack()

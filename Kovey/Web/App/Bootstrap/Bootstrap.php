@@ -84,9 +84,7 @@ class Bootstrap
 
 	public function __initProcess(Application $app)
 	{
-		$app->registerProcess('config', new Process\Config())
-			->registerProcess('cron', new Process\Cron())
-			->registerProcess('logger', new Process\Logger());
+		$app->registerProcess('config', new Process\Config());
 
 		if (Manager::get('server.session.type') === 'file') {
 			$app->registerProcess('session', new Process\ClearSession());

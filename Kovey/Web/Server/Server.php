@@ -99,7 +99,7 @@ class Server
 	{
 		$this->staticDir = array();
 
-		$dir = $this->config['document_root'];
+		$dir = APPLICATION_PATH . $this->config['document_root'];
 		if (!is_dir($dir)) {
 			return;
 		}
@@ -144,7 +144,7 @@ class Server
 			}
 
 			go(function () use ($data, $workerId) {
-				call_user_func($this->events['console'], $data);
+				call_user_func($this->events['console'], $data['p'] ?? '', $data['m'] ?? '', $data['a'] ?? array());
 			});
         } catch (\Throwable $e) {
 			if ($this->isRunDocker) {

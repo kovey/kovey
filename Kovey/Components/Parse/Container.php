@@ -29,15 +29,15 @@ class Container implements ContainerInterface
 	 * @name
 	 */
 	private static $excludes = array(
-		'@description',
-		'@package',
-		'@author',
-		'@var',
-		'@param',
-		'@return',
-		'@throws',
-		'@todo',
-		'@name',
+		'description' => 1,
+		'package' => 1,
+		'author' => 1,
+		'var' => 1,
+		'param' => 1,
+		'return' => 1,
+		'throws' => 1,
+		'todo' => 1,
+		'name' => 1,
 	);
 
     public function __construct()
@@ -95,22 +95,22 @@ class Container implements ContainerInterface
 				continue;
 			}
 
-			$lines = explode("\n", $comment);
-			foreach ($lines as $line) {
-				if ($this->isExcludes($line)) {
-					continue;
-				}
+			if (!preg_match_all('/(?=@(.*)\n)/', $comment, $matches)) {
+				continue;
+			}
 
-				if (!preg_match('/@(.*)/', $line, $match)) {
-					continue;
-				}
+			if (count($matches) != 2
+				|| empty($matches[1])
+			) {
+				continue;
+			}
 
-				if (count($match) !== 2) {
-					continue;
-				}
-
-				$class = trim($match[1]);
+			foreach ($matches[1] as $match) {
+				$class = trim($match);
 				if (empty($class)) {
+					continue;
+				}
+				if ($this->isExcludes($class)) {
 					continue;
 				}
 
@@ -125,22 +125,17 @@ class Container implements ContainerInterface
 					'class' => new \ReflectionClass($class),
 					'property' => $property
 				);
+
+				break;
 			}
         }
 
         return $ats;
     }
 
-	private function isExcludes($line)
+	private function isExcludes($class)
 	{
-		$line = strtolower($line);
-
-		foreach (self::$excludes as $exclude) {
-			if (strpos($line, $exclude) !== false) {
-				return true;
-			}
-		}
-
-		return false;
+		$class = explode(' ', strtolower($class));
+		return isset(self::$excludes[$class[0]]);
 	}
 }

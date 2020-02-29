@@ -17,6 +17,7 @@ use Kovey\Config\Manager;
 use Kovey\Rpc\Client\Client;
 use Kovey\Components\Logger\Logger;
 use Kovey\Util\Json;
+use Swoole\Timer;
 
 class Monitor extends ProcessAbstract
 {
@@ -33,13 +34,19 @@ class Monitor extends ProcessAbstract
 				return;
 			}
 
-			$this->sendToMonitor(Json::encode($logger));
+			$this->sendToMonitor('save', Json::encode($logger));
+		});
+
+		Timer::tick(60000, function () {
+			$result = sys_getloadavg();
+			$this->sendToMonitor('load', $result, Manager::get('server.server.name'));
+			Logger::writeInfoLog(__LINE__, __FILE__, 'sys load average: ' . Json::encode($result));
 		});
     }
 
-	protected function sendToMonitor($buffer)
+	protected function sendToMonitor($method, ...$args)
 	{
-		go(function () use ($buffer) {
+		go(function ($method, $args) {
 			$cli = new Client(Manager::get('rpc.monitor'));
 			if (!$cli->connect()) {
 				Logger::writeWarningLog(__LINE__, __FILE__, $cli->getError());
@@ -48,8 +55,8 @@ class Monitor extends ProcessAbstract
 
 			if (!$cli->send(array(
 				'p' => 'Monitor',
-				'm' => 'save',
-				'a' => array($buffer)
+				'm' => $method,
+				'a' => $args
 			))) {
 				$cli->close();
 				Logger::writeWarningLog(__LINE__, __FILE__, $cli->getError());
@@ -73,6 +80,6 @@ class Monitor extends ProcessAbstract
 			if (!$result['result']) {
 				Logger::writeWarningLog(__LINE__, __FILE__, 'save fail, logger: ' . $buffer);
 			}
-		});
+		}, $method, $args);
 	}
 }

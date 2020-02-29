@@ -79,7 +79,7 @@ class Mysql implements DbInterface
 		$begin = microtime(true);
         $result = $this->connection->query($sql);
 		if (!$result) {
-			if (!$this->isDisconneted()) {
+			if ($this->isDisconneted()) {
 				$this->connect();
 			}
 

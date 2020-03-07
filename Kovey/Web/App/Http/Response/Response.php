@@ -15,13 +15,46 @@ namespace Kovey\Web\App\Http\Response;
 
 class Response implements ResponseInterface
 {
+	/**
+	 * @description HTTP协议
+	 *
+	 * @var string
+	 */
     private $protocol = 'HTTP/1.1';
-    private $status = 200;
 
-    private $head;
-    private $cookie;
+	/**
+	 * @description 状态码
+	 *
+	 * @var int
+	 */
+	private $status = 200;
+
+	/**
+	 * @description 头信息
+	 *
+	 * @var Array
+	 */
+	private $head;
+
+	/**
+	 * @description cookie
+	 *
+	 * @var Array
+	 */
+	private $cookie;
+
+	/**
+	 * @description body
+	 *
+	 * @var string
+	 */
     private $body;
 
+	/**
+	 * @description 构造
+	 *
+	 * @return Response
+	 */
 	public function __construct()
 	{
 		$this->head = array();
@@ -31,12 +64,26 @@ class Response implements ResponseInterface
 		$this->head['Content-Type'] = 'text/html; charset=utf-8';
 	}
 
+	/**
+	 * @description 设置状态码
+	 *
+	 * @param int $code
+	 *
+	 * @return Response
+	 */
     public function status($code)
     {
         $this->status = $code;
 		return $this;
     }
 
+	/**
+	 * @description 跳转
+	 *
+	 * @param string $url
+	 *
+	 * @return Response
+	 */
 	public function redirect($url)
 	{
 		$this->status(302);
@@ -44,12 +91,40 @@ class Response implements ResponseInterface
 		return $this;
 	}
 
+	/**
+	 * @description 设置头信息
+	 *
+	 * @param string $key
+	 *
+	 * @param string $val
+	 *
+	 * @return Response
+	 */
     public function setHeader($key, $value)
     {
         $this->head[$key] = $value;
 		return $this;
     }
 
+	/**
+	 * @description 设置cookie
+	 *
+	 * @param string $name
+	 *
+	 * @param string $value
+	 *
+	 * @param string $expire
+	 *
+	 * @param string $path
+	 *
+	 * @param string $domain
+	 *
+	 * @param string $secure
+	 *
+	 * @param bool $httponly
+	 *
+	 * @return Response
+	 */
     public function setCookie($name, $value = null, $expire = null, $path = '/', $domain = null, $secure = null, $httponly = null)
     {
         if ($value == null) {
@@ -76,12 +151,26 @@ class Response implements ResponseInterface
 		return $this;
     }
 
+	/**
+	 * @description 添加头
+	 *
+	 * @param Array $header
+	 *
+	 * @return ResponseInterface
+	 */
     public function addHeaders(array $header)
     {
         $this->head = array_merge($this->head, $header);
 		return $this;
     }
 
+	/**
+	 * @description 获取头信息
+	 *
+	 * @param bool $fastcgi
+	 *
+	 * @return string
+	 */
     public function getHeader($fastcgi = false)
     {
         $out = '';
@@ -117,33 +206,65 @@ class Response implements ResponseInterface
         return $out;
     }
 
+	/**
+	 * @description 是否cache
+	 *
+	 * @return null
+	 */
     public function noCache()
     {
         $this->head['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0';
         $this->head['Pragma'] = 'no-cache';
     }
 
+	/**
+	 * @description 获取BODY
+	 *
+	 * @return string
+	 */
 	public function getBody()
 	{
 		return $this->body;
 	}
 
+	/**
+	 * @description 获取HEAD
+	 *
+	 * @return Array
+	 */
 	public function getHead()
 	{
 		return $this->head;
 	}
 
+	/**
+	 * @description 获取COOKIE
+	 *
+	 * @return Array
+	 */
 	public function getCookie()
 	{
 		return $this->cookie;
 	}
 
+	/**
+	 * @description 设置BODY
+	 *
+	 * @param string $body
+	 *
+	 * @return null
+	 */
 	public function setBody($body)
 	{
 		$this->body = $body;
 		$this->head['Content-Length'] = strlen($this->body);
 	}
 
+	/**
+	 * @description 转换成数组
+	 *
+	 * @return Array
+	 */
 	public function toArray() : array
 	{
 		return array(
@@ -154,12 +275,22 @@ class Response implements ResponseInterface
 		);
 	}
 
+	/**
+	 * @description 清理BODY
+	 *
+	 * @return null
+	 */
 	public function clearBody()
 	{
 		$this->body = '';
 		$this->head['Content-Length'] = 0;
 	}
 
+	/**
+	 * @description 获取状态码Y
+	 *
+	 * @return int
+	 */
 	public function getHttpCode()
 	{
 		return $this->status;

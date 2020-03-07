@@ -12,9 +12,9 @@
  * @author      kovey
  */
 if (!extension_loaded('swoole')) {
-	echo "\n" . 'swoole extension not install!' . "\n"
-		. 'kovey framwork base on swoole 4.4.x!' . "\n"
-		. 'please install swoole-4.4.x first!' . "\n";
+	echo PHP_EOL . 'swoole extension not install!' . PHP_EOL
+		. 'kovey framwork base on swoole 4.4.x!' . PHP_EOL
+		. 'please install swoole-4.4.x first!' . PHP_EOL;
 	exit;
 }
 

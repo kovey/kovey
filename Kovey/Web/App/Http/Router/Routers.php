@@ -15,18 +15,53 @@ namespace Kovey\Web\App\Http\Router;
 
 class Routers implements RoutersInterface
 {
+	/**
+	 * @description GET路由
+	 *
+	 * @var Array
+	 */
 	private $getRoutes;
 
+	/**
+	 * @description POST路由
+	 *
+	 * @var Array
+	 */
 	private $postRoutes;
 
+	/**
+	 * @description PUT路由
+	 *
+	 * @var Array
+	 */
 	private $putRoutes;
 
+	/**
+	 * @description DELETE路由
+	 *
+	 * @var Array
+	 */
 	private $delRoutes;
 
+	/**
+	 * @description 默认路由
+	 *
+	 * @var Array
+	 */
 	private $defaults;
 
+	/**
+	 * @description 是否禁用默认路由
+	 *
+	 * @var bool
+	 */
 	private $isDisableDefault = false;
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @return Routers
+	 */
 	public function __construct()
 	{
 		$this->getRoutes = array();
@@ -35,6 +70,15 @@ class Routers implements RoutersInterface
 		$this->delRoutes = array();
 	}
 
+	/**
+	 * @description 获取路由
+	 *
+	 * @param string $uri
+	 *
+	 * @param string $method
+	 *
+	 * @return RoutersInterface
+	 */
 	public function getRouter(string $uri, string $method) : ? RouterInterface
 	{
 		$uri = str_replace(array('//', '\\'), array('/'), $uri);
@@ -63,11 +107,25 @@ class Routers implements RoutersInterface
 		return null;
 	}
 
+	/**
+	 * @description uri是否合法
+	 *
+	 * @param string $uri
+	 *
+	 * @return bool
+	 */
 	public function isUri(string $uri) : bool
 	{
 		return (bool)preg_match('/^\/[a-z]+(\/[a-z][a-z0-9]+){0,2}(\/.+){0,1}$/', $uri);
 	}
 
+	/**
+	 * @description 默认路由
+	 *
+	 * @param string $uri
+	 *
+	 * @return RouterInterface
+	 */
 	public function defaultRoute(string $uri) : ? RouterInterface
 	{
 		if ($this->isDisableDefault) {
@@ -89,6 +147,15 @@ class Routers implements RoutersInterface
 		return $router;
 	}
 
+	/**
+	 * @description 添加GET路由
+	 *
+	 * @param string $uri
+	 *
+	 * @param RouterInterface $router
+	 *
+	 * @return RoutersInterface
+	 */
 	public function get(string $uri, RouterInterface $router) : RoutersInterface
 	{
 		if ($router->isValid()) {
@@ -97,6 +164,15 @@ class Routers implements RoutersInterface
 		return $this;
 	}
 
+	/**
+	 * @description 添加POST路由
+	 *
+	 * @param string $uri
+	 *
+	 * @param RouterInterface $router
+	 *
+	 * @return RoutersInterface
+	 */
 	public function post(string $uri, RouterInterface $router) : RoutersInterface
 	{
 		if ($router->isValid()) {
@@ -105,6 +181,15 @@ class Routers implements RoutersInterface
 		return $this;
 	}
 
+	/**
+	 * @description 添加PUT路由
+	 *
+	 * @param string $uri
+	 *
+	 * @param RouterInterface $router
+	 *
+	 * @return RoutersInterface
+	 */
 	public function put(string $uri, RouterInterface $router) : RoutersInterface
 	{
 		if ($router->isValid()) {
@@ -113,6 +198,15 @@ class Routers implements RoutersInterface
 		return $this;
 	}
 
+	/**
+	 * @description 添加DELETE路由
+	 *
+	 * @param string $uri
+	 *
+	 * @param RouterInterface $router
+	 *
+	 * @return RoutersInterface
+	 */
 	public function delete(string $uri, RouterInterface $router) : RoutersInterface
 	{
 		if ($router->isValid()) {
@@ -121,6 +215,11 @@ class Routers implements RoutersInterface
 		return $this;
 	}
 
+	/**
+	 * @description 禁用默认路由
+	 *
+	 * @return null
+	 */
 	public function disableDefault()
 	{
 		$this->isDisableDefault = true;

@@ -18,36 +18,119 @@ use Kovey\Web\App\Http\Session\SessionInterface;
 
 class Request implements RequestInterface
 {
+	/**
+	 * @description 请求时间
+	 *
+	 * @var int
+	 */
     private $time;
 
+	/**
+	 * @description 请求IP
+	 *
+	 * @var string
+	 */
     private $remote_ip;
 
+	/**
+	 * @description 远程信息
+	 *
+	 * @var Array
+	 */
     private $remote;
-	
+
+	/**
+	 * @description 原始请求对象
+	 *
+	 * @var Swoole\Http\Request
+	 */
 	private $req;
 
+	/**
+	 * @description 请求信息
+	 *
+	 * @var Array
+	 *
+	 */
 	private $request;
 
+	/**
+	 * @description 请求BODY
+	 *
+	 * @var string
+	 */
 	private $body;
 
+	/**
+	 * @description 服务器信息
+	 *
+	 * @var Array
+	 */
 	private $server;
 
+	/**
+	 * @description 控制器
+	 *
+	 * @var string
+	 */
 	private $controller;
 
+	/**
+	 * @description ACTION
+	 *
+	 * @var string
+	 */
 	private $action;
 
+	/**
+	 * @description 请求参数
+	 *
+	 * @var Array
+	 */
 	private $params;
 
+	/**
+	 * @description post请求参数
+	 *
+	 * @var Array
+	 */
 	private $post;
 
+	/**
+	 * @description GET请求参数
+	 *
+	 * @var Array
+	 */
 	private $get;
 
+	/**
+	 * @description PUT请求参数
+	 *
+	 * @var Array
+	 */
 	private $put;
 
+	/**
+	 * @description DELETE 请求参数
+	 *
+	 * @var Array
+	 */
 	private $delete;
 
+	/**
+	 * @description 绘画
+	 *
+	 * @var SessionInterface
+	 */
 	private $session;
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @param Swoole\Http\Request $request
+	 * 
+	 * @return Request
+	 */
 	public function __construct(\Swoole\Http\Request $request)
 	{
 		$this->req = $request;
@@ -58,6 +141,11 @@ class Request implements RequestInterface
 		$this->processParams();
 	}
 
+	/**
+	 * @description 构造函数
+	 * 
+	 * @return null
+	 */
 	private function processParams()
 	{
 		$info = explode('/', $this->getUri());
@@ -72,6 +160,11 @@ class Request implements RequestInterface
 		}
 	}
 
+	/**
+	 * @description 解析数据
+	 * 
+	 * @return null
+	 */
 	private function parseData()
 	{
 		$_GET = array();
@@ -126,6 +219,11 @@ class Request implements RequestInterface
 
 	}
 
+	/**
+	 * @description 设置全局参数
+	 * 
+	 * @return null
+	 */
     private function setGlobal()
     {
         foreach ($this->req->header as $key => $value) {
@@ -139,16 +237,31 @@ class Request implements RequestInterface
         $this->request = $_REQUEST = array_merge($_GET, $_POST, $_COOKIE);
     }
 
+	/**
+	 * @description 销毁全局参数
+	 *
+	 * @return null
+	 */
     public function unsetGlobal()
     {
         $_REQUEST = $_SESSION = $_COOKIE = $_FILES = $_POST = $_SERVER = $_GET = array();
     }
 
+	/**
+	 * @description 判断是否是WEBSocket
+	 *
+	 * @return bool
+	 */
     public function isWebSocket()
     {
         return isset($this->header['Upgrade']) && strtolower($this->header['Upgrade']) == 'websocket';
     }
 
+	/**
+	 * @description 获取客户端IP
+	 *
+	 * @return string
+	 */
     public function getClientIP()
     {
         if (isset($this->server['HTTP_X_REAL_IP']) and strcasecmp($this->server['HTTP_X_REAL_IP'], 'unknown')) {
@@ -171,6 +284,11 @@ class Request implements RequestInterface
         return '';
     }
 
+	/**
+	 * @description 获取浏览器信息
+	 *
+	 * @return string
+	 */
     public function getBrowser()
     {
         $sys = $this->server['HTTP_USER_AGENT'];
@@ -218,6 +336,11 @@ class Request implements RequestInterface
         return $exp[0] . '(' . $exp[1] . ')';
     }
 	
+	/**
+	 * @description 获取客户端系统信息
+	 *
+	 * @return string
+	 */
 	public function getOS()
     {
         $agent = $this->server['HTTP_USER_AGENT'];
@@ -341,6 +464,15 @@ class Request implements RequestInterface
         return $os;
     }
 
+	/**
+	 * @description 获取POST请求数据
+	 *
+	 * @param string $name
+	 *
+	 * @param string $default
+	 *
+	 * @return string
+	 */
 	public function getPost($name = '', $default = '')
 	{
 		if (empty($name)) {
@@ -350,6 +482,15 @@ class Request implements RequestInterface
 		return $this->post[$name] ?? $default;
 	}
 
+	/**
+	 * @description 获取GET请求数据
+	 *
+	 * @param string $name
+	 *
+	 * @param string $default
+	 *
+	 * @return string
+	 */
 	public function getQuery($name = '', $default = '')
 	{
 		if (empty($name)) {
@@ -359,6 +500,15 @@ class Request implements RequestInterface
 		return $this->get[$name] ?? $default;
 	}
 
+	/**
+	 * @description 获取PUT请求数据
+	 *
+	 * @param string $name
+	 *
+	 * @param string $default
+	 *
+	 * @return string
+	 */
 	public function getPut($name = '', $default = '')
 	{
 		if (empty($name)) {
@@ -368,6 +518,15 @@ class Request implements RequestInterface
 		return $this->put[$name] ?? $default;
 	}
 
+	/**
+	 * @description 获取DELETE请求数据
+	 *
+	 * @param string $name
+	 *
+	 * @param string $default
+	 *
+	 * @return string
+	 */
 	public function getDelete($name = '', $default = '')
 	{
 		if (empty($name)) {
@@ -377,68 +536,143 @@ class Request implements RequestInterface
 		return $this->delete[$name] ?? $default;
 	}
 
+	/**
+	 * @description 获取METHOD
+	 *
+	 * @return string
+	 */
 	public function getMethod()
 	{
 		return strtolower($this->server['request_method']);
 	}
 
+	/**
+	 * @description 获取URI
+	 *
+	 * @return string
+	 */
 	public function getUri()
 	{
 		return $this->server['request_uri'] ?? '/';
 	}
 
+	/**
+	 * @description 获取参数
+	 *
+	 * @param string $key
+	 *
+	 * @return string
+	 */
 	public function getParam($key)
 	{
 		return $this->params[$key] ?? '';
 	}
 
+	/**
+	 * @description 获取baseurl
+	 *
+	 * @return string
+	 */
 	public function getBaseUrl()
 	{
 		return $this->server['HTTP_HOST'] ?? '';
 	}
 
+	/**
+	 * @description 设置控制器
+	 *
+	 * @param string $controller
+	 * 
+	 * @return Request
+	 */
 	public function setController($controller)
 	{
 		$this->controller = $controller;
 		return $this;
 	}
 
+	/**
+	 * @description 设置Action
+	 *
+	 * @param string $action
+	 * 
+	 * @return Request
+	 */
 	public function setAction($action)
 	{
 		$this->action = $action;
 		return $this;
 	}
 
+	/**
+	 * @description 获取ACTION
+	 * 
+	 * @return string
+	 */
 	public function getAction()
 	{
 		return $this->action;
 	}
 
+	/**
+	 * @description 获取控制器
+	 * 
+	 * @return string
+	 */
 	public function getController()
 	{
 		return $this->controller;
 	}
 
+	/**
+	 * @description 获取原始数据
+	 * 
+	 * @return string
+	 */
 	public function getPhpinput()
 	{
 		return $this->req->rawContent();
 	}
 
+	/**
+	 * @description 获取cookie
+	 * 
+	 * @return Array
+	 */
 	public function getCookie()
 	{
 		return $this->req->cookie;
 	}
 
+	/**
+	 * @description 获取头信息
+	 *
+	 * @param string $name
+	 * 
+	 * @return string
+	 */
 	public function getHeader($name)
 	{
 		return $this->req->header[strtolower($name)] ?? '';
 	}
 
+	/**
+	 * @description 设置Session
+	 *
+	 * @param SessionInterface $session
+	 * 
+	 * @return null
+	 */
 	public function setSession(SessionInterface $session)
 	{
 		$this->session = $session;
 	}
 
+	/**
+	 * @description 获取Sesstion
+	 * 
+	 * @return SessionInterface
+	 */
 	public function getSession()
 	{
 		return $this->session;

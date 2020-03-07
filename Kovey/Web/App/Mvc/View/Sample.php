@@ -18,12 +18,36 @@ use Kovey\Web\App\Mvc\View\ViewInterface;
 
 class Sample implements ViewInterface
 {
+	/**
+	 * @description 模板路径
+	 *
+	 * @var string
+	 */
 	private $template;
 
+	/**
+	 * @description 响应对象
+	 *
+	 * @var ResponseInterface
+	 */
 	private $res;
 
+	/**
+	 * @description 页面数据
+	 *
+	 * @var Array
+	 */
 	private $data;
 
+	/**
+	 * @description 构造
+	 *
+	 * @param ResponseInterface $res
+	 *
+	 * @param string $template
+	 *
+	 * @return ViewInterface
+	 */
 	final public function __construct(ResponseInterface $res, string $template)
 	{
 		$this->res = $res;
@@ -31,21 +55,49 @@ class Sample implements ViewInterface
 		$this->data = array();
 	}
 
+	/**
+	 * @description 设置模板
+	 *
+	 * @param string $template
+	 *
+	 * @return null
+	 */
 	public function setTemplate($template)
 	{
 		$this->template = $template;
 	}
 
+	/**
+	 * @description 设置变量值
+	 *
+	 * @param string $name
+	 *
+	 * @param string $val
+	 *
+	 * @return null
+	 */
 	public function __set($name, $val)
 	{
 		$this->data[$name] = $val;
 	}
 
+	/**
+	 * @description 获取变量值
+	 *
+	 * @param string $name
+	 *
+	 * @return stringe
+	 */
 	public function __get($name)
 	{
 		return $this->data[$name] ?? '';
 	}
 
+	/**
+	 * @description 页面渲染
+	 *
+	 * @return null
+	 */
 	public function render()
 	{
 		ob_start();
@@ -56,8 +108,13 @@ class Sample implements ViewInterface
 		$this->res->setBody($content);
 	}
 
+	/**
+	 * @description 获取响应对象
+	 *
+	 * @return ResponseInterface
+	 */
 	public function getResponse()
 	{
 		return $this->res;
-	}	
+	}
 }

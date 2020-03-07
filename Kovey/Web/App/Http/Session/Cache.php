@@ -17,14 +17,43 @@ use Kovey\Components\Pool\PoolInterface;
 
 class Cache implements SessionInterface
 {
+	/**
+	 * @description 内容
+	 *
+	 * @var string
+	 */
 	private $content;
 
+	/**
+	 * @description 文件
+	 *
+	 * @var string
+	 */
 	private $file;
 
+	/**
+	 * @description 连接池
+	 *
+	 * @var PoolInterface
+	 */
 	private $pool;
 
-	const SESSION_KEY = 'kovey-session-';
+	/**
+	 * @description 缓存见
+	 *
+	 * @var string
+	 */
+	const SESSION_KEY = 'kovey_session_';
 
+	/**
+	 * @description 构造
+	 *
+	 * @param PoolInterface $pool
+	 *
+	 * @param string $sessionId
+	 *
+	 * @return Cache
+	 */
 	public function __construct(PoolInterface $pool, $sessionId)
 	{
 		$this->file = $sessionId;
@@ -34,6 +63,11 @@ class Cache implements SessionInterface
 		$this->init();
 	}
 
+	/**
+	 * @description 初始化
+	 *
+	 * @return null
+	 */
 	private function init()
 	{
 		$redis = $this->pool->getDatabase();
@@ -55,16 +89,37 @@ class Cache implements SessionInterface
 		$this->content = $info;
 	}
 
+	/**
+	 * @description 获取值
+	 *
+	 * @param string $name
+	 *
+	 * @return mixed
+	 */
 	public function get($name)
 	{
 		return $this->content[$name] ?? '';
 	}
 
+	/**
+	 * @description 设置值
+	 *
+	 * @param string $name
+	 *
+	 * @param mixed $val
+	 *
+	 * @return null
+	 */
 	public function set($name, $val)
 	{
 		$this->content[$name] = $val;
 	}
 
+	/**
+	 * @description 保存到REDIS
+	 *
+	 * @return null
+	 */
 	private function saveToRedis()
 	{
 		go (function () {
@@ -78,16 +133,39 @@ class Cache implements SessionInterface
 		});
 	}
 
+	/**
+	 * @description 获取值
+	 *
+	 * @param string $name
+	 *
+	 * @return mixed
+	 */
 	public function __get($name)
 	{
 		return $this->get($name);
 	}
 
+	/**
+	 * @description 设置值
+	 *
+	 * @param string $name
+	 *
+	 * @param mixed $val
+	 *
+	 * @return null
+	 */
 	public function __set($name, $val)
 	{
 		$this->set($name, $val);
 	}
 
+	/**
+	 * @description 删除
+	 *
+	 * @param string $name
+	 *
+	 * @return bool
+	 */
 	public function del($name)
 	{
 		if (!isset($this->content[$name])) {
@@ -98,6 +176,11 @@ class Cache implements SessionInterface
 		return true;
 	}
 
+	/**
+	 * @description 获取sessionID
+	 *
+	 * @return string
+	 */
 	public function getSessionId()
 	{
 		if (!empty($this->file)) {
@@ -109,16 +192,31 @@ class Cache implements SessionInterface
 		return $this->file;
 	}
 
+	/**
+	 * @description 创建sessionID
+	 *
+	 * @return null
+	 */
 	private function newSessionId()
 	{
 		$this->file = password_hash(uniqid('session', true) . random_int(1000000, 9999999), PASSWORD_DEFAULT);
 	}
 
+	/**
+	 * @description 清除
+	 *
+	 * @return null
+	 */
 	public function clear()
 	{
 		$this->content = array();
 	}
 
+	/**
+	 * @description 一些处理
+	 *
+	 * @return null
+	 */
 	public function __destruct()
 	{
 		$this->saveToRedis();

@@ -20,19 +20,49 @@ use Kovey\Components\Process\ProcessAbstract;
 
 class Cron extends ProcessAbstract
 {
+	/**
+	 * @description 文件修改时间
+	 *
+	 * @var int
+	 */
     protected $fileTime = 0;
 
+	/**
+	 * @description 缓存
+	 *
+	 * @var Array
+	 */
     protected $cache = array();
 
+	/**
+	 * @description 任务个数
+	 *
+	 * @var int
+	 */
     protected $cfgCount = 0;
 
+	/**
+	 * @description 当前秒数
+	 *
+	 * @var int
+	 */
     protected $seconds;
 
+	/**
+	 * @description 初始化
+	 *
+	 * @return null
+	 */
     protected function init()
     {
         $this->processName = Manager::get('app.process.name') . ' core crontab';
     }
 
+	/**
+	 * @description 业务处理
+	 *
+	 * @return null
+	 */
     protected function busi()
     {
         while (true) {
@@ -44,6 +74,11 @@ class Cron extends ProcessAbstract
         }
     }
 
+	/**
+	 * @description 解析crontab文件
+	 *
+	 * @return null
+	 */
     protected function parseConfig()
     {
         $file = Manager::get('app.cron.file');
@@ -105,7 +140,14 @@ class Cron extends ProcessAbstract
         Logger::writeInfoLog(__LINE__,__FILE__, 'Parse crontab file success, config: ' . json_encode($this->cache, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 
-    protected function getShell($cfg)
+	/**
+	 * @description 获取执行的shell
+	 *
+	 * @param Array $cfg
+	 *
+	 * @return null
+	 */
+    protected function getShell(Array $cfg)
     {
         if (!isset($cfg[6])) {
             return false;
@@ -120,6 +162,11 @@ class Cron extends ProcessAbstract
         return implode(' ', $params);
     }
 
+	/**
+	 * @description 执行shell
+	 *
+	 * @return null
+	 */
     protected function runCron()
     {
         for ($i = 0; $i < $this->cfgCount;  $i ++) {
@@ -154,7 +201,14 @@ class Cron extends ProcessAbstract
         }
     }
 
-    protected function getSleep($config)
+	/**
+	 * @description 获取睡眠时间
+	 *
+	 * @param Array $config
+	 *
+	 * @return null
+	 */
+    protected function getSleep(Array $config)
     {
         if (strpos($config['sec'], '/') !== false) {
             return array(
@@ -190,6 +244,13 @@ class Cron extends ProcessAbstract
         );
     }
 
+	/**
+	 * @description 解析是否能执行
+	 *
+	 * @param Array $config
+	 *
+	 * @return null
+	 */
     protected function parseCanRun($config)
     {
         if ($config['mon'] !== '*') {

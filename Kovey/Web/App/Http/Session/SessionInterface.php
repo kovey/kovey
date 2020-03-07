@@ -15,17 +15,66 @@ namespace Kovey\Web\App\Http\Session;
 
 interface SessionInterface
 {
+	/**
+	 * @description 设置值
+	 *
+	 * @param string $name
+	 *
+	 * @param mixed $val
+	 *
+	 * @return null
+	 */
 	public function set($name, $val);
 
+	/**
+	 * @description 获取值
+	 *
+	 * @param string $name
+	 *
+	 * @return mixed
+	 */
 	public function get($name);
 
+	/**
+	 * @description 设置值
+	 *
+	 * @param string $name
+	 *
+	 * @param mixed $val
+	 *
+	 * @return null
+	 */
 	public function __set($name, $val);
 
+	/**
+	 * @description 获取值
+	 *
+	 * @param string $name
+	 *
+	 * @return mixed
+	 */
 	public function __get($name);
 
+	/**
+	 * @description 删除
+	 *
+	 * @param string $name
+	 *
+	 * @return bool
+	 */
 	public function del($name);
 
+	/**
+	 * @description 获取sessionID
+	 *
+	 * @return string
+	 */
 	public function getSessionId();
 
+	/**
+	 * @description 清除
+	 *
+	 * @return null
+	 */
 	public function clear();
 }

@@ -18,18 +18,55 @@ use Kovey\Components\Logger\Logger;
 
 class Server
 {
+	/**
+	 * @description 服务器
+	 *
+	 * @var Swoole\Http\Server
+	 */
     private $serv;
 
+	/**
+	 * @description 配置
+	 *
+	 * @var Array
+	 */
     private $config;
 
+	/**
+	 * @description 事件
+	 *
+	 * @var Array
+	 */
 	private $events;
 
+	/**
+	 * @description 允许的事件类型
+	 *
+	 * @var Array
+	 */
 	private $eventsTypes;
 
+	/**
+	 * @description 静态目录
+	 *
+	 * @var Array
+	 */
 	private $staticDir;
 
+	/**
+	 * @description 是否在docker中运行
+	 *
+	 * @var bool
+	 */
 	private $isRunDocker;
 
+	/**
+	 * @description 构造
+	 *
+	 * @param Array $config
+	 *
+	 * @return Server
+	 */
 	public function __construct(Array $config)
 	{
 		$this->config = $config;
@@ -47,6 +84,15 @@ class Server
 		$this->init();
     }
 
+	/**
+	 * @description 事件监听
+	 *
+	 * @param string $name
+	 *
+	 * @param $callback
+	 *
+	 * @return Server
+	 */
 	public function on(string $name, $callback)
 	{
 		if (!isset($this->eventsTypes[$name])) {
@@ -61,6 +107,11 @@ class Server
 		return $this;
 	}
 
+	/**
+	 * @description 初始化
+	 *
+	 * @return Server
+	 */
     private function init()
     {
 		$logDir = dirname($this->config['log_file']);
@@ -95,6 +146,11 @@ class Server
 		return $this;
     }
 
+	/**
+	 * @description 扫描静态资源目录
+	 *
+	 * @return null
+	 */
 	private function scanStaticDir()
 	{
 		$this->staticDir = array();
@@ -113,6 +169,11 @@ class Server
 		}
 	}
 
+	/**
+	 * @description 初始化回调
+	 *
+	 * @return Server
+	 */
     private function initCallBack()
     {
         $this->serv->on('workerStart', array($this, 'workerStart'));
@@ -120,8 +181,17 @@ class Server
         $this->serv->on('request', array($this, 'request'));
         $this->serv->on('close', array($this, 'close'));
         $this->serv->on('pipeMessage', array($this, 'pipeMessage'));
+
+		return $this;
     }
 
+	/**
+	 * @description 捕捉致命错误
+	 *
+	 * @param Swoole\Http\Response
+	 *
+	 * @return null
+	 */
 	public function handleFatal($response)
 	{
 		$error = error_get_last();
@@ -136,6 +206,17 @@ class Server
 		}
 	}
 
+	/**
+	 * @description 监听进程间通讯
+	 *
+	 * @param Swoole\Http\Server $serv
+	 *
+	 * @param int $workerId
+	 *
+	 * @param mixed $data
+	 *
+	 * @return null
+	 */
     public function pipeMessage($serv, $workerId, $data)
     {
         try {
@@ -150,22 +231,38 @@ class Server
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" . $e->getTraceAsString();
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
 			}
 		} catch (\Exception $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" . $e->getTraceAsString();
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
 			}
 		}
     }
 
+	/**
+	 * @description Manager 进程启动
+	 *
+	 * @param Swoole\Http\Server $serv
+	 *
+	 * @return null
+	 */
     public function managerStart($serv)
     {
 		ko_change_process_name($this->config['name'] . ' master');
     }
 
+	/**
+	 * @description Worker 进程启动
+	 *
+	 * @param Swoole\Http\Server $serv
+	 *
+	 * @param int $workerId
+	 *
+	 * @return null
+	 */
     public function workerStart($serv, $workerId)
     {
         ko_change_process_name($this->config['name'] . ' worker');
@@ -177,6 +274,13 @@ class Server
 		call_user_func($this->events['init'], $this);
     }
 
+	/**
+	 * @description 判断是否是静态资源目录
+	 *
+	 * @param string $uri
+	 *
+	 * @return bool
+	 */
 	private function isStatic($uri)
 	{
 		$info = explode('/', $uri);
@@ -187,6 +291,15 @@ class Server
 		return in_array($info[1], $this->staticDir, true);
 	}
 
+	/**
+	 * @description Worker 进程启动
+	 *
+	 * @param Swoole\Http\Request $request
+	 *
+	 * @param Swoole\Http\Response $response
+	 *
+	 * @return null
+	 */
     public function request($request, $response)
 	{
 		if ($this->isStatic($request->server['request_uri'] ?? '')) {
@@ -209,7 +322,7 @@ class Server
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" . $e->getTraceAsString();
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
 			}
 
 			$result = array(
@@ -224,7 +337,7 @@ class Server
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" . $e->getTraceAsString();
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
 			}
 			$result = array(
 				'httpCode' => 500,
@@ -252,14 +365,35 @@ class Server
         $response->end($httpCode == 200 ? $result['content'] : ErrorTemplate::getContent($httpCode));
     }
 
+	/**
+	 * @description 启动
+	 *
+	 * @return null
+	 */
     public function start()
     {
         $this->serv->start();
     }
 
+	/**
+	 * @description 链接关闭
+	 *
+	 * @param Swoole\Http\Server $server
+	 *
+	 * @param int $fd
+	 *
+	 * @param int $reactorId
+	 *
+	 * @return null
+	 */
     public function close($server, int $fd, int $reactorId)
     {}
 
+	/**
+	 * @description 获取服务器对象
+	 *
+	 * @return Swoole\Http\Server
+	 */
 	public function getServ()
 	{
 		return $this->serv;

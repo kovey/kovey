@@ -37,6 +37,13 @@ use Kovey\Components\Logger\Monitor;
 
 class Bootstrap
 {
+	/**
+	 * @description 初始化日志目录
+	 *
+	 * @param Application $app
+	 *
+	 * @return null
+	 */
 	public function __initLogger(Application $app)
 	{
 		ko_change_process_name(Manager::get('app.process.name') . ' root');
@@ -51,6 +58,13 @@ class Bootstrap
 		}
 	}
 
+	/**
+	 * @description 初始化APP
+	 *
+	 * @param Application $app
+	 *
+	 * @return null
+	 */
 	public function __initApp(Application $app)
 	{
 		$app->registerServer(new Server(Manager::get('server.server')))
@@ -60,6 +74,13 @@ class Bootstrap
 			->registerUserProcess(new UserProcess(Manager::get('server.server.worker_num')));
 	}
 
+	/**
+	 * @description 初始化事件
+	 *
+	 * @param Application $app
+	 *
+	 * @return null
+	 */
 	public function __initEvents(Application $app)
 	{
 		$app->on('request', function ($request) {
@@ -82,6 +103,13 @@ class Bootstrap
 			});
 	}
 
+	/**
+	 * @description 初始化进程
+	 *
+	 * @param Application $app
+	 *
+	 * @return null
+	 */
 	public function __initProcess(Application $app)
 	{
 		$app->registerProcess('config', new Process\Config());
@@ -91,6 +119,13 @@ class Bootstrap
 		}
 	}
 
+	/**
+	 * @description 初始化弟自定义的Bootstrap
+	 *
+	 * @param Application $app
+	 *
+	 * @return null
+	 */
 	public function __initCustomBoot(Application $app)
 	{
 		$bootstrap = $app->getConfig()['boot'] ?? 'application/Bootstrap.php';
@@ -104,6 +139,13 @@ class Bootstrap
 		$app->registerCustomBootstrap(new \Bootstrap());
 	}
 
+	/**
+	 * @description 初始化路由
+	 *
+	 * @param Application $app
+	 *
+	 * @return null
+	 */
 	public function __initRouters(Application $app)
 	{
 		$path = APPLICATION_PATH . '/' . $app->getConfig()['routers'];

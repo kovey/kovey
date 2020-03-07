@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * @description 
+ * @description HTTP 错误码
  *
  * @package     
  *
@@ -65,6 +65,11 @@ class ErrorTemplate
 
 	const HTTP_CODE_505 = 505;
 
+	/**
+	 * @description 简单的错误模板
+	 *
+	 * @var Array
+	 */
 	private static $templates = array(
 		self::HTTP_CODE_404 => '<p style="text-align:center;">Kovey Frawework</p><p style="text-align:center">Page Not Found!</p>',
 		self::HTTP_CODE_500 => '<p style="text-align:center;">Kovey Frawework</p><p style="text-align:center">Internal Error!</p>',
@@ -73,8 +78,15 @@ class ErrorTemplate
 		self::HTTP_CODE_405 => '<p style="text-align:center;">Kovey Frawework</p><p style="text-align:center">Method Disable!</p>'
 	);
 
+	/**
+	 * @description 获取错误模板
+	 *
+	 * @param int $code
+	 *
+	 * @return string
+	 */
 	public static function getContent($code)
 	{
-		return self::$templates[$code] ?? '';
+		return self::$templates[$code] ?? '<p style="text-align:center;">Kovey Frawework</p><p style="text-align:center">Network Error!</p>';
 	}
 }

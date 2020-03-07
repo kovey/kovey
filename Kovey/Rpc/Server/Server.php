@@ -198,13 +198,13 @@ class Server
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
 			}
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
 			}
 		}
     }
@@ -255,15 +255,15 @@ class Server
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" .
-					$e->getTraceAsString() . "\n";
+				echo $e->getMessage() . PHP_EOL .
+					$e->getTraceAsString() . PHP_EOL;
 			}
 		} catch (\Exception $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" .
-					$e->getTraceAsString() . "\n";
+				echo $e->getMessage() . PHP_EOL .
+					$e->getTraceAsString() . PHP_EOL;
 			}
 		}
     }
@@ -356,10 +356,10 @@ class Server
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
 			}
             $result = array(
-                'err' => $e->getMessage() . "\n" . $e->getTraceAsString(),
+                'err' => $e->getMessage() . PHP_EOL . $e->getTraceAsString(),
                 'type' => 'exception',
                 'code' => 1000,
                 'packet' => $packet->getClear()
@@ -368,10 +368,10 @@ class Server
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
 			}
             $result = array(
-                'err' => $e->getMessage() . "\n" . $e->getTraceAsString(),
+                'err' => $e->getMessage() . PHP_EOL . $e->getTraceAsString(),
                 'type' => 'exception',
                 'code' => 1000,
                 'packet' => $packet->getClear()
@@ -424,13 +424,13 @@ class Server
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
 			}
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
-				echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
 			}
 		}
 	}

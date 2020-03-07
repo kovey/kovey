@@ -17,13 +17,30 @@ use Kovey\Util;
 
 class Database
 {
+	/**
+	 * @description 最大值
+	 *
+	 * @var int
+	 */
 	private $maxCount;
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @return Database
+	 */
 	public function __construct()
 	{
 		$this->maxCount = 128;
 	}
 
+	/**
+	 * @description 获取KEY
+	 *
+	 * @param mixed $id
+	 *
+	 * @return int
+	 */
 	public function getShardingKey($id)
 	{
 		if (!Util::isNumber($id)) {

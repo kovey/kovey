@@ -18,8 +18,20 @@ use Kovey\Util\Json;
 
 class Monitor
 {
+	/**
+	 * @description 日志目录
+	 *
+	 * @var string
+	 */
 	private static $logDir;
 
+	/**
+	 * @description 设置日志目录
+	 *
+	 * @param string $logDir
+	 *
+	 * @return null
+	 */
 	public static function setLogDir($logDir)
 	{
 		self::$logDir = $logDir;
@@ -28,6 +40,13 @@ class Monitor
 		}
 	}
 
+	/**
+	 * @description 写入日志
+	 *
+	 * @param Array $content
+	 *
+	 * @return null
+	 */
 	public static function write(Array $content)
 	{
 		go (function () use ($content) {

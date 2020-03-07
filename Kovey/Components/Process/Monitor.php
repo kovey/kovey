@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * @description 系统监控
+ * @description 系统监控进程
  *
  * @package     Kovey\Components\Process
  *
@@ -21,11 +21,21 @@ use Swoole\Timer;
 
 class Monitor extends ProcessAbstract
 {
+	/**
+	 * @description 初始化
+	 *
+	 * @return null
+	 */
     protected function init()
     {
         $this->processName = 'kovey framework cluster monitor';
     }
 
+	/**
+	 * @description 业务处理
+	 *
+	 * @return null
+	 */
     protected function busi()
     {
 		swoole_event_add($this->process->pipe, function ($pipe) {
@@ -44,6 +54,15 @@ class Monitor extends ProcessAbstract
 		});
     }
 
+	/**
+	 * @description 发送数据到监控系统
+	 *
+	 * @param string $method
+	 *
+	 * @param ...mixed $args
+	 *
+	 * @return null
+	 */
 	protected function sendToMonitor($method, ...$args)
 	{
 		go(function ($method, $args) {

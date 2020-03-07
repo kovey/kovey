@@ -18,11 +18,21 @@ use Kovey\Components\Process\ProcessAbstract;
 
 class Config extends ProcessAbstract
 {
+	/**
+	 * @description 初始化
+	 *
+	 * @return null
+	 */
     protected function init()
     {
         $this->processName = Manager::get('server.rpc.name') . ' config';
     }
 
+	/**
+	 * @description 业务逻辑处理
+	 *
+	 * @return null
+	 */
     protected function busi()
     {
         while (true) {

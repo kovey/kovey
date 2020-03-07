@@ -15,12 +15,32 @@ namespace Kovey\Rpc\App\Bootstrap;
 
 class Autoload
 {
+	/**
+	 * @description 自定义的加载路径
+	 *
+	 * @var Array
+	 */
 	private $customs;
 
+	/**
+	 * @description 插件加载目录
+	 *
+	 * @var string
+	 */
 	private $plugins;
 
+	/**
+	 * @description 库目录
+	 *
+	 * @var string
+	 */
 	private $library;
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @return Autoload
+	 */
 	public function __construct()
 	{
 		$this->plugins = APPLICATION_PATH . '/application/plugins/';
@@ -29,6 +49,11 @@ class Autoload
 		$this->customs = array();
 	}
 
+	/**
+	 * @description 注册自动加载的路径
+	 *
+	 * @return null
+	 */
 	public function register()
 	{
 		spl_autoload_register(array($this, 'autoloadCore'));
@@ -37,6 +62,11 @@ class Autoload
 		spl_autoload_register(array($this, 'autoloadLocal'));
 	}
 
+	/**
+	 * @description 核心库路径
+	 *
+	 * @return null
+	 */
 	public function autoloadCore($className)
 	{
 		try {
@@ -51,6 +81,11 @@ class Autoload
 		}
 	}
 
+	/**
+	 * @description 插件库路径
+	 *
+	 * @return null
+	 */
 	public function autoloadPlugins($className)
 	{
 		try {
@@ -66,6 +101,11 @@ class Autoload
 		}
 	}
 
+	/**
+	 * @description 用户库目录
+	 *
+	 * @return null
+	 */
 	public function autoloadUserLib($className)
 	{
 		try {
@@ -81,6 +121,11 @@ class Autoload
 		}
 	}
 
+	/**
+	 * @description 自定义加载路径
+	 *
+	 * @return null
+	 */
 	public function autoloadLocal($className)
 	{
 		foreach ($this->customs as $path) {
@@ -98,6 +143,13 @@ class Autoload
 		}
 	}
 
+	/**
+	 * @description 添加自定义加载路径
+	 *
+	 * @param string $path
+	 *
+	 * @return Autoload
+	 */
 	public function addLocalPath($path)
 	{
 		if (!is_dir($path)) {

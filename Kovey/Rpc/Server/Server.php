@@ -20,16 +20,48 @@ use Kovey\Components\Logger\Logger;
 
 class Server
 {
+	/**
+	 * @description 服务器
+	 *
+	 * @var Swoole\Server
+	 */
     private $serv;
 
+	/**
+	 * @description 配置
+	 *
+	 * @var Array
+	 */
     private $conf;
 
+	/**
+	 * @description 事件
+	 *
+	 * @var Array
+	 */
 	private $events;
 
+	/**
+	 * @description 允许的事件
+	 *
+	 * @var Array
+	 */
 	private $allowEevents;
 
+	/**
+	 * @description 是否运行在docker中
+	 *
+	 * @var bool
+	 */
 	private $isRunDocker;
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @param Array $conf
+	 *
+	 * @return Server
+	 */
     public function __construct(Array $conf)
     {
         $this->conf = $conf;
@@ -62,6 +94,11 @@ class Server
 			->initCallback();
     }
 
+	/**
+	 * @description 初始化允许的事件
+	 *
+	 * @return Server
+	 */
 	private function initAllowEvents()
 	{
 		$this->allowEevents = array(
@@ -74,6 +111,11 @@ class Server
 		return $this;
 	}
 
+	/**
+	 * @description 初始化回调
+	 *
+	 * @return Server
+	 */
     private function initCallback()
     {
         $this->serv->on('connect', array($this, 'connect'));
@@ -85,6 +127,19 @@ class Server
 		return $this;
     }
 
+	/**
+	 * @description 致命错误处理
+	 *
+	 * @param int $fd
+	 *
+	 * @param ProtocolInterface $packet
+	 *
+	 * @param float $begin
+	 *
+	 * @param int $reqTime
+	 * 
+	 * @return null
+	 */
 	public function handleFatal($fd, $packet, $begin, $reqTime)
 	{
 		$end = microtime(true);
@@ -108,11 +163,27 @@ class Server
 		}
 	}
 
+	/**
+	 * @description manager 启动回调
+	 *
+	 * @param Swoole\Server $serv
+	 *
+	 * @return null
+	 */
     public function managerStart($serv)
     {
         ko_change_process_name($this->conf['name'] . ' master');
     }
 
+	/**
+	 * @description worker 启动回调
+	 *
+	 * @param Swoole\Server $serv
+	 *
+	 * @param int $workerId
+	 *
+	 * @return null
+	 */
     public function workerStart($serv, $workerId)
     {
         ko_change_process_name($this->conf['name'] . ' worker');
@@ -138,6 +209,15 @@ class Server
 		}
     }
 
+	/**
+	 * @description 添加事件
+	 *
+	 * @param string $events
+	 *
+	 * @param callable $cal
+	 *
+	 * @return Server
+	 */
 	public function on($event, $call)
 	{
 		if (!isset($this->allowEevents[$event])) {
@@ -152,6 +232,17 @@ class Server
 		return $this;
 	}
 
+	/**
+	 * @description 管道事件回调
+	 *
+	 * @param Swoole\Server $serv
+	 *
+	 * @param int $workerId
+	 *
+	 * @param mixed $data
+	 *
+	 * @return null
+	 */
     public function pipeMessage($serv, $workerId, $data)
     {
         try {
@@ -177,10 +268,32 @@ class Server
 		}
     }
 
+	/**
+	 * @description 链接回调
+	 *
+	 * @param Swoole\Server $serv
+	 *
+	 * @param int $fd
+	 *
+	 * @return null
+	 */
     public function connect($serv, $fd)
     {
     }
 
+	/**
+	 * @description 接收回调
+	 *
+	 * @param Swoole\Server $serv
+	 *
+	 * @param int $fd
+	 *
+	 * @param int $reactor_id
+	 *
+	 * @param mixed $data
+	 *
+	 * @return null
+	 */
     public function receive($serv, $fd, $reactor_id, $data)
     {
 		$proto = new Json($data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
@@ -200,6 +313,15 @@ class Server
         $serv->close($fd);
     }
 
+	/**
+	 * @description Hander 处理
+	 *
+	 * @param ProtocolInterface $packet
+	 *
+	 * @param int $fd
+	 *
+	 * @return null
+	 */
     private function handler(ProtocolInterface $packet, $fd)
     {
 		$begin = microtime(true);
@@ -261,6 +383,23 @@ class Server
 		$this->monitor($begin, $end, $packet, $reqTime, $result, $fd);
     }
 
+	/**
+	 * @description 监控
+	 *
+	 * @param float $begin
+	 *
+	 * @param float $end
+	 *
+	 * @param ProtocolInterface $packet
+	 *
+	 * @param int $reqTime
+	 *
+	 * @param Array $result
+	 *
+	 * @param int $fd
+	 *
+	 * @return null
+	 */
 	private function monitor($begin, $end, $packet, $reqTime, $result, $fd)
 	{
 		if (!isset($this->events['monitor'])) {
@@ -296,6 +435,15 @@ class Server
 		}
 	}
 
+	/**
+	 * @description 发送数据
+	 *
+	 * @param Array $packet
+	 *
+	 * @param int $fd
+	 *
+	 * @return null
+	 */
     private function send(Array $packet, $fd)
     {
 		$data = Json::pack($packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
@@ -306,15 +454,34 @@ class Server
         $this->serv->send($fd, $data);
     }
 
+	/**
+	 * @description 关闭链接
+	 *
+	 * @param Swoole\Server $serv
+	 *
+	 * @param int $fd
+	 *
+	 * @return null
+	 */
     public function close($serv, $fd)
     {
     }
 
+	/**
+	 * @description 启动服务
+	 *
+	 * @return null
+	 */
     public function start()
     {
         $this->serv->start();
     }
 
+	/**
+	 * @description 获取底层服务
+	 *
+	 * @return Swoole\Server
+	 */
 	public function getServ()
 	{
 		return $this->serv;

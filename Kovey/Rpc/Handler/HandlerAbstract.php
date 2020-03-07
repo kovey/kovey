@@ -1,6 +1,6 @@
 <?php
 /**
- * @description
+ * @description 对外接口基类
  *
  * @package
  *

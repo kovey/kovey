@@ -17,18 +17,55 @@ use Kovey\Rpc\Protocol\Json;
 
 class Client
 {
+	/**
+	 * @description 底层客户端
+	 *
+	 * @var Swoole\Coroutine\Client
+	 */
     private $cli;
 
+	/**
+	 * @description 服务端配置
+	 *
+	 * @var Array
+	 */
 	private $configs;
 
+	/**
+	 * @description 客户端配置
+	 *
+	 * @var Array
+	 */
 	private $conf;
 
+	/**
+	 * @description 当前使用配置
+	 *
+	 * @var int
+	 */
 	private $current = 0;
 
+	/**
+	 * @description 不可用的配置
+	 *
+	 * @var Array
+	 */
 	private $unavailables = array();
 
+	/**
+	 * @description 错误信息
+	 *
+	 * @var string
+	 */
 	private $error = '';
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @param Array $configs
+	 *
+	 * @return Client
+	 */
     public function __construct(Array $configs)
     {
         $this->cli = new \Swoole\Coroutine\Client(SWOOLE_SOCK_TCP);
@@ -43,6 +80,11 @@ class Client
         $this->configs = $configs;
     }
 
+	/**
+	 * @description 链接服务器端
+	 *
+	 * @return bool
+	 */
     public function connect()
     {
 		$count = 0;
@@ -67,6 +109,11 @@ class Client
 		return false;
     }
 
+	/**
+	 * @description 获取可用的服务端配置
+	 *
+	 * @return Array
+	 */
 	private function getConf()
 	{
 		$this->current = array_rand($this->configs, 1);
@@ -86,6 +133,13 @@ class Client
 		return false;
 	}
 
+	/**
+	 * @description 向服务端发送数据
+	 *
+	 * @param Array $data
+	 *
+	 * @return bool
+	 */
     public function send(Array $data)
     {
 		$data = Json::pack($data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes', true);
@@ -100,6 +154,11 @@ class Client
 		return $result;
     }
 
+	/**
+	 * @description 接收数据
+	 *
+	 * @return Array
+	 */
     public function recv()
     {
         $packet = $this->cli->recv();
@@ -115,11 +174,21 @@ class Client
         return $packet;
     }
 
+	/**
+	 * @description 获取错误信息
+	 *
+	 * @return string
+	 */
     public function getError()
     {
 		return $this->error;
     }
 
+	/**
+	 * @description 关闭链接
+	 *
+	 * @return null
+	 */
     public function close()
     {
         $this->cli->close();

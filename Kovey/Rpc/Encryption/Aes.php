@@ -1,6 +1,6 @@
 <?php
 /**
- * @description
+ * @description AES加密
  *
  * @package
  *
@@ -15,6 +15,15 @@ namespace Kovey\Rpc\Encryption;
 
 class Aes
 {
+	/**
+	 * @description 加密
+	 *
+	 * @param string $data
+	 *
+	 * @param string $key
+	 *
+	 * @return string
+	 */
     public static function encrypt(string $data, $key)
     {
         if (strlen($key) != 43) {
@@ -26,6 +35,15 @@ class Aes
         return openssl_encrypt($data, 'AES-256-CBC', $key, 0, $iv);
     }
 
+	/**
+	 * @description 解密
+	 *
+	 * @param string $encrypt
+	 *
+	 * @param string $key
+	 *
+	 * @return string
+	 */
     public static function decrypt($encrypt, $key)
     {
         if (strlen($key) != 43) {

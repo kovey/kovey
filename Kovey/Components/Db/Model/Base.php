@@ -3,7 +3,7 @@
  *
  * @description 对应表
  *
- * @package     
+ * @package    Kovey\Components\Db\Model 
  *
  * @time        2020-01-19 17:55:12
  *
@@ -15,6 +15,7 @@ namespace Kovey\Components\Db\Model;
 
 use Kovey\Components\Db\Sql\Insert;
 use Kovey\Components\Db\Sql\Update;
+use Kovey\Components\Db\Sql\Delete;
 use Kovey\Components\Db\Sql\BatchInsert;
 use Kovey\Components\Db\DbInterface;
 
@@ -34,7 +35,7 @@ abstract class Base
 	 *
 	 * @param DbInterface $db
 	 *
-	 * @return string
+	 * @return int
 	 *
 	 * @throws Exception
 	 */
@@ -144,5 +145,25 @@ abstract class Base
 		}
 
 		return $db->batchInsert($batchInsert);
+	}
+
+	/**
+	 * @description 更新数据
+	 *
+	 * @param Array $data
+	 *
+	 * @param Array $condition
+	 *
+	 * @param DbInterface $db
+	 *
+	 * @return int
+	 *
+	 * @throws Exception
+	 */
+	public function delete(Array $condition, DbInterface $db)
+	{
+		$delete = new Delete($this->tableName);
+		$delete->where($condition);
+		return $db->delete($delete);
 	}
 }

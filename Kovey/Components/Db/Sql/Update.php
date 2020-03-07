@@ -18,26 +18,81 @@ use Kovey\Util\Util;
 
 class Update implements SqlInterface
 {
+	/**
+	 * @description 表名
+	 *
+	 * @var string
+	 */
     private $table;
 
+	/**
+	 * @description 更新的字段
+	 *
+	 * @var Array
+	 */
     private $fields = array();
 
+	/**
+	 * @description 字段的值
+	 *
+	 * @var Array
+	 */
     private $data = array();
 
+	/**
+	 * @description 更新格式
+	 *
+	 * @var string
+	 */
     const SQL_FORMAT = 'UPDATE %s SET %s';
 
+	/**
+	 * @description 条件
+	 *
+	 * @var Where
+	 */
     private $where;
 
+	/**
+	 * @description 原始数据
+	 *
+	 * @var Array
+	 */
     private $orignalData = array();
 
+	/**
+	 * @description 自增数据
+	 *
+	 * @var Array
+	 */
     private $addData = array();
 
+	/**
+	 * @description 自减数据
+	 *
+	 * @var Array
+	 */
     private $subData = array();
 
+	/**
+	 * @description 直更数据
+	 *
+	 * @var Array
+	 */
     private $equalData = array();
 
+	/**
+	 * @description 是否解析标志
+	 *
+	 * @var bool
+	 */
 	private $isParsed = false;
 
+	/**
+	 * @description 构造
+	 *
+	 * @var string $table
+	 */
     public function __construct($table)
     {
         $this->where = new Where();
@@ -49,17 +104,38 @@ class Update implements SqlInterface
 		$this->table = implode('.', $info);
     }
 
+	/**
+	 * @description 格式化字段
+	 *
+	 * @param string $name
+	 *
+	 * @return string
+	 */
 	private function format($name)
 	{
 		return sprintf('`%s`', $name);
 	}
 
+	/**
+	 * @description 设置直更值
+	 *
+	 * @param string $name
+	 *
+	 * @param string $val
+	 *
+	 * @return null
+	 */
     public function __set($name, $val)
     {
         $this->orignalData[$name] = $val;
         $this->equalData[$name] = $val;
     }
 
+	/**
+	 * @description 解析数据
+	 *
+	 * @return Update
+	 */
     protected function parseData()
     {
 		if ($this->isParsed) {
@@ -85,11 +161,27 @@ class Update implements SqlInterface
 		return $this;
     }
 
+	/**
+	 * @description 获取字段值
+	 *
+	 * @param string $name
+	 *
+	 * @return string
+	 */
     public function __get($name)
     {
         return $this->orignalData[$name] ?? '';
     }
 
+	/**
+	 * @description 自增字段
+	 *
+	 * @param string $name
+	 *
+	 * @param string $val
+	 *
+	 * @return Update
+	 */
     public function addSelf($name, $val)
     {
         $this->orignalData[$name] = $val;
@@ -97,13 +189,29 @@ class Update implements SqlInterface
 		return $this;
     }
 
+	/**
+	 * @description 自减字段
+	 *
+	 * @param string $name
+	 *
+	 * @param string $val
+	 *
+	 * @return Update
+	 */
     public function subSelf($name, $val)
     {
         $this->orignalData[$name] = $val;
         $this->subData[$name] = $val;
 		return $this;
     }
-    
+
+	/**
+	 * @description 条件
+	 *
+	 * @param Array $condition
+	 *
+	 * @return Update
+	 */
     public function where(Array $condition)
     {
         foreach ($condition as $key => $val) {
@@ -118,6 +226,11 @@ class Update implements SqlInterface
 		return $this;
     }
 
+	/**
+	 * @description 准备SQL语句
+	 *
+	 * @return string | bool
+	 */
     public function getPrepareSql()
     {
         $this->parseData();
@@ -135,6 +248,11 @@ class Update implements SqlInterface
         return $sql;
     }
 
+	/**
+	 * @description 获取绑定数据
+	 *
+	 * @return Array
+	 */
     public function getBindData()
     {
         $tmp = $this->data;
@@ -145,6 +263,11 @@ class Update implements SqlInterface
         return $tmp;
     }
 
+	/**
+	 * @description 格式化SQL
+	 *
+	 * @return string
+	 */
 	public function toString()
 	{
 		$sql = $this->getPrepareSql();

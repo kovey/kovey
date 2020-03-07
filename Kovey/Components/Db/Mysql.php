@@ -16,28 +16,74 @@ namespace Kovey\Components\Db;
 use Kovey\Components\Db\Sql\Update;
 use Kovey\Components\Db\Sql\Insert;
 use Kovey\Components\Db\Sql\Select;
+use Kovey\Components\Db\Sql\Delete;
 use Kovey\Components\Db\Sql\Where;
 use Swoole\Coroutine\MySQL as SCD;
 use Kovey\Components\Logger\Db as DbLogger;
 
 class Mysql implements DbInterface
 {
+	/**
+	 * @description 数据名称
+	 *
+	 * @var string
+	 */
     private $dbname;
 
+	/**
+	 * @description 地址
+	 *
+	 * @var string
+	 */
     private $host;
 
+	/**
+	 * @description 用户名
+	 *
+	 * @var string
+	 */
     private $username;
 
+	/**
+	 * @description 密码
+	 *
+	 * @var string
+	 */
     private $password;
 
+	/**
+	 * @description 数据库链接
+	 *
+	 * @var Swoole\Coroutine\MySQL
+	 */
     private $connection;
 
+	/**
+	 * @description 适配器
+	 *
+	 * @var string
+	 */
     private $adapter;
 
+	/**
+	 * @description 端口号
+	 *
+	 * @var string
+	 */
     private $port;
 
+	/**
+	 * @description 是否开发环境
+	 *
+	 * @var bool
+	 */
 	private $isDev = false;
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @param Array $config
+	 */
     public function __construct(Array $config)
     {
         $this->dbname = isset($config['dbname']) ? $config['dbname'] : '';
@@ -52,7 +98,12 @@ class Mysql implements DbInterface
 		$this->connection = new SCD();
     }
 
-    public function connect()
+	/**
+	 * @description 连接服务器
+	 *
+	 * @return bool
+	 */
+    public function connect() : bool
     {
 		return $this->connection->connect(array(
 			'host' => $this->host,
@@ -65,11 +116,25 @@ class Mysql implements DbInterface
 		));
     }
 
-	public function getError()
+	/**
+	 * @description 获取错误信息
+	 *
+	 * @return string
+	 */
+	public function getError() : string
 	{
 		return $this->connection->errno . $this->connection->error . $this->connection->connect_errno . $this->connection->connect_error;
 	}
 
+	/**
+	 * @description 查询
+	 *
+	 * @param string $sql
+	 *
+	 * @return mixed
+	 *
+	 * @throws Exception
+	 */
     public function query($sql)
     {
 		if (!$this->connection->connected) {
@@ -102,12 +167,22 @@ class Mysql implements DbInterface
 		return $result;
     }
 
+	/**
+	 * @description 事务提交
+	 *
+	 * @return null
+	 */
     public function commit()
     {
         $this->connection->commit();
     }
 
-    public function beginTransaction()
+	/**
+	 * @description 开启事务
+	 *
+	 * @return bool
+	 */
+    public function beginTransaction() : bool
     {
 		if (!$this->connection->connected) {
 			$this->connect();
@@ -125,11 +200,29 @@ class Mysql implements DbInterface
 		return true;
     }
 
+	/**
+	 * @description 撤销事务
+	 *
+	 * @return null
+	 */
     public function rollBack()
     {
         $this->connection->rollback();
     }
 
+	/**
+	 * @description 获取一行
+	 *
+	 * @param string $table
+	 *
+	 * @param Array $condition
+	 *
+	 * @param Array $columns
+	 *
+	 * @return mixed
+	 *
+	 * @throws Exception
+	 */
     public function fetchRow($table, Array $condition, Array $columns = array())
     {
         $select = new Select($table);
@@ -156,7 +249,20 @@ class Mysql implements DbInterface
         return $this->select($select, $select::SINGLE);
     }
 
-    public function fetchAll($table, Array $condition = array(), Array $columns = array())
+	/**
+	 * @description 获取所有行
+	 *
+	 * @param string $table
+	 *
+	 * @param Array $condition
+	 *
+	 * @param Array $columns
+	 *
+	 * @return Array
+	 *
+	 * @throws Exception
+	 */
+    public function fetchAll($table, Array $condition = array(), Array $columns = array()) : array
     {
         $select = new Select($table);
         $select->columns($columns);
@@ -178,9 +284,22 @@ class Mysql implements DbInterface
 
             $select->where($where);
         }
-        return $this->select($select);
+		
+		$rows = $this->select($select);
+		if ($rows === false) {
+			return array();
+		}
+
+		return $rows;
     }
 
+	/**
+	 * @description 更新
+	 *
+	 * @param Update $update
+	 *
+	 * @return mixed
+	 */
     public function update(Update $update)
     {
 		$sth = $this->prepare($update);
@@ -192,6 +311,13 @@ class Mysql implements DbInterface
         }
     }
 
+	/**
+	 * @description 插入
+	 *
+	 * @param Insert $insert
+	 *
+	 * @return mixed
+	 */
     public function insert(Insert $insert)
     {
 		$sth = $this->prepare($insert);
@@ -205,6 +331,13 @@ class Mysql implements DbInterface
         return $this->connection->insert_id;
     }
 
+	/**
+	 * @description 准备SQL语句
+	 *
+	 * @param SqlInterface $sqlObj
+	 *
+	 * @return Swoole\Coroutine\MySQL\Statement
+	 */
 	private function prepare(SqlInterface $sqlObj)
 	{
         $sql = $sqlObj->getPrepareSql();
@@ -252,6 +385,15 @@ class Mysql implements DbInterface
 		return $sth;
 	}
 
+	/**
+	 * @description 查询
+	 *
+	 * @param Select $select
+	 *
+	 * @param int $type
+	 *
+	 * @return mixed
+	 */
     public function select(Select $select, $type = Select::ALL)
     {
 		$sth = $this->prepare($select);
@@ -268,11 +410,21 @@ class Mysql implements DbInterface
 		return $sth->fetchAll();
     }
 
+	/**
+	 * @description 链接是否断开
+	 *
+	 * @return bool
+	 */
 	private function isDisconneted()
 	{
 		return preg_match('/2006/', $this->getError()) || preg_match('/2013/', $this->getError());
 	}
 
+	/**
+	 * @description 关闭连接
+	 *
+	 * @return null
+	 */
 	public function __destruct()
 	{
 		try {
@@ -280,4 +432,24 @@ class Mysql implements DbInterface
 		} catch (\Throwable $e) {
 		}
 	}
+
+	/**
+	 * @description 删除
+	 *
+	 * @param Delete $delete
+	 *
+	 * @return mixed
+	 */
+    public function delete(Delete $delete)
+    {
+		$sth = $this->prepare($delete);
+
+        if ($this->connection->affected_rows < 1) {
+            throw new \Exception(
+                sprintf('Update Fail, Effictive Rows: %s', $this->connection->affected_rows)
+            );
+		}
+
+		return true;
+    }
 }

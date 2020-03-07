@@ -18,32 +18,110 @@ use Kovey\Rpc\Encryption\Encryption;
 
 class Json implements ProtocolInterface
 {
+	/**
+	 * @description 打包类型
+	 *
+	 * @var string
+	 */
 	const PACK_TYPE = 'N';
 
+	/**
+	 * @description 包头长度
+	 *
+	 * @var int
+	 */
 	const HEADER_LENGTH = 4;
 
+	/**
+	 * @description 包最大长度
+	 *
+	 * @var int
+	 */
 	const MAX_LENGTH = 81920;
 
+	/**
+	 * @description 包长度所在位置
+	 *
+	 * @var int
+	 */
 	const LENGTH_OFFSET = 0;
 
+	/**
+	 * @description 包体开始位置
+	 *
+	 * @var int
+	 */
 	const BODY_OFFSET = 4;
 
+	/**
+	 * @description 路径
+	 *
+	 * @var string
+	 */
 	private $path;
 
+	/**
+	 * @description 方法
+	 *
+	 * @var string
+	 */
 	private $method;
 
+	/**
+	 * @description 参数
+	 *
+	 * @var Array
+	 */
 	private $args;
 
+	/**
+	 * @description 包体类容
+	 *
+	 * @var string
+	 */
 	private $body;
 
+	/**
+	 * @description 秘钥
+	 *
+	 * @var string
+	 */
 	private $secretKey;
 
+	/**
+	 * @description 明文
+	 *
+	 * @var string
+	 */
 	private $clear;
 
+	/**
+	 * @description 加密类型
+	 *
+	 * @var string
+	 */
 	private $encryptType;
 
+	/**
+	 * @description 是否公钥
+	 *
+	 * @var bool
+	 */
 	private $isPub;
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @param string $body
+	 *
+	 * @param string $key
+	 *
+	 * @param string $type
+	 *
+	 * @param bool $isPub
+	 *
+	 * @return Json
+	 */
 	public function __construct(string $body, string $key, string $type = 'aes', bool $isPub = false)
 	{
 		$this->body = $body;
@@ -52,6 +130,11 @@ class Json implements ProtocolInterface
 		$this->isPub = $isPub;
 	}
 
+	/**
+	 * @description 解析包
+	 *
+	 * @return bool
+	 */
 	public function parse()
 	{
 		$this->clear = self::unpack($this->body, $this->secretKey, $this->encryptType, $this->isPub);
@@ -82,26 +165,59 @@ class Json implements ProtocolInterface
 		return true;
 	}
 
+	/**
+	 * @description 获取路径
+	 *
+	 * @return string
+	 */
 	public function getPath()
 	{
 		return $this->path;
 	}
 
+	/**
+	 * @description 获取方法
+	 *
+	 * @return string
+	 */
 	public function getMethod()
 	{
 		return $this->method;
 	}
 
+	/**
+	 * @description 获取参数
+	 *
+	 * @return Array
+	 */
 	public function getArgs()
 	{
 		return $this->args;
 	}
 
+	/**
+	 * @description 获取明文
+	 *
+	 * @return string
+	 */
 	public function getClear()
 	{
 		return $this->clear;
 	}
 
+	/**
+	 * @description 打包
+	 *
+	 * @param Array $packet
+	 *
+	 * @param string $secretKey
+	 *
+	 * @param string $type
+	 *
+	 * @param bool $isPub
+	 *
+	 * @return string | bool
+	 */
 	public static function pack(Array $packet, string $secretKey, $type = 'aes', $isPub = false)
 	{
         $data = Encryption::encrypt(json_encode($packet), $secretKey, $type, $isPub);
@@ -112,6 +228,19 @@ class Json implements ProtocolInterface
         return pack(self::PACK_TYPE, strlen($data)) . $data;
 	}
 
+	/**
+	 * @description 解包
+	 *
+	 * @param string $data
+	 *
+	 * @param string $secretKey
+	 *
+	 * @param string $type
+	 *
+	 * @param bool $isPub
+	 *
+	 * @return Array | bool
+	 */
 	public static function unpack(string $data, string $secretKey, $type = 'aes', $isPub = false)
 	{
         $info = unpack(self::PACK_TYPE, substr($data, self::LENGTH_OFFSET, self::HEADER_LENGTH));

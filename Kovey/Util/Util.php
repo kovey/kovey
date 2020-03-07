@@ -15,6 +15,11 @@ namespace Kovey\Util;
 
 class Util
 {
+	/**
+	 * @description 数字字母
+	 *
+	 * @var Array
+	 */
 	private static $char = array(
 		'A', 'a', 'B', 'b', 'C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'H', 'h', 'I', 'i', 'J', 'j',
 		'K', 'k', 'L', 'l', 'M', 'm', 'N', 'n', 'O', 'o', 'P', 'p', 'Q', 'q', 'R', 'r', 'S', 's', 'T', 't',
@@ -22,31 +27,44 @@ class Util
 		'9', '0'
 	);
 
+	/**
+	 * @description 数字
+	 *
+	 * @var Array
+	 */
 	private static $num = array(
 		'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
 	);
 
+	/**
+	 * @description path判断
+	 *
+	 * @param string $path
+	 *
+	 * @return bool
+	 */
     public static function isPath($data)
     {
         return (bool)preg_match('/^[a-zA-Z0-9]+$/', $data);
     }
 
-	public static function getPassword($name, $password, $createTime)
-	{
-		return md5($name . $password . $createTime);
-	}
-
-	public static function getToken($name, $createTime)
-	{
-		return hash('sha256', $name . $createTime . self::getMicrotime() . uniqid('token', true));
-	}
-
+	/**
+	 * @description 获取微秒数
+	 *
+	 * @return float
+	 */
 	public static function getMicrotime()
 	{
-		list($usec, $sec) = explode(" ", microtime());
-		return floatval($sec) . floatval($usec);
+		return microtime(true);
 	}
 
+	/**
+	 * @description 获取随机字符串
+	 *
+	 * @param int $size
+	 *
+	 * @return string
+	 */
 	public static function getRandom($size)
 	{
 		$rand = '';
@@ -58,15 +76,25 @@ class Util
 		return $rand;
 	}
 
+	/**
+	 * @description 加密手机号
+	 *
+	 * @param string $mobile
+	 *
+	 * @return string
+	 */
 	public static function encryptMobile($mobile)
 	{
-		if (strlen($mobile) != 11) {
-			return '';
-		}
-
-		return substr_replace($mobile, '******', 3, 6);
+		return substr_replace($mobile, '****', 3, 4);
 	}
 
+	/**
+	 * @description 获取随机数字
+	 *
+	 * @param int $size
+	 *
+	 * @return string
+	 */
 	public static function getRandomNumber($size)
 	{
 		$rand = '';
@@ -78,6 +106,13 @@ class Util
 		return $rand;
 	}
 
+	/**
+	 * @description 通过身份证获取年龄
+	 *
+	 * @param string $idCard
+	 *
+	 * @return int
+	 */
 	public static function getUserAge($idCard)
 	{
 		$year = substr($idCard, 6, 8);
@@ -88,6 +123,13 @@ class Util
 		return intval((time() - strtotime($year)) / (365 * 24 * 3600));
 	}
 
+	/**
+	 * @description 通过身份证号获取生日
+	 *
+	 * @param string $idCard
+	 *
+	 * @return string
+	 */
 	public static function getBirthday($idCard)
 	{
 		$year = substr($idCard, 6, 4);
@@ -106,17 +148,13 @@ class Util
 		return $year . '-' . $month . '-' . $day;
 	}
 
-	public static function getInvite($mobile)
-	{
-		$date = date('YmdHis');
-		$code = substr($date, 0, 1) . random_int(0, 9) . substr($date, 1, 1) . random_int(0, 9) . substr($date, 2, 1) . random_int(0, 9);
-		for ($i = 0; $i < 11; $i ++) {
-			$code .= substr($date, $i + 3, 1) . substr($mobile, $i, 1);
-		}
-
-		return $code;
-	}
-
+	/**
+	 * @description 转换身份证号
+	 *
+	 * @param string $idCard
+	 *
+	 * @return string
+	 */
 	public static function convertIdCard($idCard) 
 	{
 		if (15 == strlen($idCard)) {
@@ -135,22 +173,15 @@ class Util
 		return $idCard;
 	}
 
+	/**
+	 * @description 判断是否是数字
+	 *
+	 * @param mixed $num
+	 *
+	 * @return bool
+	 */
     public static function isNumber($num)
     {
         return ctype_digit(strval($num));
     }
-
-	public static function strposall($haystack, $needle)
-	{
-		$count = substr_count($haystack, $needle);
-		$index = 0;
-		$res = array();
-		for ($i = 0; $i < $count; $i ++) {
-			$index = strpos($haystack, $needle, $index);
-			$res[] = $index;
-			$index ++;
-		}
-
-		return $res;
-	}
 }

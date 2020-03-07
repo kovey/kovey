@@ -15,32 +15,77 @@ namespace Kovey\Util;
 
 class Validator
 {
+	/**
+	 * @description 错误
+	 *
+	 * @var Array
+	 */
     private $errors;
 
+	/**
+	 * @description 待验证的数据
+	 *
+	 * @var Array
+	 */
     private $data;
 
+	/**
+	 * @description 验证规则
+	 *
+	 * @var Array
+	 */
     private $rules;
 
+	/**
+	 * @description 18位身份证正则
+	 *
+	 * @var string
+	 */
     const PATTERN18  = '/^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/';
 
+	/**
+	 * @description 15位身份证正则
+	 *
+	 * @var string
+	 */
 	const PATTERN15 = '/^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}[0-9Xx]$/';
 
-    public function __construct($data, $rules)
+	/**
+	 * @description 构造函数
+	 *
+	 * @param Array $data
+	 *
+	 * @param Array $rules
+	 *
+	 * @return Validator
+	 */
+    public function __construct(Array $data, Array $rules)
     {
         $this->data = $data;
         $this->rules = $rules;
         $this->errors = array();
     }
 
-    public function getErros()
+	/**
+	 * @description 获取错误
+	 *
+	 * @return Array
+	 */
+    public function getErrors()
     {
         return $this->errors;
     }
 
 	/**
-	 * 适用于同一个字段在其依赖字段的不同值的情况下的验证
+	 * @description 适用于同一个字段在其依赖字段的不同值的情况下的验证
+	 *
+	 * @param string $key
+	 *
+	 * @param Array $conditions
+	 *
+	 * @return bool
 	 */
-	protected function inlineCondition($key, $conditions)
+	protected function inlineCondition($key, Array $conditions)
 	{
 		foreach ($conditions as $condition) {
 			foreach ($condition as $field => $rules) {
@@ -80,10 +125,15 @@ class Validator
 	}
 
 	/**
-	 * 适用于不同字段依赖于同一个字段时的验证
+	 * @description 适用于不同字段依赖于同一个字段时的验证
 	 *
+	 * @param string $key
+	 *
+	 * @param Array $ruleInfo
+	 *
+	 * @return bool
 	 */
-	protected function condition($key, $ruleInfo)
+	protected function condition($key, Array $ruleInfo)
 	{
 		$condition = $ruleInfo['condition'];
 		unset($ruleInfo['condition']);
@@ -126,6 +176,15 @@ class Validator
 		return $this->validRule($key, $ruleInfo);
 	}
 
+	/**
+	 * @description 普通验证
+	 *
+	 * @param string $key
+	 *
+	 * @param Array $ruleInfo
+	 *
+	 * @return bool
+	 */
 	protected function validRule($key, $ruleInfo)
 	{
 		if (in_array('required', $ruleInfo, true)) {
@@ -142,7 +201,7 @@ class Validator
 		}
 
 		if (in_array('canEmpty', $ruleInfo, true)) {
-			if (strlen($this->data[$key]) === 0) {
+			if (!is_numeric($this->data[$key]) && empty($this->data[$key])) {
 				return true;
 			}
 		}
@@ -154,7 +213,7 @@ class Validator
 				}
 
 				if (!$this->$params($this->data[$key])) {
-					$this->errors[] = "$key validate fail with $params";
+					$this->errors[] = "$key validate fail with $params, value: [" . $this->formatData($this->data[$key]) . ']';
 					return false;
 				}
 
@@ -163,7 +222,7 @@ class Validator
 
 			if (!is_array($params)) {
 				if (!$this->$fun($this->data[$key], $params)) {
-					$this->errors[] = "$key validate fail with $fun limit with $params";
+					$this->errors[] = "$key validate fail with $fun limit with $params, value: [" . $this->formatData($this->data[$key]) . ']';
 					return false;
 				}
 
@@ -172,19 +231,15 @@ class Validator
 
 			if ($fun === 'inArray') {
 				if (!$this->inArray($this->data[$key], $params)) {
-					$this->errors[] = "$key validate fail with $fun limit with " . Json::encode($params);
+					$this->errors[] = "$key validate fail with $fun limit with " . Json::encode($params) . ', value: [' . $this->formatData($this->data[$key]) . ']';
 					return false;
 				}
+
 				continue;
 			}
 
-			if (count($params) !== 2) {
-				$this->errors[] = "params format error: " . Json::encode($params);
-				return false;
-			}
-
-			if (!$this->$fun($this->data[$key], $params[0], $params[1])) {
-				$this->errors[] = "$key validate fail with $fun limit with {$params[0]} and {$params[1]}";
+			if (!$this->$fun($this->data[$key], ...$params)) {
+				$this->errors[] = "$key validate fail with $fun limit with " . implode(',', $params) . ', value: [' . $this->formatData($this->data[$key]) . ']';
 				return false;
 			}
 		}
@@ -192,6 +247,23 @@ class Validator
 		return true;
 	}
 
+	/**
+	 * @description 格式化数据
+	 *
+	 * @param mixed $data
+	 *
+	 * @return string
+	 */
+	private function formatData($data)
+	{
+		return is_array($data) ? Json::encode($data) : $data;
+	}
+
+	/**
+	 * @description 开始验证
+	 * 
+	 * @return bool
+	 */
     public function run()
     {
         foreach ($this->rules as $key => $ruleInfo) {
@@ -225,71 +297,185 @@ class Validator
         return true;
     }
 
+	/**
+	 * @description 最大长度
+	 *
+	 * @param mixed $data
+	 *
+	 * @param int $length
+	 *
+	 * @return bool
+	 */
     public function maxlength($data, $length)
     {
         return strlen($data) <= $length;
     }
 
+	/**
+	 * @description 最小长度
+	 *
+	 * @param mixed $data
+	 *
+	 * @param int $length
+	 *
+	 * @return bool
+	 */
     public function minlength($data, $length)
     {
         return strlen($data) >= $length;
     }
 
-    public function greaterThan($data, $val)
+	/**
+	 * @description 大于
+	 *
+	 * @param mixed $data
+	 *
+	 * @param int $val
+	 *
+	 * @return bool
+	 */
+    public function gt($data, $val)
     {
         return $data > $val;
     }
 
-    public function nessThan($data, $val)
+	/**
+	 * @description 大于等于
+	 *
+	 * @param mixed $data
+	 *
+	 * @param int $val
+	 *
+	 * @return bool
+	 */
+    public function gte($data, $val)
     {
         return $data >= $val;
     }
 
-    public function little($data, $val)
+	/**
+	 * @description 小于
+	 *
+	 * @param mixed $data
+	 *
+	 * @param int $val
+	 *
+	 * @return bool
+	 */
+    public function lt($data, $val)
     {
         return $data < $val;
     }
 
-    public function littleTo($data, $val)
+	/**
+	 * @description 小于等于
+	 *
+	 * @param mixed $data
+	 *
+	 * @param int $val
+	 *
+	 * @return bool
+	 */
+    public function lte($data, $val)
     {
         return $data <= $val;
     }
 
+	/**
+	 * @description 等于指定长度
+	 *
+	 * @param mixed $data
+	 *
+	 * @param int $length
+	 *
+	 * @return bool
+	 */
     public function equalsLength($data, $length)
     {
         return strlen($data) === $length;
     }
 
+	/**
+	 * @description 必填选项
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function required($data)
     {
         return !is_null($data);
     }
 
+	/**
+	 * @description 数字
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function numberic($data)
     {
         return is_numeric($data);
     }
 
+	/**
+	 * @description 金额
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
 	public function money($data)
 	{
 		return (bool)preg_match('/^[0-9][0-9]*.[0-9]{2}$/', $data);
 	}
 
+	/**
+	 * @description 比率
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
 	public function rate($data)
 	{
 		return (bool)preg_match('/^0.[0-9]{5}$/', $data);
 	}
 
+	/**
+	 * @description 纯数字
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function number($data)
     {
         return ctype_digit($data) || is_int($data);
     }
 
+	/**
+	 * @description 数组
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function isArray($data)
     {
         return is_array($data);
     }
 
+	/**
+	 * @description 是否在数组中
+	 *
+	 * @param mixed $data
+	 *
+	 * @param Array $val
+	 *
+	 * @return bool
+	 */
     public function inArray($data, Array $val)
     {
 		if (is_array($data)) {
@@ -305,51 +491,109 @@ class Validator
         return in_array($data, $val, true);
     }
 
+	/**
+	 * @description 订单号
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function order($data)
     {
         return (bool)preg_match('/^[a-zA-Z0-9]+$/', $data);
     }
 
+	/**
+	 * @description 微信号
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function wechat($data)
     {
         return (bool)preg_match('/^[a-zA-Z0-9_-]+$/', $data);
     }
 
+	/**
+	 * @description 编码
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function code($data)
     {
         return (bool)preg_match('/^[a-zA-Z]+$/', $data);
     }
 
+	/**
+	 * @description YmdHis时间
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function YmdHisDate($data)
     {
-        return true;
+		return $this->dateTime(date('Y-m-d H:i:s', strtotime($data)));
     }
 
+	/**
+	 * @description Url
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function url($data)
     {
         return (bool)preg_match('/^((ht|f)tps?):\/\/([\w\-]+(\.[\w\-]+)*\/)*[\w\-]+(\.[\w\-]+)*\/?(\?([\w\-\.,@?^=%&:\/~\+#]*)+)?/', $data);
     }
 
-    public function ext($data)
-    {
-        return true;
-    }
-
+	/**
+	 * @description 名称
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function name($data)
     {
         return (bool)preg_match('/^(?!_)[A-Za-z0-9_\-\x80-\xff]+$/', $data);
     }
 
+	/**
+	 * @description 手机号
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
 	public function  mobile($data)
 	{
 		return (bool)preg_match('/1[3456789]{1}\d{9}$/', $data);
 	}	
 
+	/**
+	 * @description 邮箱
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
 	public function email($data)
 	{
 		return filter_var($data, FILTER_VALIDATE_EMAIL) !== false;
 	}
 
+	/**
+	 * @description 日期
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
 	public function date($date)
 	{
         $date = explode('-', $date);
@@ -398,6 +642,13 @@ class Validator
         return true;
 	}
 
+	/**
+	 * @description 时间
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function dateTime($dateTime)
     {
 		$info = explode(' ', $dateTime);
@@ -414,6 +665,13 @@ class Validator
 		return $this->time($time);
     }
 
+	/**
+	 * @description 闰年
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public function isLeapYear($year) 
     {
         if (strlen($year) != 4) {
@@ -427,6 +685,13 @@ class Validator
         return false;
     }
 
+	/**
+	 * @description 时间
+	 *
+	 * @param mixed $time
+	 *
+	 * @return bool
+	 */
     public function time($time) 
     {
 		$time = explode(':', $time);
@@ -460,11 +725,25 @@ class Validator
         return true;
     }
 
+	/**
+	 * @description 身份证
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
 	public function idCard($data)
 	{
 		return preg_match(self::PATTERN18, $data) || preg_match(self::PATTERN15, $data);
 	}
 
+	/**
+	 * @description 不为空
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
 	public function notEmpty($data)
 	{
 		if (is_array($data)) {
@@ -474,17 +753,38 @@ class Validator
 		return strlen($data) > 0;
 	}
 
+	/**
+	 * @description 雷鸣
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
 	public function className($data)
 	{
 		return (bool)preg_match('/^[A-Z][a-zA-Z]+$/', $data);
 	}
 
+	/**
+	 * @description 公司
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
 	public function mobileCompany($data)
 	{
 		return (bool)preg_match('/^[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$/', $data);
 	}
 
-	public function equalCount($data, $count)
+	/**
+	 * @description 等于某个数
+	 *
+	 * @param Array $data
+	 *
+	 * @return bool
+	 */
+	public function equalCount(Array $data, $count)
 	{
 		return count($data) == $count;
 	}

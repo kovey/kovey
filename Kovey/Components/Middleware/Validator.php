@@ -20,14 +20,33 @@ use Kovey\Util\Json;
 
 class Validator implements MiddlewareInterface
 {
+	/**
+	 * @description 规则
+	 *
+	 * @var Array
+	 */
 	private $rules = array();
 
+	/**
+	 * @description 设置验证规则
+	 *
+	 * @param Array $rules
+	 */
 	public function setRules(Array $rules)
 	{
 		$this->rules = $rules;
 		return $this;
 	}
 
+	/**
+	 * @description 中间件的具体实现
+	 *
+	 * @param RequestInterface $req
+	 *
+	 * @param ResponseInterface $res
+	 *
+	 * @param callable $next
+	 */
 	public function handle(RequestInterface $req, ResponseInterface $res, callable $next)
 	{
 		if (empty($this->rules)) {

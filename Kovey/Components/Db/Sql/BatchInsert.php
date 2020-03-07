@@ -53,6 +53,11 @@ class BatchInsert implements SqlInterface
 	 */
     const SQL_FORMAT = 'INSERT INTO %s (%s) VALUES %s';
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @var string $table
+	 */
     public function __construct($table)
     {
 		$info = explode('.', $table);
@@ -83,11 +88,23 @@ class BatchInsert implements SqlInterface
 		return $this;
 	}
 
+	/**
+	 * @description 格式化字段
+	 *
+	 * @param string $name
+	 *
+	 * @return string
+	 */
 	private function format($name)
 	{
 		return sprintf('`%s`', $name);
 	}
 
+	/**
+	 * @description 获取sql
+	 *
+	 * @return string | bool
+	 */
     public function getPrepareSql()
     {
         if (count($this->fields) < 1 || count($this->data) < 1) {
@@ -99,11 +116,21 @@ class BatchInsert implements SqlInterface
         return $sql;
     }
 
+	/**
+	 * @description 获取绑定的数据
+	 *
+	 * @return Array
+	 */
     public function getBindData()
     {
         return $this->data;
     }
 
+	/**
+	 * @description 将对象转换成SQL语句
+	 *
+	 * @return string
+	 */
 	public function toString()
 	{
 		$sql = $this->getPrepareSql();

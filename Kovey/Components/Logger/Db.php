@@ -17,8 +17,18 @@ use Swoole\Coroutine\System;
 
 class Db
 {
+	/**
+	 * @description 日志mulu
+	 *
+	 * @var string
+	 */
 	private static $logDir;
 
+	/**
+	 * @description 设置日志目录
+	 *
+	 * @param string $logDir
+	 */
 	public static function setLogDir($logDir)
 	{
 		self::$logDir = $logDir;
@@ -27,6 +37,13 @@ class Db
 		}
 	}
 
+	/**
+	 * @description 写入日志
+	 *
+	 * @param string $sql
+	 *
+	 * @param float $spentTime
+	 */
 	public static function write($sql, $spentTime)
 	{
 		$spentTime = round($spentTime * 1000, 2) . 'ms';

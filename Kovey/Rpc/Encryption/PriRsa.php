@@ -1,6 +1,6 @@
 <?php
 /**
- * @description
+ * @description RSA 私钥解密
  *
  * @package
  *
@@ -15,6 +15,15 @@ namespace Kovey\Rpc\Encryption;
 
 class PriRsa
 {
+	/**
+	 * @description 加密
+	 *
+	 * @param string $data
+	 *
+	 * @param string $key
+	 *
+	 * @return string | bool
+	 */
     public static function encrypt(string $data, $key)
     {
         if (is_file($key)) {
@@ -28,6 +37,15 @@ class PriRsa
         return base64_encode($crypted);
     }
 
+	/**
+	 * @description 解密
+	 *
+	 * @param string $encrypt
+	 *
+	 * @param string $key
+	 *
+	 * @return string | bool
+	 */
     public static function decrypt(string $encrypt, $key)
     {
         if (is_file($key)) {

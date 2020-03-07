@@ -15,6 +15,11 @@ namespace Kovey\Components\Parse;
 
 class Container implements ContainerInterface
 {
+	/**
+	 * @description 依赖缓存
+	 *
+	 * @var Array
+	 */
     private $instances;
 
 	/**
@@ -27,6 +32,7 @@ class Container implements ContainerInterface
 	 * @throws
 	 * @todo
 	 * @name
+	 * @category
 	 */
 	private static $excludes = array(
 		'description' => 1,
@@ -38,13 +44,28 @@ class Container implements ContainerInterface
 		'throws' => 1,
 		'todo' => 1,
 		'name' => 1,
+		'category' => 1
 	);
 
+	/**
+	 * @description 构造函数
+	 */
     public function __construct()
     {
         $this->instances = array();
     }
 
+	/**
+	 * @description 根据类名获取实例
+	 *
+	 * @param string $class
+	 *
+	 * @param ...mixed $args
+	 *
+	 * @return mixed
+	 *
+	 * @throws Throwable
+	 */
     public function get(string $class, ...$args)
     {
         $class = new \ReflectionClass($class);
@@ -57,6 +78,17 @@ class Container implements ContainerInterface
         return $this->bind($class, $this->instances[$class->getName()], $args);
     }
 
+	/**
+	 * @description 绑定依赖
+	 *
+	 * @param ReflectionClass $class
+	 *
+	 * @param Array $dependencies
+	 *
+	 * @param Array $args
+	 *
+	 * @return mixed
+	 */
     private function bind(\ReflectionClass $class, Array $dependencies, Array $args = array())
     {
 		$obj = null;
@@ -77,6 +109,13 @@ class Container implements ContainerInterface
         return $obj;
     }
 
+	/**
+	 * @description 缓存依赖
+	 *
+	 * @param ReflectionClass $class
+	 *
+	 * @return null
+	 */
     private function resolve(\ReflectionClass $class)
     {
         $this->instances[$class->getName()] = $this->getAts($class);
@@ -85,6 +124,13 @@ class Container implements ContainerInterface
         }
     }
 
+	/**
+	 * @description 获取所有依赖
+	 *
+	 * @param ReflectionClass $ref
+	 *
+	 * @return Array
+	 */
     private function getAts(\ReflectionClass $ref)
     {
         $properties = $ref->getProperties();
@@ -133,9 +179,14 @@ class Container implements ContainerInterface
         return $ats;
     }
 
+	/**
+	 * @description 判断是否是关键字
+	 *
+	 * @return bool
+	 */
 	private function isExcludes($class)
 	{
-		$class = explode(' ', strtolower($class));
-		return isset(self::$excludes[$class[0]]);
+		$info = explode(' ', $class);
+		return isset(self::$excludes[strtolower($info[0])]);
 	}
 }

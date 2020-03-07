@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * @description 
+ * @description 简单的开启session中间件
  *
  * @package     
  *
@@ -20,6 +20,15 @@ use Kovey\Config\Manager;
 
 class SessionStart implements MiddlewareInterface
 {
+	/**
+	 * @description 中间件的具体实现
+	 *
+	 * @param RequestInterface $req
+	 *
+	 * @param ResponseInterface $res
+	 *
+	 * @param callable $next
+	 */
 	public function handle(RequestInterface $req, ResponseInterface $res, callable $next)
 	{
 		$cookie = $req->getCookie();

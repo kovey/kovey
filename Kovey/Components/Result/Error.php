@@ -15,12 +15,34 @@ namespace Kovey\Components\Result;
 
 class Error extends Result
 {
+	/**
+	 * @description 获取结果数据
+	 *
+	 * @param mixed $code
+	 *
+	 * @param mixed $msg
+	 *
+	 * @param mixed $data
+	 *
+	 * @return Array
+	 */
     public static function getArray($code, $msg, $data = array())
     {
         $res = new self($code, $msg, $data);
         return $res->toArray();
     }
 
+	/**
+	 * @description 获取结果JSON
+	 *
+	 * @param mixed $code
+	 *
+	 * @param mixed $msg
+	 *
+	 * @param mixed $data
+	 *
+	 * @return string
+	 */
     public static function getJson($code, $msg, $data = array())
     {
         $res = new self($code, $msg, $data);

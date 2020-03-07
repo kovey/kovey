@@ -1,6 +1,6 @@
 <?php
 /**
- * @description
+ * @description 数据加解密
  *
  * @package
  *
@@ -15,6 +15,19 @@ namespace Kovey\Rpc\Encryption;
 
 class Encryption
 {
+	/**
+	 * @description 加密
+	 *
+	 * @param string $data
+	 *
+	 * @param string $key
+	 *
+	 * @param string $type
+	 *
+	 * @param bool isPub
+	 *
+	 * @return string | bool
+	 */
     public static function encrypt(string $data, $key, $type = 'aes', $isPub = false)
     {
         if (strtolower($type) === 'aes') {
@@ -32,6 +45,19 @@ class Encryption
         return false;
     }
 
+	/**
+	 * @description 解密
+	 *
+	 * @param string $data
+	 *
+	 * @param string $key
+	 *
+	 * @param string $type
+	 *
+	 * @param bool isPub
+	 *
+	 * @return string | bool
+	 */
     public static function decrypt(string $data, $key, $type = 'aes', $isPub = false)
     {
         if (strtolower($type) === 'aes') {

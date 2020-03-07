@@ -18,35 +18,85 @@ use Kovey\Components\Parse\ContainerInterface;
 
 class Pipeline implements PipelineInterface
 {
+	/**
+	 * @description 请求对象
+	 *
+	 * @var ProtocolInterface
+	 */
 	private $request;
 
+	/**
+	 * @description 请求方法
+	 *
+	 * @var string
+	 */
 	private $method;
 
+	/**
+	 * @description 容器
+	 *
+	 * @var ContainerInterface
+	 */
 	private $container;
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @param ContainerInterface $container
+	 *
+	 * @return Pipeline
+	 */
 	public function __construct(ContainerInterface $container)
 	{
 		$this->container = $container;
 	}
 
+	/**
+	 * @description 发送数据
+	 *
+	 * @param ProtocolInterface $request
+	 *
+	 * @return Pipeline
+	 */
 	public function send(ProtocolInterface $request)
 	{
 		$this->request = $request;
 		return $this;
 	}
 
+	/**
+	 * @description 设置中间件
+	 *
+	 * @param Array $middlewares
+	 *
+	 * @return Pipeline
+	 */
 	public function through(Array $middlewares)
 	{
 		$this->middlewares = $middlewares;
 		return $this;
 	}
 
+	/**
+	 * @description 设置方法
+	 *
+	 * @param string $method
+	 *
+	 * @return Pipeline
+	 */
 	public function via(string $method)
 	{
 		$this->method = $method;
 		return $this;
 	}
 
+	/**
+	 * @description 设置最终调用方法
+	 *
+	 * @param callable $description
+	 *
+	 * @return mixed
+	 */
 	public function then(callable $destination)
 	{
 		$pipeline = array_reduce(
@@ -56,6 +106,11 @@ class Pipeline implements PipelineInterface
         return $pipeline($this->request);
 	}
 
+	/**
+	 * @description 中间件处理函数
+	 *
+	 * @return callable
+	 */
 	protected function carry()
 	{
 		return function ($stack, $pipe) {
@@ -77,6 +132,13 @@ class Pipeline implements PipelineInterface
         };
 	}
 
+	/**
+	 * @description 准备下一次调用
+	 *
+	 * @param callable $descriptio
+	 *
+	 * @return callable
+	 */
 	protected function prepareDestination(callable $destination)
     {
         return function ($request) use ($destination) {
@@ -84,6 +146,13 @@ class Pipeline implements PipelineInterface
         };
     }
 
+	/**
+	 * @description 解析参数
+	 *
+	 * @param string $pipe
+	 *
+	 * @return Array
+	 */
 	protected function parsePipeString($pipe)
 	{
 		list($name, $parameters) = array_pad(explode(':', $pipe, 2), 2, []);

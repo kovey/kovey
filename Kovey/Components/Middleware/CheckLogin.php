@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * @description 只能是数字
+ * @description 中间件，检测登录, 这只是一个示例
  *
  * @package     Middleware
  *
@@ -19,6 +19,15 @@ use Kovey\Util\Json;
 
 class CheckLogin implements MiddlewareInterface
 {
+	/**
+	 * @description 中间件的具体实现
+	 *
+	 * @param RequestInterface $req
+	 *
+	 * @param ResponseInterface $res
+	 *
+	 * @param callable $next
+	 */
 	public function handle(RequestInterface $req, ResponseInterface $res, callable $next)
 	{
 		$userId = $req->getSession()->userId;

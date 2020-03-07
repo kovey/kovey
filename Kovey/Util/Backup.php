@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * @description 
+ * @description  备份
  *
  * @package     
  *
@@ -17,8 +17,18 @@ use Kovey\Util\Json;
 
 class Backup
 {
+	/**
+	 * @description 备份目录
+	 *
+	 * @var string
+	 */
 	private static $dir;
 
+	/**
+	 * @description 设置备份目录
+	 *
+	 * @param string $dir
+	 */
 	public static function setDir($dir)
 	{
 		self::$dir = $dir;
@@ -27,6 +37,15 @@ class Backup
 		}
 	}
 
+	/**
+	 * @description 备份
+	 *
+	 * @param mixed $data
+	 *
+	 * @param string $category
+	 *
+	 * @return bool
+	 */
 	public static function backup($data, string $category = 'incoming')
 	{
 		if (!is_string($data)
@@ -42,6 +61,15 @@ class Backup
 		return self::write($data, $category);
 	}
 
+	/**
+	 * @description 写入
+	 *
+	 * @param string $content
+	 *
+	 * @param string $category
+	 *
+	 * @return bool
+	 */
 	public static function write(string $content, string $category)
 	{
 		if (empty($content)) {

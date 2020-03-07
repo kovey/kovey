@@ -18,16 +18,44 @@ use Kovey\Rpc\Client\Client;
 
 abstract class ServiceAbstract
 {
+	/**
+	 * @description 客户端链接
+	 *
+	 * @var Kovey\Rpc\Client\Client
+	 */
     private $cli;
 
+	/**
+	 * @description 配置文件
+	 *
+	 * @var Array
+	 */
     private $conf;
 
+	/**
+	 * @description 构造
+	 *
+	 * @param Array $conf
+	 *
+	 * @return ServiceAbstract
+	 */
     public function __construct(Array $conf)
     {
         $this->cli = new Client($conf);
         $this->conf = $conf;
     }
 
+	/**
+	 * @description 调用服务端方法
+	 *
+	 * @param string $method
+	 *
+	 * @param Array $args
+	 *
+	 * @return mixed
+	 *
+	 * @throws Exception
+	 */
     public function __call($method, $args)
     {
         if (!$this->cli->connect()) {
@@ -55,5 +83,10 @@ abstract class ServiceAbstract
 		return $result['result'];
     }
 
+	/**
+	 * @description 获取服务名称
+	 *
+	 * @return string
+	 */
     abstract protected function getServiceName();
 }

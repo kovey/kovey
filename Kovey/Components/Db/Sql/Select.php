@@ -3,7 +3,7 @@
  *
  * @description 查询语句实现
  *
- * @package     Components\Db\Sql
+ * @package     Kovey\Components\Db\Sql
  *
  * @time        Tue Sep 24 09:04:25 2019
  *
@@ -18,40 +18,132 @@ use Kovey\Util\Util;
 
 class Select implements SqlInterface
 {
+	/**
+	 * @description 单条查询
+	 *
+	 * @var int
+	 */
     const SINGLE = 1;
 
+	/**
+	 * @description 查询全部
+	 *
+	 * @var int
+	 */
     const ALL = 2;
 
+	/**
+	 * @description 表名
+	 *
+	 * @var string
+	 */
     private $table;
 
+	/**
+	 * @description 查询字段
+	 *
+	 * @var Array
+	 */
     private $fields = array();
 
+	/**
+	 * @description SQL格式
+	 *
+	 * @var string
+	 */
     const SQL_FORMAT = 'SELECT %s FROM %s';
 
+	/**
+	 * @description 内联语法
+	 *
+	 * @var string
+	 */
     const INNER_JOIN_FORMAT = ' INNER JOIN %s AS %s ON %s ';
 
+	/**
+	 * @description 左联语法
+	 *
+	 * @var string
+	 */
     const LEFT_JOIN_FORMAT = ' LEFT JOIN %s AS %s ON %s ';
 
+	/**
+	 * @description 右联语法
+	 *
+	 * @var string
+	 */
     const RIGHT_JOIN_FORMAT = ' RIGHT JOIN %s AS %s ON %s ';
 
+	/**
+	 * @description 字段格式化语法
+	 *
+	 * @var string
+	 */
     const FIELD_FORMAT = '%s.%s as %s';
 
+	/**
+	 * @description 字段常规模式语法
+	 *
+	 * @var string
+	 */
     const FIELD_NORMAL_FORMAT = '%s as %s';
 
+	/**
+	 * @description wher条件
+	 *
+	 * @var Where
+	 */
     private $where;
 
+	/**
+	 * @description OR Where条件
+	 *
+	 * @var Where
+	 */
     private $orWhere;
 
+	/**
+	 * @description join数据
+	 *
+	 * @var Array
+	 */
     private $joins = array();
 
+	/**
+	 * @description limit
+	 *
+	 * @var string
+	 */
     private $limit;
 
+	/**
+	 * @description 排序
+	 *
+	 * @var string
+	 */
     private $order;
 
+	/**
+	 * @description 分组
+	 *
+	 * @var string
+	 */
     private $group;
 
+	/**
+	 * @description 表别名
+	 *
+	 * @var string
+	 */
     private $tableAs;
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @param string $table
+	 *
+	 * @param string | bool $as
+	 */
     public function __construct($table, $as = false)
     {
         $this->tableAs = $as;
@@ -63,6 +155,13 @@ class Select implements SqlInterface
 		$this->table = implode('.', $info);
     }
 
+	/**
+	 * @description 格式化字段
+	 *
+	 * @param string $name
+	 *
+	 * @return string
+	 */
 	private function format($name)
 	{
 		$info = explode('.', $name);
@@ -76,6 +175,15 @@ class Select implements SqlInterface
 		return sprintf('`%s`', $name);
 	}
 
+	/**
+	 * @description 查询列
+	 *
+	 * @param Array $columns
+	 *
+	 * @param string | bool $tableName
+	 *
+	 * @return Select
+	 */
     public function columns(Array $columns, $tableName = false)
     {
         $finalTable = $this->table;
@@ -110,7 +218,20 @@ class Select implements SqlInterface
         return $this;
     }
 
-    private function join(Array $tableInfo, $on, $fileds, $type)
+	/**
+	 * @description 关联
+	 *
+	 * @param Array $tableInfo
+	 *
+	 * @param string $on
+	 *
+	 * @param Array $fields
+	 *
+	 * @param int $type
+	 *
+	 * @return Select
+	 */
+    private function join(Array $tableInfo, $on, Array $fileds, $type)
     {
 		$on = $this->formatOn($on);
 
@@ -133,21 +254,61 @@ class Select implements SqlInterface
         return $this;
     }
 
+	/**
+	 * @description 内联
+	 *
+	 * @param Array $tableInfo
+	 *
+	 * @param string $on
+	 *
+	 * @param Array $fileds
+	 *
+	 * @return Select
+	 */
     public function innerJoin(Array $tableInfo, $on, Array $fileds = array())
     {
         return $this->join($tableInfo, $on, $fileds, self::INNER_JOIN_FORMAT);
     }
 
+	/**
+	 * @description 左联
+	 *
+	 * @param Array $tableInfo
+	 *
+	 * @param string $on
+	 *
+	 * @param Array $fileds
+	 *
+	 * @return Select
+	 */
     public function leftJoin(Array $tableInfo, $on, Array $fileds = array())
     {
         return $this->join($tableInfo, $on, $fileds, self::LEFT_JOIN_FORMAT);
     }
 
+	/**
+	 * @description 右联
+	 *
+	 * @param Array $tableInfo
+	 *
+	 * @param string $on
+	 *
+	 * @param Array $fileds
+	 *
+	 * @return Select
+	 */
     public function rightJoin(Array $tableInfo, $on, Array $fileds = array())
     {
         return $this->join($tableInfo, $on, $fileds, self::RIGHT_JOIN_FORMAT);
     }
 
+	/**
+	 * @description 查询条件
+	 *
+	 * @param Where | Array $where
+	 *
+	 * @return Select
+	 */
     public function where($where)
 	{
 		if ($where instanceof Where) {
@@ -170,12 +331,24 @@ class Select implements SqlInterface
 		return $this;
     }
 
+	/**
+	 * @description 或条件
+	 *
+	 * @param Where
+	 *
+	 * @return Select
+	 */
     public function orWhere(Where $where)
     {
         $this->orWhere = $where;
         return $this;
     }
 
+	/**
+	 * @description 处理表的别名
+	 *
+	 * @return string
+	 */
     private function processAsTable()
     {
         if ($this->tableAs === false) {
@@ -189,6 +362,11 @@ class Select implements SqlInterface
         return sprintf('%s AS %s', $this->table, $this->tableAs);
     }
 
+	/**
+	 * @description 准备语句
+	 *
+	 * @return string
+	 */
     public function getPrepareSql()
     {
         $finalTable = $this->processAsTable();
@@ -224,6 +402,11 @@ class Select implements SqlInterface
         return $sql;
     }
 
+	/**
+	 * @description 准备查询条件
+	 *
+	 * @return string
+	 */
     private function getPrepareWhere()
     {
         $sql = null;
@@ -242,6 +425,11 @@ class Select implements SqlInterface
         return $sql;
     }
 
+	/**
+	 * @description 获取绑定数据
+	 *
+	 * @return Array
+	 */
     public function getBindData()
     {
         $tmp = array();
@@ -260,6 +448,15 @@ class Select implements SqlInterface
         return $tmp;
     }
 
+	/**
+	 * @description 条数限制
+	 *
+	 * @param int $page
+	 *
+	 * @param int $size
+	 *
+	 * @return Select
+	 */
     public function limit($page, $size = 0)
 	{
 		if ($size <= 0) {
@@ -271,6 +468,13 @@ class Select implements SqlInterface
         return $this;
     }
 
+	/**
+	 * @description 排序
+	 *
+	 * @param string $order
+	 *
+	 * @return Select
+	 */
     public function order($order)
     {
 		if (!is_array($order)) {
@@ -287,6 +491,13 @@ class Select implements SqlInterface
         return $this;
     }
 
+	/**
+	 * @description 分组
+	 *
+	 * @param string | Array $group
+	 *
+	 * @return Select
+	 */
     public function group($group)
     {
         if (!is_array($group)) {
@@ -301,6 +512,13 @@ class Select implements SqlInterface
         return $this;
     }
 
+	/**
+	 * @description 格式化ON条件
+	 *
+	 * @param string $on
+	 *
+	 * @return string
+	 */
 	private function formatOn($on)
 	{
 		$info = explode(' ', $on);
@@ -336,6 +554,11 @@ class Select implements SqlInterface
 		return implode(' ', $info);
 	}
 
+	/**
+	 * @description 格式化SQL语句
+	 *
+	 * @return string
+	 */
 	public function toString()
 	{
 		$sql = $this->getPrepareSql();

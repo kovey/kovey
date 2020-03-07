@@ -15,9 +15,24 @@ namespace Kovey\Components\Db;
 
 interface SqlInterface
 {
+	/**
+	 * @description 准备好的SQL
+	 *
+	 * @return string | bool
+	 */
 	public function getPrepareSql();
 
+	/**
+	 * @description 获取绑定的数据
+	 *
+	 * @return Array
+	 */
 	public function getBindData();
 
+	/**
+	 * @description 格式化sql
+	 *
+	 * @return string
+	 */
 	public function toString();
 }

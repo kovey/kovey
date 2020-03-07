@@ -15,16 +15,42 @@ namespace Kovey\Components\Uniqid;
 
 class Number
 {
+	/**
+	 * @description 唯一值
+	 *
+	 * @var Swoole\Atomic
+	 */
     private $atomic;
 
+	/**
+	 * @description 初始值
+	 *
+	 * @var int
+	 */
 	const INIT_VALUE = 10000000;
+
+	/**
+	 * @description 最大值
+	 *
+	 * @var int
+	 */
 	const MAX_VALUE  =  20000000;
 
+	/** 
+	 * @description 构造函数
+	 *
+	 * @return Number
+	 */
 	public function __construct()
 	{
         $this->atomic = new \Swoole\Atomic(self::INIT_VALUE);
 	}
 
+	/**
+	 * @description 获取值
+	 *
+	 * @return int
+	 */
 	public function get()
 	{
 		$val = $this->atomic->get();
@@ -37,6 +63,11 @@ class Number
 		return strval($val);
 	}
 
+	/**
+	 * @description 订单号
+	 *
+	 * @return stringl
+	 */
 	public function getOrderId($size, $pref = '')
 	{
 		$time = date('YmdHis');

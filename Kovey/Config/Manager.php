@@ -15,12 +15,34 @@ namespace Kovey\Config;
 
 class Manager
 {
+	/**
+	 * @description 配置key存放
+	 *
+	 * @var Swoole\Table
+	 */
 	private static $keys;
 
+	/**
+	 * @description 配置值存放
+	 *
+	 * @var Swoole\Table
+	 */
 	private static $values;
 
+	/**
+	 * @description 配置路劲
+	 *
+	 * @var string
+	 */
 	private static $path;
 
+	/** 
+	 * @description 初始化
+	 *
+	 * @param string $param
+	 *
+	 * @return null
+	 */
 	public static function init($path)
 	{
 		self::$path = $path;
@@ -32,6 +54,11 @@ class Manager
 		self::$values->create();
 	}
 
+	/**
+	 * @description 解析配置
+	 *
+	 * @return null
+	 */
 	public static function parse()
 	{
 		$files = scandir(self::$path);
@@ -51,6 +78,13 @@ class Manager
 		}
 	}
 
+	/**
+	 * @description 将配置写入内存
+	 *
+	 * @param string $file
+	 *
+	 * @param string $content
+	 */
 	private static function writeIntoMemory($file, $content)
 	{
 		$contents = explode("\n", $content);
@@ -90,7 +124,18 @@ class Manager
 		self::writeKeyIntoMemory('', $areaKeys);
 	}
 
-	private static function getValue($info, $split, $index)
+	/**
+	 * @description 获取配置的值
+	 *
+	 * @param Array $info
+	 *
+	 * @param string $split
+	 *
+	 * @param int $index
+	 *
+	 * @return string
+	 */
+	private static function getValue(Array $info, $split, $index)
 	{
 		$len = count($info);
 		if ($len == $index + 1) {
@@ -105,7 +150,16 @@ class Manager
 		return trim($result . $info[$len - 1]);
 	}
 
-	private static function writeKeyIntoMemory($pref, $areaKeys)
+	/**
+	 * @description 把键写入内存
+	 *
+	 * @param string $pref
+	 *
+	 * @param Array $areaKeys
+	 *
+	 * @return null
+	 */
+	private static function writeKeyIntoMemory($pref, Array $areaKeys)
 	{
 		$keys = array();
 		$areaKey = '';
@@ -134,6 +188,13 @@ class Manager
 		}
 	}
 
+	/**
+	 * @description 获取配置的值
+	 *
+	 * @param string $key
+	 *
+	 * @return string
+	 */
 	public static function get($key)
 	{
 		$val = self::$values->get(md5($key));

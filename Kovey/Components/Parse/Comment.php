@@ -52,6 +52,11 @@ class Comment
 		'name' => 1,
 	);
 
+	/**
+	 * @description 构造函数
+	 *
+	 * @param string $class
+	 */
 	public function __construct($class)
 	{
 		$this->ats = array();
@@ -106,7 +111,7 @@ class Comment
 	/**
 	 * @description 实例化对象
 	 *
-	 * @param ...mixed
+	 * @param ...mixed $args
 	 *
 	 * @return mixed
 	 */

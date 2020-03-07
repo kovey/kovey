@@ -25,6 +25,13 @@ use Kovey\Components\Process\UserProcess;
 
 class Bootstrap
 {
+	/**
+	 * @description 初始化日志
+	 *
+	 * @param Application $app
+	 *
+	 * @return null
+	 */
 	public function __initLogger(Application $app)
 	{
 		ko_change_process_name(Manager::get('server.rpc.name') . ' rpc root');
@@ -33,6 +40,13 @@ class Bootstrap
 		Monitor::setLogDir(Manager::get('server.logger.monitor'));
 	}
 
+	/**
+	 * @description 初始化APP
+	 *
+	 * @param Application $app
+	 *
+	 * @return null
+	 */
 	public function __initApp(Application $app)
 	{
 		$app->registerServer(new Server($app->getConfig()['server']))
@@ -40,6 +54,13 @@ class Bootstrap
 			->registerUserProcess(new UserProcess($app->getConfig()['server']['worker_num']));
 	}
 
+	/**
+	 * @description 初始化自定义进程
+	 *
+	 * @param Application $app
+	 *
+	 * @return null
+	 */
 	public function __initProcess(Application $app)
 	{
 		$app->registerProcess('config', new Process\Config());
@@ -47,6 +68,13 @@ class Bootstrap
 			//->registerProcess('logger', new Process\Logger());
 	}
 
+	/**
+	 * @description 初始化自定义的Bootsrap
+	 *
+	 * @param Application $app
+	 *
+	 * @return null
+	 */
 	public function __initCustomBoot(Application $app)
 	{
 		$bootstrap = $app->getConfig()['rpc']['boot'] ?? 'application/Bootstrap.php';

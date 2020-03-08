@@ -22,17 +22,18 @@ class Help implements CommandInterface
 	{
 		Logo::show(Version::KOVEY_FRAMEWORK_VERSION);
 
-		echo "Usage: kf.php [options] [--type] <type create del>\n" .
-			"-h                    show help\n" .
-			"--help                show help\n" .
-			"-v                    show version\n" .
-			"--version             show version\n" .
-			"--project <name>      named project will be create or del\n" .
-			"--handler <name>      named handler will be create or del\n" .
-			"--service <name>      named service will be create or del\n" .
-			"--controller <name>   named controller will be create or del\n" .
-			"--path <path>         path to project\n" .
-			"--ptype <name>        project type, only web or rpc\n";
+		echo "Usage: kf.php [options] [--type] <type create del>" . PHP_EOL .
+			"-h                    show help" . PHP_EOL .
+			"--help                show help" . PHP_EOL .
+			"-v                    show version" . PHP_EOL .
+			"--version             show version" . PHP_EOL .
+			"--project <name>      named project will be create or del" . PHP_EOL .
+			"--handler <name>      named handler will be create or del" . PHP_EOL .
+			"--service <name>      named service will be create or del" . PHP_EOL .
+			"--controller <name>   named controller will be create or del" . PHP_EOL .
+			"--path <path>         path to project" . PHP_EOL .
+			"--ptype <name>        project type, only web or rpc or websocket" . PHP_EOL;
+			"--logdir <path>       project logger directory" . PHP_EOL;
 		exit;
 	}
 }

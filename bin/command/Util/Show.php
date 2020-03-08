@@ -17,7 +17,7 @@ class Show
 {
 	public static function show($message)
 	{
-		echo "$message\n";
+		echo "$message" . PHP_EOL;
 	}
 
 	public static function showFormat($format, ...$args)

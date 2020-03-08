@@ -25,7 +25,8 @@ $opt = getopt('hp:vp:', array(
 	'controller:',
 	'version',
 	'path:',
-	'ptype:'
+	'ptype:',
+	'logdir:'
 ));
 
 if (empty($opt)
@@ -76,5 +77,5 @@ if (isset($opt['project'])) {
 		Command::run('help', 'common');
 	}
 
-	Command::run($opt['type'], 'project', $path, $opt['project'], $opt['ptype']);
+	Command::run($opt['type'], 'project', $path, $opt['project'], $opt['ptype'], $opt['logdir'] ?? '');
 }

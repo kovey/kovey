@@ -23,22 +23,26 @@ class Create implements CommandInterface
 
 	private $type;
 
+	private $logdir;
+
 	private $types = array(
 		'web' => 'Web',
-		'rpc' => 'Rpc'
+		'rpc' => 'Rpc',
+		'websocket' => 'Websocket'
 	);
 
-	public function __construct($path, $name, $type)
+	public function __construct($path, $name, $type, $logdir)
 	{
 		$this->path = $path;
 		$this->name = $name;
 		$this->type = $type;
+		$this->logdir = $logdir;
 	}
 
 	public function run()
 	{
 		if (!isset($this->types[$this->type])) {
-			Show::show('ptype is only "web" or "rpc"');
+			Show::show('ptype is only "web" or "rpc" or "websocket"');
 			exit;
 		}
 
@@ -54,7 +58,7 @@ class Create implements CommandInterface
 	{
 		try {
 			$class = '\Command\Project\Create\\' . $this->types[$this->type];
-			$obj = new $class($this->path, $this->name);
+			$obj = new $class($this->path, $this->name, $this->logdir);
 			$obj->create();
 			Show::showFormat('create %s in %s success', $this->name, $this->path);
 		} catch (\Throwable $e) {

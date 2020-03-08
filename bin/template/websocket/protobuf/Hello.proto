@@ -1,0 +1,9 @@
+syntax='proto3';
+package protobuf;
+message Hello {
+	string handler=1;
+	string handlerMethod=2;
+	string hello=3;
+	int32 type=4;
+	string world=5;
+}

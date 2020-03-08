@@ -23,11 +23,14 @@ class Rpc
 
 	private $root;
 
-	public function __construct($path, $name)
+	private $logdir;
+
+	public function __construct($path, $name, $logdir)
 	{
 		$this->path = $path;
 		$this->name = $name;
 		$this->root = $this->path . '/' . $this->name;
+		$this->logdir = $logdir;
 	}
 
 	public function create()
@@ -91,6 +94,12 @@ class Rpc
 
 		mkdir($this->root . '/run', 0755, true);
 
+		if (empty($this->logdir)) {
+			$this->logdir = $this->root . '/logs';
+		} else if (!is_dir($this->logdir)) {
+			mkdir($this->logdir, 0755, true);
+		}
+
 		$core = file_get_contents($this->root . '/conf/server.ini');
 		$core = str_replace(array(
 			'{log_file}',
@@ -104,15 +113,15 @@ class Rpc
 			'{monitor}',
 			'{rpc-name}'
 		), array(
-			$this->root . '/logs/server/server.log',
-			$this->root . '/run/kovey-rpc',
+			$this->logdir . '/server/server.log',
+			$this->logdir . '/run/kovey-rpc',
 			$this->name,
-			$this->root . '/logs/info',
-			$this->root . '/logs/exception',
-			$this->root . '/logs/error',
-			$this->root . '/logs/warning',
-			$this->root . '/logs/db',
-			$this->root . '/monitor',
+			$this->logdir . '/info',
+			$this->logdir . '/exception',
+			$this->logdir . '/error',
+			$this->logdir . '/warning',
+			$this->logdir . '/db',
+			$this->logdir . '/monitor',
 			$this->name
 		), $core);
 		file_put_contents($this->root . '/conf/server.ini', $core);

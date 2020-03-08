@@ -1,13 +1,13 @@
 <?php
 /**
  *
- * @description 创建web工程
+ * @description 
  *
  * @package     
  *
- * @time        2019-12-26 00:03:07
+ * @time        2020-01-18 21:28:26
  *
- * @file  /Users/kovey/Documents/php/kovey/bin/command/Command/Project/Create/Web.php
+ * @file  /Users/kovey/Documents/php/kovey/bin/command/Command/Project/Create/Websocket.php
  *
  * @author      kovey
  */
@@ -15,7 +15,7 @@ namespace Command\Project\Create;
 
 use Util\Util;
 
-class Web
+class Websocket
 {
 	private $name;
 
@@ -43,18 +43,10 @@ class Web
 
 		$this->createApplication()
 			->createBin()
-			->createCron()
 			->createConf()
-			->createPublic()
 			->createService()
 			->createIndex()
 			->createVendor();
-	}
-
-	private function createPublic()
-	{
-		mkdir($this->root . '/public/static', 0755, true);
-		return $this;
 	}
 
 	private function createService()
@@ -65,7 +57,7 @@ class Web
 			'{pid_file}', 
 			'{root}'
 		), array(
-			$this->root . '/run/kovey-framework',
+			$this->root . '/run/kovey-websocket',
 			$this->root
 		), $app);
 		file_put_contents($this->root . '/service/kovey.service', $app);
@@ -74,49 +66,36 @@ class Web
 
 	private function createIndex()
 	{
-		copy(KOVEY_TOOLS_BIN . '/template/web/index.php', $this->root . '/index.php');
+		copy(KOVEY_TOOLS_BIN . '/template/websocket/index.php', $this->root . '/index.php');
 		return $this;
 	}
 
 	private function createApplication()
 	{
 		$app = $this->root . '/application';
-		Util::copy(KOVEY_TOOLS_BIN . '/template/controllers', $app . '/controllers');
-		Util::copy(KOVEY_TOOLS_BIN . '/template/layouts', $app . '/layouts');
+		Util::copy(KOVEY_TOOLS_BIN . '/template/websocket/Handler', $app . '/Handler');
 		mkdir($app . '/library', 0755, true);
-		mkdir($app . '/routers', 0755, true);
+		Util::copy(KOVEY_TOOLS_BIN  . '/template/websocket/protobuf/Protobuf', $app . '/library/Protobuf');
+		Util::copy(KOVEY_TOOLS_BIN  . '/template/websocket/protobuf/GPBMetadata', $app . '/library/GPBMetadata');
 
-		Util::copy(KOVEY_TOOLS_BIN . '/template/plugins', $app . '/plugins');
-		Util::copy(KOVEY_TOOLS_BIN . '/template/views', $app . '/views');
-
-		copy(KOVEY_TOOLS_BIN . '/template/web/Bootstrap.php', $app . '/Bootstrap.php');
+		copy(KOVEY_TOOLS_BIN . '/template/websocket/Bootstrap.php', $app . '/Bootstrap.php');
  
 		return $this;
 	}
 
 	private function createBin()
 	{
-		Util::copy(KOVEY_TOOLS_BIN . '/template/bin', $this->root . '/bin');
+		Util::copy(KOVEY_TOOLS_BIN . '/template/websocket/bin', $this->root . '/bin');
 		chmod($this->root . '/bin/kovey', 0755);
-		return $this;
-	}
-
-	private function createCron()
-	{
-		mkdir($this->root . '/cron', 0755, true);
-		touch($this->root . '/cron/cron');
 		return $this;
 	}
 
 	private function createConf()
 	{
-		Util::copy(KOVEY_TOOLS_BIN . '/template/web/conf', $this->root . '/conf');
-
-		$app = file_get_contents($this->root . '/conf/app.ini');
-		$app = str_replace(array('{project}', '{cron-file}'), array($this->name, $this->root . '/cron/cron'), $app);
-		file_put_contents($this->root . '/conf/app.ini', $app);
+		Util::copy(KOVEY_TOOLS_BIN . '/template/websocket/conf', $this->root . '/conf');
 
 		mkdir($this->root . '/run', 0755, true);
+
 		if (empty($this->logdir)) {
 			$this->logdir = $this->root . '/logs';
 		} else if (!is_dir($this->logdir)) {
@@ -125,27 +104,27 @@ class Web
 
 		$core = file_get_contents($this->root . '/conf/server.ini');
 		$core = str_replace(array(
-			'{pid_file}', 
-			'{logger_info}', 
-			'{logger_error}', 
-			'{logger_warning}', 
-			'{logger_exception}', 
-			'{session_dir}',
+			'{log_file}',
+			'{pid_file}',
+		   	'{name}',	
+			'{info}', 
+			'{exception}', 
+			'{error}', 
+			'{warning}', 
 			'{db}',
 			'{monitor}',
-			'{project}',
-			'{log_file}'
+			'{websocket-name}'
 		), array(
-			$this->logdir . '/run/kovey-framework',
+			$this->logdir . '/server/server.log',
+			$this->logdir . '/run/kovey-websocket',
+			$this->name,
 			$this->logdir . '/info',
+			$this->logdir . '/exception',
 			$this->logdir . '/error',
 			$this->logdir . '/warning',
-			$this->logdir . '/exception',
-			$this->logdir . '/session',
 			$this->logdir . '/db',
 			$this->logdir . '/monitor',
-			$this->name,
-			$this->logdir . '/server/server.log'
+			$this->name
 		), $core);
 		file_put_contents($this->root . '/conf/server.ini', $core);
 		return $this;
@@ -156,7 +135,7 @@ class Web
 		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Components', $this->root . '/vendor/Kovey/Components');
 		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Config', $this->root . '/vendor/Kovey/Config');
 		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Util', $this->root . '/vendor/Kovey/Util');
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Web', $this->root . '/vendor/Kovey/Web');
+		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Websocket', $this->root . '/vendor/Kovey/Websocket');
 		copy(KOVEY_TOOLS_BIN . '/../kovey.php', $this->root. '/vendor/kovey.php');
 
 		return $this;

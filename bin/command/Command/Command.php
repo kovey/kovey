@@ -22,9 +22,9 @@ class Command
 			$obj = new $class(...$args);
 			$obj->run();
 		} catch (\Throwable $e) {
-			echo "command $command is unkown\n";
+			echo "command $command is unkown" . PHP_EOL;
 		} catch (\Exception $e) {
-			echo $e->getMessage() , "\n";
+			echo $e->getMessage() , "" . PHP_EOL;
 		}
 	}
 }

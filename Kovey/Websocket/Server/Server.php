@@ -22,7 +22,7 @@ class Server
 	/**
 	 * @description 服务器
 	 *
-	 * @var Swoole\Websocket
+	 * @var Swoole\Websocket\Server
 	 */
     private $serv;
 
@@ -124,12 +124,6 @@ class Server
 	 *
 	 * @param int $fd
 	 *
-	 * @param ProtocolInterface $packet
-	 *
-	 * @param float $begin
-	 *
-	 * @param int $reqTime
-	 * 
 	 * @return null
 	 *
 	 */
@@ -257,7 +251,7 @@ class Server
 	 *
 	 * @param Swoole\Server $serv
 	 *
-	 * @param int $fd
+	 * @param Swoole\Http\Request $request
 	 *
 	 * @return null
 	 */

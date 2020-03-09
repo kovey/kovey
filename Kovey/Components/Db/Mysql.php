@@ -16,6 +16,7 @@ namespace Kovey\Components\Db;
 use Kovey\Components\Db\Sql\Update;
 use Kovey\Components\Db\Sql\Insert;
 use Kovey\Components\Db\Sql\Select;
+use Kovey\Components\Db\Sql\BatchInsert;
 use Kovey\Components\Db\Sql\Delete;
 use Kovey\Components\Db\Sql\Where;
 use Swoole\Coroutine\MySQL as SCD;
@@ -433,12 +434,36 @@ class Mysql implements DbInterface
 		}
 	}
 
+    /**
+     * @description 批量插入
+     *
+     * @param BatchInsert $batchInsert
+     *
+     * @return bool
+     *
+     * @throws Exception
+     *
+     */
+    public function batchInsert(BatchInsert $batchInsert)
+    {
+        $sth = $this->prepare($batchInsert);
+        if ($this->connection->affected_rows < 1) {
+            throw new \Exception(
+                sprintf('Insert Fail, Effictive Rows: %s', $this->connection->affected_rows)
+            );
+        }
+
+        return true;
+    }
+
 	/**
 	 * @description 删除
 	 *
 	 * @param Delete $delete
 	 *
-	 * @return mixed
+     * @return bool
+     *
+     * @throws Exception
 	 */
     public function delete(Delete $delete)
     {

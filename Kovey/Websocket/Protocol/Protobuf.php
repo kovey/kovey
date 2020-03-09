@@ -85,12 +85,6 @@ class Protobuf
 	 *
 	 * @param Protobuf $packet
 	 *
-	 * @param string $secretKey
-	 *
-	 * @param string $type
-	 *
-	 * @param bool $isPub
-	 *
 	 * @return string | bool
 	 */
 	public static function pack(Protobuf $packet)
@@ -104,12 +98,6 @@ class Protobuf
 	 * @description 解包
 	 *
 	 * @param string $data
-	 *
-	 * @param string $secretKey
-	 *
-	 * @param string $type
-	 *
-	 * @param bool $isPub
 	 *
 	 * @return Protobuf
 	 *

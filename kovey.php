@@ -74,7 +74,7 @@ if (!defined('KOVEY_RPC_ROOT')) {
     define('KOVEY_RPC_ROOT', __DIR__);
 }
 
-// 定义RPC路径
+// 定义WEBSOCKET路径
 if (!defined('KOVEY_WEBSOCKET_ROOT')) {
     define('KOVEY_WEBSOCKET_ROOT', __DIR__);
 }

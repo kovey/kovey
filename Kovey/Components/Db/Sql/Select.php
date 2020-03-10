@@ -321,6 +321,11 @@ class Select implements SqlInterface
 					continue;
 				}
 
+                if (is_array($val)) {
+                    $this->where->in($key, $val);
+                    continue;
+                }
+
 				$this->where->equal($key, $val);
 			}
 		} else {

@@ -418,7 +418,7 @@ class Mysql implements DbInterface
 	 */
 	private function isDisconneted()
 	{
-		return preg_match('/2006/', $this->getError()) || preg_match('/2013/', $this->getError());
+		return preg_match('/2006/', $this->getError()) || preg_match('/2013/', $this->getError()) || preg_match('/2002/', $this->getError());
 	}
 
 	/**

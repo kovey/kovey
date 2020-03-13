@@ -148,7 +148,7 @@ abstract class Base
 	}
 
 	/**
-	 * @description 更新数据
+	 * @description 删除数据
 	 *
 	 * @param Array $data
 	 *

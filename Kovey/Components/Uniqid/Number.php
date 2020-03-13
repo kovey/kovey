@@ -54,12 +54,13 @@ class Number
 	public function get()
 	{
 		$val = $this->atomic->get();
+		$this->atomic->add();
 		if ($val >= self::MAX_VALUE) {
 			$this->atomic->set(self::INIT_VALUE);
+            $this->atomic->add();
 			$val = self::MAX_VALUE;
 		}
 
-		$this->atomic->add();
 		return strval($val);
 	}
 

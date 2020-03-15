@@ -11,8 +11,10 @@
  *
  * @author      kovey
  */
-use Protobuf\Error;
 use Kovey\Components\Exception\BusiException;
+use Protobuf\Error;
+use Kovey\Config\Manager;
+use Protocol\Protobuf;
 
 class Bootstrap
 {
@@ -23,44 +25,49 @@ class Bootstrap
 
 	public function __initOn($app)
 	{
-		$app->on('error', function ($error) {
-			$error = new Error();
-			$error->setError($error);
-			$error->setHandlerMethod('error');
-			$error->setHandler('Error');
-			return array(
-				'name' => $error->getHandler(),
-				'body' => $error->serializeToString()
-			);
-		})
-		->on('protobuf', function ($messageName, $body) {
+		$app->on('protobuf', function ($packet) {
+            $messageName = Manager::get('protocol.' . $packet->getAction() . '.class');
 			$class = new $messageName();
-			$class->mergeFromString($body);
+			$class->mergeFromString($packet->getData());
 
-			return $class;
+            return array(
+                'handler' => Manager::get('protocol.' . $action . '.handler'),
+                'method' => Manager::get('protocol.' . $action . '.method'),
+                'message' => $class
+            );
 		})
 		->on('run_handler', function ($handler, $method, $message) {
 			try {
-				$result = $handler->$method($message);
-				if (is_array($result)) {
-					return $result;
-				}
-
-				return array(
-					'name' => $error->getHandler(),
-					'body' => $error->serializeToString()
-				);
+				return $handler->$method($message);
 			} catch (BusiException $e) {
-				$error = new Error();
+				$error = new KoveyErrorMessage();
 				$error->setError($e->getMessage());
 				$error->setCode($e->getCode());
-				$error->setHandlerMethod('error');
-				$error->setHandler('Error');
 				return array(
-					'name' => $error->getHandler(),
-					'body' => $error->serializeToString()
+					'action' => 500,
+					'message' => $error
 				);
 			}
-		});
+        })
+	    ->on('error', function ($msg) {
+			$error = new Error();
+            $error->setError($msg)
+                ->setCode(500);
+            return array(
+                'action' => 500,
+                'message' => $error
+            );
+		})
+        ->serverOn('error', function () {
+			$error = new Error();
+            return $error->setError('Internal Error!')
+                ->setCode(500);
+        })
+        ->serverOn('pack', function ($packet, $action) {
+            return Protobuf::pack($packet, $action);
+        })
+        ->serverOn('unpack', function ($data) {
+            return Protobuf::unpack($data);
+        });
 	}
 }

@@ -11,7 +11,7 @@
  *
  * @author      kovey
  */
-namespace Kovey\App\Websocket;
+namespace Kovey\Websocket\App;
 
 use Kovey\Websocket\Handler\HandlerAbstract;
 use Kovey\Components\Process\ProcessAbstract;
@@ -23,6 +23,7 @@ use Kovey\Websocket\Server\Server;
 use Kovey\Components\Process\UserProcess;
 use Kovey\Components\Logger\Logger;
 use Kovey\Components\Logger\Monitor;
+use Google\Protobuf\Internal\Message;
 
 class App
 {
@@ -236,15 +237,15 @@ class App
 	/**
 	 * @description handler业务
 	 *
-	 * @param string $messageName
+	 * @param Message $packet
 	 *
-	 * @param string body
+	 * @param int $fd
 	 *
 	 * @param string $ip
 	 *
 	 * @return Array
 	 */
-	public function handler($messageName, $body, $ip)
+	public function handler($packet, $fd, $ip)
 	{
 		$begin = microtime(true);
 		$reqTime = time();
@@ -259,8 +260,8 @@ class App
 				return array();
 			}
 
-			$message = call_user_func($this->events['protobuf'], $messageName, $body);
-			if (empty($message)) {
+			$message = call_user_func($this->events['protobuf'], $packet);
+			if (empty($message['handler']) || empty($message['method'])) {
 				if (isset($this->events['error'])) {
 					$this->sendToMonitor($reqTime, $begin, $ip, 'exception');
 					return call_user_func($this->events['error'], 'unknown message');
@@ -270,39 +271,25 @@ class App
 				return array();
 			}
 
-			$instance = $this->container->get($this->config['websocket']['handler'] . '\\' . ucfirst($message->getHandler()));
+			$instance = $this->container->get($this->config['websocket']['handler'] . '\\' . ucfirst($message['handler']));
 			if (!$instance instanceof HandlerAbstract) {
 				if (isset($this->events['error'])) {
 					$this->sendToMonitor($reqTime, $begin, $ip, 'exception', $message);
-					return call_user_func($this->events['error'], sprintf('%s is not extends HandlerAbstract', ucfirst($messageName)));
+					return call_user_func($this->events['error'], sprintf('%s is not extends HandlerAbstract', ucfirst($message['handler'])));
 				}
 
 				return array();
 			}
 
 			if (!isset($this->events['run_handler'])) {
-				$method = $message->getHandlerMethod();
-				$result = $instance->$method($message);
+				$method = $message['method'];
+				$result = $instance->$method($message['message']);
 				$this->sendToMonitor($reqTime, $begin, $ip, 'exception', $message);
-				if (!is_array($result)) {
-					return array(
-						'name' => $result->getHandler(),
-						'body' => $result->serializeToString()
-					);
-				}
-
-				return $result;
+                return $result;
 			}
 
-			$result = call_user_func($this->events['run_handler'], $instance, $message->getHandlerMethod(), $message);
+			$result = call_user_func($this->events['run_handler'], $instance, $message['method'], $message['message']);
 			$this->sendToMonitor($reqTime, $begin, $ip, 'success', $message);
-			if (!is_array($result)) {
-				return array(
-					'name' => $result->getHandler(),
-					'body' => $result->serializeToString()
-				);
-			}
-
 			return $result;
 		} catch (\Exception $e) {
 			Logger::writeExceptionLog(__LINE__, __FILE__, $e);
@@ -340,10 +327,10 @@ class App
 
 		$data = array(
 			'delay' => round(($end - $begin) * 1000, 2),
-			'handler' => empty($message) ? '' : $message->getHandler(),
-			'method' => empty($message) ? '' : $message->getHandlerMethod(),
+			'handler' => $message['handler'] ?? '',
+			'method' => $message['method'],
 			'type' => $type,
-			'params' => empty($message) ? '' : $message->serializeToJsonString(),
+			'params' => empty($message['message']) ? '' : $message['message']->serializeToJsonString(),
 			'ip' => $ip,
 			'time' => $reqTime,
 			'timestamp' => date('Y-m-d H:i:s', $reqTime),
@@ -632,4 +619,33 @@ class App
 
 		$this->server->start();
 	}
+
+	/**
+	 * @description 发送数据
+	 *
+	 * @param Message $packet
+	 *
+	 * @param int $fd
+	 *
+	 * @return null
+	 */
+    public function send(Message $packet, int $action, $fd)
+    {
+        $this->server->send($packet, $action, $fd);
+    }
+
+    /**
+     * @description 服务器事件注册
+     *
+     * @param string $name
+     *
+     * @param callable $callable
+     *
+     * @return App
+     */
+    public function serverOn(string $event, $callable)
+    {
+        $this->server->on($event, $callable);
+        return $this;
+    }
 }

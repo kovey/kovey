@@ -19,11 +19,12 @@ class Hello extends HandlerAbstract
     public function world($message)
 	{
 		$hello = new PH();
-		$hello->setHandler('Hello');
-		$hello->setHandlerMethod('world');
 		$hello->setHello('hello');
 		$hello->setType(5);
 		$hello->setWorld('world');
-		return $hello;
+        return array(
+            'action' => 1000,
+            'message' => $hello
+        );
     }
 }

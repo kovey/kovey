@@ -14,8 +14,8 @@
 namespace Kovey\Websocket\Server;
 
 use Kovey\Components\Logger\Logger;
-use Kovey\Websocket\Protocol\Protobuf;
 use Kovey\Websocket\Protocol\Exception;
+use Google\Protobuf\Internal\Message;
 
 class Server
 {
@@ -97,7 +97,10 @@ class Server
 		$this->allowEevents = array(
 			'handler' => 1,
 			'pipeMessage' => 1,
-			'initPool' => 1
+            'initPool' => 1,
+            'pack' => 1,
+            'unpack' => 1,
+            'error' => 1
 		);
 
 		return $this;
@@ -135,8 +138,11 @@ class Server
 			case E_ERROR :
 			case E_PARSE :
 			case E_CORE_ERROR :
-			case E_COMPILE_ERROR :
-				//$this->send($result, $fd);
+            case E_COMPILE_ERROR :
+                if (isset($this->events['error'])) {
+                    $this->send(call_user_func($this->events['error']), 500, $fd);
+                }
+                Logger::writeErrorLog(__LINE__, __FILE__, sprintf('%s in %s on line %s'), $error['message'], $error['file'], $error['line']);
 				break;
 		}
 	}
@@ -195,6 +201,8 @@ class Server
 	 * @param callable $cal
 	 *
 	 * @return Server
+     *
+     * @throws Exception
 	 */
 	public function on($event, $call)
 	{
@@ -203,7 +211,7 @@ class Server
 		}
 
 		if (!is_callable($call)) {
-			return $this;
+            throw new \Exception(sprintf('%s event is not callable', $event), 500);
 		}
 
 		$this->events[$event] = $call;
@@ -265,22 +273,29 @@ class Server
 	 * @param Swoole\Server $serv
 	 *
 	 * @param int $fd
-	 *
-	 * @param int $reactor_id
-	 *
-	 * @param mixed $data
+     *
+     * @param Frame $frame
 	 *
 	 * @return null
 	 */
     public function message($serv, $frame)
     {
 		if ($frame->opcode != SWOOLE_WEBSOCKET_OPCODE_BINARY) {
-			$serv->close($frame->id);
+			$serv->close($frame->fd);
 			return;
 		}
 
+        if (!isset($this->events['unpack'])) {
+			$serv->close($frame->fd);
+            return;
+        }
+
 		try {
-			$protobuf = Protobuf::unpack($frame->data);
+			$protobuf = call_user_func($this->events['unpack'], $frame->data);
+            if (empty($protobuf)) {
+                throw new Exception('unpack error', 500, 'unpack_exception');
+            }
+
 			$this->handler($protobuf, $frame->fd);
 		} catch (Exception $e) {
 			$serv->close($frame->fd);
@@ -295,13 +310,13 @@ class Server
 	/**
 	 * @description Hander 处理
 	 *
-	 * @param Protobuf $packet
+	 * @param Message $packet
 	 *
 	 * @param int $fd
 	 *
 	 * @return null
 	 */
-    private function handler(Protobuf $packet, $fd)
+    private function handler(Message $packet, $fd)
     {
         try {
 			if (!isset($this->events['handler'])) {
@@ -311,16 +326,19 @@ class Server
 
 			register_shutdown_function(array($this, 'handleFatal'), $fd);
 
-			$result = call_user_func($this->events['handler'], $packet->getMessageName(), $packet->getBody(), $this->serv->getClientInfo($fd)['remote_ip']);
-			if (!is_array($result)
-				|| !isset($result['name'])
-				|| !isset($result['body'])
-			) {
+			$result = call_user_func($this->events['handler'], $packet, $fd, $this->serv->getClientInfo($fd)['remote_ip']);
+
+            if (!isset($result['message']) || !isset($result['action'])) {
+                $this->serv->close($fd);
+                return;
+            }
+
+			if (!$result['message'] instanceof Message) {
 				$this->serv->close($fd);
 				return;
 			}
 
-			$this->send(new Protobuf($result['name'], $result['body']), $fd);
+			$this->send($result['message'], $result['action'], $fd);
 		} catch (\Exception $e) {
 			Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         } catch (\Throwable $e) {
@@ -331,15 +349,19 @@ class Server
 	/**
 	 * @description 发送数据
 	 *
-	 * @param Protobuf $packet
+	 * @param Message $packet
 	 *
 	 * @param int $fd
 	 *
 	 * @return null
 	 */
-    private function send(Protobuf $packet, $fd)
+    private function send(Message $packet, int $action, $fd)
     {
-        $this->serv->push($fd, Protobuf::pack($packet), SWOOLE_WEBSOCKET_OPCODE_BINARY);
+        if (!isset($this->events['pack'])) {
+            return;
+        }
+
+        $this->serv->push($fd, call_user_func($this->events['pack'], $packet, $action), SWOOLE_WEBSOCKET_OPCODE_BINARY);
     }
 
 	/**

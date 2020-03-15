@@ -77,6 +77,8 @@ class Websocket
 		mkdir($app . '/library', 0755, true);
 		Util::copy(KOVEY_TOOLS_BIN  . '/template/websocket/protobuf/Protobuf', $app . '/library/Protobuf');
 		Util::copy(KOVEY_TOOLS_BIN  . '/template/websocket/protobuf/GPBMetadata', $app . '/library/GPBMetadata');
+		Util::copy(KOVEY_TOOLS_BIN  . '/template/websocket/protobuf/pb.proto', $app . '/library/pb.proto');
+		Util::copy(KOVEY_TOOLS_BIN  . '/template/websocket/Protocol', $app . '/library/Protocol');
 
 		copy(KOVEY_TOOLS_BIN . '/template/websocket/Bootstrap.php', $app . '/Bootstrap.php');
  

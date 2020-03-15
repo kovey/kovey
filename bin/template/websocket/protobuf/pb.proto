@@ -1,0 +1,17 @@
+syntax='proto3';
+package protobuf;
+message BaseMessage {
+	int32 action=1;
+	bytes data=2;
+}
+
+message Error {
+    string error=1; 
+    string code=2;
+}
+
+message Hello {
+	string hello=3;
+	int32 type=4;
+	string world=5;
+}

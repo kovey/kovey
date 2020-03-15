@@ -1,8 +1,0 @@
-syntax='proto3';
-package protobuf;
-message Error {
-	string handler=1;
-	string handlerMethod=2;
-	string error=3;
-	int32 code=4;
-}

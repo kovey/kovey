@@ -283,12 +283,12 @@ class App
 
 			if (!isset($this->events['run_handler'])) {
 				$method = $message['method'];
-				$result = $instance->$method($message['message']);
+				$result = $instance->$method($message['message'], $fd);
 				$this->sendToMonitor($reqTime, $begin, $ip, 'exception', $message);
                 return $result;
 			}
 
-			$result = call_user_func($this->events['run_handler'], $instance, $message['method'], $message['message']);
+			$result = call_user_func($this->events['run_handler'], $instance, $message['method'], $message['message'], $fd);
 			$this->sendToMonitor($reqTime, $begin, $ip, 'success', $message);
 			return $result;
 		} catch (\Exception $e) {

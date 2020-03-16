@@ -45,7 +45,7 @@ class Server
 	 *
 	 * @var Array
 	 */
-	private $allowEevents;
+	private $allowEvents;
 
 	/**
 	 * @description 是否运行在docker中
@@ -94,13 +94,15 @@ class Server
 	 */
 	private function initAllowEvents()
 	{
-		$this->allowEevents = array(
+		$this->allowEvents = array(
 			'handler' => 1,
 			'pipeMessage' => 1,
             'initPool' => 1,
             'pack' => 1,
             'unpack' => 1,
-            'error' => 1
+            'error' => 1,
+            'close' => 1,
+            'open' => 1
 		);
 
 		return $this;
@@ -206,7 +208,7 @@ class Server
 	 */
 	public function on($event, $call)
 	{
-		if (!isset($this->allowEevents[$event])) {
+		if (!isset($this->allowEvents[$event])) {
 			return $this;
 		}
 
@@ -265,6 +267,17 @@ class Server
 	 */
     public function open($serv, $request)
     {
+        if (!isset($this->events['open'])) {
+            return;
+        }
+
+        try {
+            call_user_func($this->events['open'], $request->fd, empty($request->get) ? $request->post : $request->get);
+        } catch (\Exception $e) {
+            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+        } catch (\Throwable $e) {
+            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+        }
     }
 
 	/**
@@ -320,21 +333,24 @@ class Server
     {
         try {
 			if (!isset($this->events['handler'])) {
-				$this->serv->close($fd);
+				$this->serv->disconnect($fd, 4000, 'NO_HANDLER');
 				return;
 			}
 
 			register_shutdown_function(array($this, 'handleFatal'), $fd);
 
 			$result = call_user_func($this->events['handler'], $packet, $fd, $this->serv->getClientInfo($fd)['remote_ip']);
+            if ($result === false) {
+                $this->serv->disconnect($fd, 4001, 'THROW_BUSI_EXCEPTION');
+                return;
+            }
 
-            if (!isset($result['message']) || !isset($result['action'])) {
-                $this->serv->close($fd);
+            if (empty($result) || !isset($result['message']) || !isset($result['action'])) {
                 return;
             }
 
 			if (!$result['message'] instanceof Message) {
-				$this->serv->close($fd);
+				$this->serv->disconnect($fd, 4002, 'PROTOCOL_ERROR');
 				return;
 			}
 
@@ -375,6 +391,17 @@ class Server
 	 */
     public function close($serv, $fd)
     {
+        if (!isset($this->events['close'])) {
+            return;
+        }
+
+        try {
+            call_user_func($this->events['close'], $fd);
+        } catch (\Exception $e) {
+            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+        } catch (\Throwable $e) {
+            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+        }
     }
 
 	/**

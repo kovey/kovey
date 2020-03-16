@@ -36,17 +36,11 @@ class Bootstrap
                 'message' => $class
             );
 		})
-		->on('run_handler', function ($handler, $method, $message) {
+		->on('run_handler', function ($handler, $method, $message, $fd) {
 			try {
-				return $handler->$method($message);
+				return $handler->$method($message, $fd);
 			} catch (BusiException $e) {
-				$error = new KoveyErrorMessage();
-				$error->setError($e->getMessage());
-				$error->setCode($e->getCode());
-				return array(
-					'action' => 500,
-					'message' => $error
-				);
+                return false;
 			}
         })
 	    ->on('error', function ($msg) {

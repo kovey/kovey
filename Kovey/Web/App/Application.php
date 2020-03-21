@@ -237,9 +237,11 @@ class Application
 	public function registerServer(Server $server)
 	{
 		$this->server = $server;
-		$this->server->on('workflow', array($this, 'workflow'))
+        $this->server
+            ->on('workflow', array($this, 'workflow'))
 			->on('init', array($this, 'init'))
-			->on('console', array($this, 'console'));
+            ->on('console', array($this, 'console'))
+            ->on('monitor', array($this, 'monitor'));
 
 		return $this;
 	}
@@ -314,9 +316,6 @@ class Application
 	 */
 	public function workflow(\Swoole\Http\Request $request)
 	{
-		$begin = microtime(true);
-		$reqTime = time();
-
 		if (!isset($this->events['request'])
 			|| !isset($this->events['response'])
 		) {
@@ -346,8 +345,6 @@ class Application
 			->setAction($router->getAction());
 
 		$result = null;
-		$params = $req->getMethod() === 'post' ? $req->getPost() : $req->getQuery();
-
 		if (isset($this->events['pipeline'])) {
 			$result = call_user_func($this->events['pipeline'], $req, $res, $router);
 			if ($result instanceof ResponseInterface) {
@@ -357,20 +354,14 @@ class Application
 			$result = $this->runAction($req, $res, $router);
 		}
 
-		$end = microtime(true);
-
-		Monitor::write(array(
-			'delay' => round(($end - $begin) * 1000, 2),
-			'path' => $uri,
-			'params' => $params,
-			'ip' => $req->getClientIP(),
-			'time' => $reqTime,
-			'timestamp' => date('Y-m-d H:i:s', $reqTime),
-			'minute' => date('YmdHi', $reqTime)
-		));
-
 		return $result;
 	}
+
+    public function monitor(Array $data)
+    {
+		$this->userProcess->push('monitor', $data);
+		Monitor::write($data);
+    }
 
 	/**
 	 * @description 事件监听

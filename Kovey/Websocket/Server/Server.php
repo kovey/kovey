@@ -16,6 +16,7 @@ namespace Kovey\Websocket\Server;
 use Kovey\Components\Logger\Logger;
 use Kovey\Websocket\Protocol\Exception;
 use Google\Protobuf\Internal\Message;
+use Kovey\Components\Exception\CloseConnectionException;
 
 class Server
 {
@@ -81,7 +82,7 @@ class Server
 		$pidDir = dirname($this->conf['pid_file']);
 		if (!is_dir($pidDir)) {
 			mkdir($pidDir, 0777, true);
-		}
+        }
 
 		$this->initAllowEvents()
 			->initCallback();
@@ -239,14 +240,14 @@ class Server
 			}
 
 			call_user_func($this->events['pipeMessage'], $data['p'] ?? '', $data['m'] ?? '', $data['a'] ?? array());
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
 				echo $e->getMessage() . PHP_EOL .
 					$e->getTraceAsString() . PHP_EOL;
 			}
-		} catch (\Exception $e) {
+		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
@@ -273,6 +274,8 @@ class Server
 
         try {
             call_user_func($this->events['open'], $request->fd, empty($request->get) ? $request->post : $request->get);
+        } catch (CloseConnectionException $e) {
+            $serv->disconnect($request->fd, WebsocketCode::THROW_CLOSE_CONNECTION_EXCEPTION, 'THROW_CLOSE_CONNECTION_EXCEPTION');
         } catch (\Exception $e) {
             Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         } catch (\Throwable $e) {
@@ -294,12 +297,12 @@ class Server
     public function message($serv, $frame)
     {
 		if ($frame->opcode != SWOOLE_WEBSOCKET_OPCODE_BINARY) {
-			$serv->close($frame->fd);
+            $serv->disconnect($frame->fd, WebsocketCode::STREAM_ERROR, 'STREAM_ERROR');
 			return;
 		}
 
         if (!isset($this->events['unpack'])) {
-			$serv->close($frame->fd);
+			$serv->disconnect($frame->fd, WebsocketCode::UNPACK_STREAM_ERROR, 'UNPACK_STREAM_ERROR');
             return;
         }
 
@@ -309,9 +312,11 @@ class Server
                 throw new Exception('unpack error', 500, 'unpack_exception');
             }
 
-			$this->handler($protobuf, $frame->fd);
+            $this->handler($protobuf, $frame->fd);
+        } catch (CloseConnectionException $e) {
+            $serv->disconnect($frame->fd, WebsocketCode::THROW_CLOSE_CONNECTION_EXCEPTION, 'THROW_CLOSE_CONNECTION_EXCEPTION');
 		} catch (Exception $e) {
-			$serv->close($frame->fd);
+			$serv->disconnect($frame->fd, WebsocketCode::PROTOCOL_ERROR, 'PROTOCOL_ERROR');
 			Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 		} catch (\Exception $e) {
 			Logger::writeExceptionLog(__LINE__, __FILE__, $e);
@@ -331,35 +336,25 @@ class Server
 	 */
     private function handler(Message $packet, $fd)
     {
-        try {
-			if (!isset($this->events['handler'])) {
-				$this->serv->disconnect($fd, 4000, 'NO_HANDLER');
-				return;
-			}
-
-			register_shutdown_function(array($this, 'handleFatal'), $fd);
-
-			$result = call_user_func($this->events['handler'], $packet, $fd, $this->serv->getClientInfo($fd)['remote_ip']);
-            if ($result === false) {
-                $this->serv->disconnect($fd, 4001, 'THROW_BUSI_EXCEPTION');
-                return;
-            }
-
-            if (empty($result) || !isset($result['message']) || !isset($result['action'])) {
-                return;
-            }
-
-			if (!$result['message'] instanceof Message) {
-				$this->serv->disconnect($fd, 4002, 'PROTOCOL_ERROR');
-				return;
-			}
-
-			$this->send($result['message'], $result['action'], $fd);
-		} catch (\Exception $e) {
-			Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-        } catch (\Throwable $e) {
-			Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+        if (!isset($this->events['handler'])) {
+            $this->serv->disconnect($fd, WebsocketCode::NO_HANDLER, 'NO_HANDLER');
+            return;
         }
+
+        register_shutdown_function(array($this, 'handleFatal'), $fd);
+
+        $result = call_user_func($this->events['handler'], $packet, $fd, $this->serv->getClientInfo($fd)['remote_ip']);
+
+        if (empty($result) || !isset($result['message']) || !isset($result['action'])) {
+            return;
+        }
+
+        if (!$result['message'] instanceof Message) {
+            $this->serv->disconnect($fd, WebsocketCode::PROTOCOL_ERROR, 'PROTOCOL_ERROR');
+            return;
+        }
+
+        $this->send($result['message'], $result['action'], $fd);
     }
 
 	/**

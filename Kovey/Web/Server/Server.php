@@ -78,7 +78,8 @@ class Server
 			'startedAfter' => 1, 
 			'workflow' => 1, 
 			'init' => 1, 
-			'console' => 1
+            'console' => 1,
+            'monitor' => 1
 		);
 
 		$this->init();
@@ -313,6 +314,9 @@ class Server
 			return;
 		}
 
+        $begin = microtime(true);
+        $time = time();
+
 		register_shutdown_function(array($this, 'handleFatal'), $response);
 
 		$result = array();
@@ -363,6 +367,31 @@ class Server
 		}
 
         $response->end($httpCode == 200 ? $result['content'] : ErrorTemplate::getContent($httpCode));
+        $this->monitor($begin, microtime(true), $request->server['request_uri'] ?? '/', $request->rawContent(), $request->server['remote_addr'] ?? '', $time, $httpCode);
+    }
+
+    private function monitor($begin, $end, $uri, $params, $ip, $time, $code)
+    {
+        if (!isset($this->allowEvents['monitor'])) {
+            return;
+        }
+
+        try {
+            call_user_func($this->allowEvents['monitor'], array(
+                'delay' => round(($end - $begin) * 1000, 2),
+                'path' => $uri,
+                'params' => $params,
+                'ip' => $ip,
+                'time' => $time,
+                'timestamp' => date('Y-m-d H:i:s', $time),
+                'minute' => date('YmdHi', $time),
+                'http_code' => $code
+            ));
+        } catch (\Exception $e) {
+            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+        } catch (\Throwable $e) {
+            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+        }
     }
 
 	/**

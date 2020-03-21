@@ -40,7 +40,13 @@ class Bootstrap
 			try {
 				return $handler->$method($message, $fd);
 			} catch (BusiException $e) {
-                return false;
+                $error = new Error();
+                $error->setError($e->getMessage())
+                    ->setCode($e->getCode());
+                return array(
+                    'action' => 500,
+                    'message' => $error
+                );
 			}
         })
 	    ->on('error', function ($msg) {

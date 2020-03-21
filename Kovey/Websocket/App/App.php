@@ -104,6 +104,13 @@ class App
 	 */
 	private $globals;
 
+    /**
+     * @description 其他服务的对象
+     *
+     * @var mixed
+     */
+    private $otherApps;
+
 	/**
 	 * @description 构造函数
 	 *
@@ -114,6 +121,7 @@ class App
 		$this->pools = array();
 		$this->events = array();
 		$this->globals = array();
+        $this->otherApps = array();
 	}
 
 	private function __clone()
@@ -647,5 +655,42 @@ class App
     {
         $this->server->on($event, $callable);
         return $this;
+    }
+
+    /**
+     * @description 注册其他服务的大对象
+     *
+     * @param string $name
+     *
+     * @param mixed $app
+     *
+     * @return App
+     */
+    public function registerOtherApp(string $name, $app)
+    {
+        $this->otherApps[$name] = $app;
+        return $this;
+    }
+
+    /**
+     * @description 获取其他服务的对象
+     *
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function getOtherApp($name)
+    {
+        return $this->otherApps[$name] ?? null;
+    }
+
+    /**
+     * @description 获取服务对象
+     *
+     * @return Server
+     */
+    public function getServer()
+    {
+        return $this->server;
     }
 }

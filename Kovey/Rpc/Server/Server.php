@@ -46,7 +46,7 @@ class Server
 	 *
 	 * @var Array
 	 */
-	private $allowEevents;
+	private $allowEvents;
 
 	/**
 	 * @description 是否运行在docker中
@@ -101,7 +101,7 @@ class Server
 	 */
 	private function initAllowEvents()
 	{
-		$this->allowEevents = array(
+		$this->allowEvents = array(
 			'handler' => 1,
 			'pipeMessage' => 1,
 			'initPool' => 1,
@@ -220,7 +220,7 @@ class Server
 	 */
 	public function on($event, $call)
 	{
-		if (!isset($this->allowEevents[$event])) {
+		if (!isset($this->allowEvents[$event])) {
 			return $this;
 		}
 

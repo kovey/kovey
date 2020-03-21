@@ -13,40 +13,15 @@
  */
 namespace Kovey\Rpc;
 
-use Kovey\Rpc\Handler\HandlerAbstract;
 use Kovey\Components\Process\ProcessAbstract;
 use Kovey\Components\Pool\PoolInterface;
-use Kovey\Components\Parse\ContainerInterface;
-use Kovey\Config\Manager;
-use Kovey\Rpc\App\Bootstrap\Autoload;
 use Kovey\Rpc\Server\Server;
 use Kovey\Components\Process\UserProcess;
 use Kovey\Components\Logger\Logger;
-use Kovey\Components\Logger\Monitor;
+use Kovey\Rpc\App\AppBase;
 
-class Application
+class Application extends AppBase
 {
-	/**
-	 * @description Application实例
-	 *
-	 * @var Application
-	 */
-	private static $instance;
-
-	/**
-	 * @description 服务器
-	 *
-	 * @var Kovey\Rpc\Server\Server
-	 */
-	private $server;
-
-	/**
-	 * @description 容器对象
-	 *
-	 * @var Kovey\Components\Parse\ContainerInterface
-	 */
-	private $container;
-
 	/**
 	 * @description 启动处理
 	 *
@@ -60,13 +35,6 @@ class Application
 	 * @var mixed
 	 */
 	private $customBootstrap;
-
-	/**
-	 * @description 应用配置
-	 *
-	 * @var Array
-	 */
-	private $config;
 
 	/**
 	 * @description 用户自定义进程
@@ -83,20 +51,6 @@ class Application
 	private $pools;
 
 	/**
-	 * @description 自动加载
-	 *
-	 * @var Kovey\Rpc\App\Bootstrap\Autoload
-	 */
-	private $autoload;
-
-	/**
-	 * @description 事件
-	 *
-	 * @var Array
-	 */
-	private $events;
-
-	/**
 	 * @description 全局变量
 	 *
 	 * @var Array
@@ -111,8 +65,8 @@ class Application
 	private function __construct()
 	{
 		$this->pools = array();
-		$this->events = array();
 		$this->globals = array();
+        parent::__construct();
 	}
 
 	private function __clone()
@@ -160,48 +114,6 @@ class Application
 	}
 
 	/**
-	 * @description 事件监听
-	 *
-	 * @param string $event
-	 *
-	 * @param callable $callable
-	 *
-	 * @return Application
-	 */
-	public function on($event, $callable)
-	{
-		if (!is_callable($callable)) {
-			return $this;
-		}
-
-		$this->events[$event] = $callable;
-		return $this;
-	}
-
-	/**
-	 * @description 设置配置
-	 *
-	 * @param Array $config
-	 *
-	 * @return Application
-	 */
-	public function setConfig(Array $config)
-	{
-		$this->config = $config;
-		return $this;
-	}
-
-	/**
-	 * @description 获取配置
-	 *
-	 * @return Array
-	 */
-	public function getConfig()
-	{
-		return $this->config;
-	}
-
-	/**
 	 * @description 启动处理
 	 *
 	 * @return Application
@@ -230,59 +142,6 @@ class Application
 			}
 		}
 
-		return $this;
-	}
-
-	/**
-	 * @description handler业务
-	 *
-	 * @param string $class
-	 *
-	 * @param string $method
-	 *
-	 * @param Array $args
-	 *
-	 * @return Array
-	 */
-	public function handler($class, $method, $args)
-	{
-		$instance = $this->container->get($this->config['rpc']['handler'] . '\\' . ucfirst($class));
-		if (!$instance instanceof HandlerAbstract) {
-			return array(
-				'err' => sprintf('%s is not extends HandlerAbstract', ucfirst($class)),
-				'type' => 'exception',
-				'code' => 1,
-			);
-		}
-		if (empty($args)) {
-			$result = $instance->$method();
-			return array(
-				'err' => '',
-				'type' => 'success',
-				'code' => 0,
-				'result' => $result
-			);
-		}
-
-		$result = $instance->$method(...$args);
-		return array(
-			'err' => '',
-			'type' => 'success',
-			'code' => 0,
-			'result' => $result
-		);
-	}
-
-	/**
-	 * @description 注册自动加载
-	 *
-	 * @param Autoload $autoload
-	 *
-	 * @return Application
-	 */
-	public function registerAutoload(Autoload $autoload)
-	{
-		$this->autoload = $autoload;
 		return $this;
 	}
 
@@ -364,20 +223,7 @@ class Application
 	public function monitor(Array $data)
 	{
 		$this->userProcess->push('monitor', $data);
-		Monitor::write($data);
-	}
-
-	/**
-	 * @description 注册容器
-	 *
-	 * @param ContainerInterface $container
-	 *
-	 * @return Application
-	 */
-	public function registerContainer(ContainerInterface $container)
-	{
-		$this->container = $container;
-		return $this;
+        parent::monitor($data);
 	}
 
 	/**
@@ -485,23 +331,6 @@ class Application
 	}
 
 	/**
-	 * @description 注册本地加载路径
-	 *
-	 * @param string $path
-	 *
-	 * @return Application
-	 */
-	public function registerLocalLibPath($path)
-	{
-		if (!is_object($this->autoload)) {
-			return $this;
-		}
-
-		$this->autoload->addLocalPath($path);
-		return $this;
-	}
-
-	/**
 	 * @description 注册连接池
 	 *
 	 * @param string $name
@@ -526,16 +355,6 @@ class Application
 	public function getPool($name)
 	{
 		return $this->pools[$name] ?? false;
-	}
-
-	/**
-	 * @description 获取容器
-	 *
-	 * @return ContainerInterface
-	 */
-	public function getContainer()
-	{
-		return $this->container;
 	}
 
 	/**

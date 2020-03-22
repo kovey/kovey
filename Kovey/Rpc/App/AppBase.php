@@ -41,21 +41,21 @@ class AppBase
 	 *
 	 * @var Array
 	 */
-	private $config;
+	protected $config;
 
 	/**
 	 * @description 自动加载
 	 *
 	 * @var Kovey\Rpc\App\Bootstrap\Autoload
 	 */
-	private $autoload;
+	protected $autoload;
 
 	/**
 	 * @description 事件
 	 *
 	 * @var Array
 	 */
-	private $events;
+	protected $events;
 
 	/**
 	 * @description 构造函数

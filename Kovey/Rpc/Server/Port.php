@@ -21,6 +21,19 @@ use Kovey\Components\Logger\Logger;
 
 class Port extends Base
 {
+    /**
+     * @description 允许监听的事件
+     */
+    protected $allowEvents = array(
+        'monitor' => 1,
+        'handler' => 1
+    );
+
+    /**
+     * @description 初始化
+     *
+     * @return mixed
+     */
     protected function init()
     {
         $this->port->set(array(
@@ -34,6 +47,16 @@ class Port extends Base
         $this->port->on('connect', array($this, 'connect'));
         $this->port->on('receive', array($this, 'receive'));
         $this->port->on('close', array($this, 'close'));
+    }
+
+    /**
+     * @description 是否允许监听事件
+     *
+     * @return bool
+     */
+    protected function isAllow($event) : bool
+    {
+        return isset($this->allowEvents[$event]);
     }
 
 	/**

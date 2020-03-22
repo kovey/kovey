@@ -15,6 +15,7 @@ namespace Kovey\Rpc;
 
 use Kovey\Components\Process\ProcessAbstract;
 use Kovey\Components\Pool\PoolInterface;
+use Kovey\Components\Server\PortInterface;
 use Kovey\Rpc\Server\Server;
 use Kovey\Components\Process\UserProcess;
 use Kovey\Components\Logger\Logger;
@@ -22,6 +23,13 @@ use Kovey\Rpc\App\AppBase;
 
 class Application extends AppBase
 {
+    /**
+     * @description Application 实例
+     *
+     * @var Application
+     */
+    private static $instance;
+
 	/**
 	 * @description 启动处理
 	 *
@@ -148,11 +156,11 @@ class Application extends AppBase
 	/**
 	 * @description 注册服务端
 	 *
-	 * @param Server $server
+	 * @param PortInterface $server
 	 *
 	 * @return Application
 	 */
-	public function registerServer(Server $server)
+	public function registerServer(PortInterface $server)
 	{
 		$this->server = $server;
 		$this->server

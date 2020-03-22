@@ -17,8 +17,9 @@ use Kovey\Rpc\Protocol\Json;
 use Kovey\Rpc\Protocol\ProtocolInterface;
 use Kovey\Components\Exception\BusiException;
 use Kovey\Components\Logger\Logger;
+use Kovey\Components\Server\PortInterface;
 
-class Server
+class Server implements PortInterface
 {
 	/**
 	 * @description 服务器
@@ -216,16 +217,18 @@ class Server
 	 *
 	 * @param callable $cal
 	 *
-	 * @return Server
+     * @return PortInterface
+     *
+     * @throws Exception
 	 */
-	public function on($event, $call)
+	public function on(string $event, $call) : PortInterface
 	{
 		if (!isset($this->allowEvents[$event])) {
-			return $this;
+            throw new \Exception('event: "' . $event . '" is not allow');
 		}
 
 		if (!is_callable($call)) {
-			return $this;
+            throw new \Exception('callback is not callable');
 		}
 
 		$this->events[$event] = $call;

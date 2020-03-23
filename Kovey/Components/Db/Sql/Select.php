@@ -130,6 +130,13 @@ class Select implements SqlInterface
 	 */
     private $group;
 
+    /**
+     * @description HAVING
+     *
+     * @var string
+     */
+    private $having;
+
 	/**
 	 * @description 表别名
 	 *
@@ -170,6 +177,14 @@ class Select implements SqlInterface
 		if ($len > 1) {
 			$info[$len - 1] = sprintf('`%s`', $info[$len - 1]);
 			return implode('.', $info);
+		}
+
+		$info = explode(' ', $name);
+		$len = count($info);
+
+		if ($len > 1) {
+			$info[$len - 1] = sprintf('`%s`', $info[$len - 1]);
+			return implode(' ', $info);
 		}
 
 		return sprintf('`%s`', $name);
@@ -350,6 +365,40 @@ class Select implements SqlInterface
     }
 
 	/**
+	 * @description Having过滤条件
+	 *
+	 * @param Having | Array $having | string
+	 *
+	 * @return Select
+	 */
+    public function having($having)
+	{
+		if ($having instanceof Having) {
+        	$this->having = $having;
+		} else if (is_array($having)) {
+			$this->having = new Having();
+			foreach ($having as $key => $val) {
+				if (is_numeric($key)) {
+					$this->having->statement($val);
+					continue;
+				}
+
+                if (is_array($val)) {
+                    $this->having->in($key, $val);
+                    continue;
+                }
+
+				$this->having->equal($key, $val);
+			}
+		} else {
+			$this->having = new Having();
+			$this->having->statement($having);
+		}
+
+		return $this;
+    }
+
+	/**
 	 * @description 处理表的别名
 	 *
 	 * @return string
@@ -396,6 +445,13 @@ class Select implements SqlInterface
             $sql .= $this->group;
         }
 
+        if (!empty($this->having)) {
+            $hsql = $this->having->getPrepareHavingSql();
+            if (!empty($hsql)) {
+                $sql .= $hsql;
+            }
+        }
+
         if (!empty($this->order)) {
             $sql .= $this->order;
         }
@@ -439,15 +495,15 @@ class Select implements SqlInterface
     {
         $tmp = array();
         if (!empty($this->where)) {
-            foreach ($this->where->getBindData() as $val) {
-                $tmp[] = $val;
-            }
+            $tmp = array_merge($tmp, $this->where->getBindData()); 
         }
 
         if (!empty($this->orWhere)) {
-            foreach ($this->orWhere->getBindData() as $val) {
-                $tmp[] = $val;
-            }
+            $tmp = array_merge($tmp, $this->orWhere->getBindData()); 
+        }
+
+        if (!empty($this->having)) {
+            $tmp = array_merge($tmp, $this->having->getBindData()); 
         }
 
         return $tmp;

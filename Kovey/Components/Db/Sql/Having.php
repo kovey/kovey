@@ -1,28 +1,28 @@
 <?php
 /**
+ * @description Having条件
  *
- * @description where语句实现
+ * @package
  *
- * @package     Components\Db\Sql
+ * @author kovey
  *
- * @time        Tue Sep 24 09:05:28 2019
+ * @time 2020-03-23 22:49:07
  *
- * @class       vendor/Kovey/Components/Db/Sql/Where.php
+ * @file kovey/Kovey/Components/Db/Sql/Having.php
  *
- * @author      kovey
  */
 namespace Kovey\Components\Db\Sql;
 
 use Kovey\Util\Util;
 
-class Where
+class Having
 {
 	/**
-	 * @description where语法格式
+	 * @description having语法格式
 	 *
 	 * @var string
 	 */
-    const SQL_FORMAT = ' WHERE %s';
+    const SQL_FORMAT = ' HAVING (%s)';
 
 	/**
 	 * @description 条件数据
@@ -261,27 +261,13 @@ class Where
 	 *
 	 * @return string
 	 */
-    public function getPrepareWhereSql()
+    public function getPrepareHavingSql()
     {
         if (count($this->fields) < 1) {
             return false;
         }
 
         return sprintf(self::SQL_FORMAT, implode(' AND ', $this->fields));
-    }
-
-	/**
-	 * @description 准备OR WHERE
-	 *
-	 * @return string
-	 */
-    public function getPrepareOrWhereSql()
-    {
-        if (count($this->fields) < 1) {
-            return false;
-        }
-
-        return sprintf(self::SQL_FORMAT, implode(' OR ', $this->fields));
     }
 
 	/**
@@ -301,7 +287,7 @@ class Where
 	 */
 	public function toString()
 	{
-		$sql = $this->getPrepareWhereSql();
+		$sql = $this->getPrepareHavingSql();
 		if (count($this->data) < 1) {
 			return $sql;
 		}

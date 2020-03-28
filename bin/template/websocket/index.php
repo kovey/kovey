@@ -21,7 +21,6 @@ use Kovey\Websocket\App\Bootstrap\Autoload;
 use Kovey\Config\Manager;
 use Kovey\Websocket\App\App;
 use Kovey\Websocket\App\Bootstrap\Bootstrap;
-use Kovey\Util\Backup;
 
 $autoload = new Autoload();
 $autoload->register();

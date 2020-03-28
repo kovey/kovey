@@ -70,7 +70,7 @@ class Application extends AppBase
 	 *
 	 * @return Application
 	 */
-	private function __construct()
+	public function __construct()
 	{
 		$this->pools = array();
 		$this->globals = array();

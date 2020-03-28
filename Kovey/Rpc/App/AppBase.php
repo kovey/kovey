@@ -263,4 +263,17 @@ class AppBase
 	{
 		return $this->container;
 	}
+
+    /**
+     * @description 服务器事件监听
+     *
+     * @param string $event
+     *
+     * @param callable $callable
+     */
+    public function serverOn(string $event, $callable)
+    {
+        $this->server->on($event, $callable);
+        return $this;
+    }
 }

@@ -21,7 +21,10 @@ use Kovey\Components\Logger\Db;
 use Kovey\Components\Parse\Container;
 use Kovey\Rpc\Application;
 use Kovey\Rpc\Server\Server;
+use Kovey\Rpc\Manager\Router\Router;
 use Kovey\Components\Process\UserProcess;
+use Kovey\Rpc\Protocol\Exception;
+use Kovey\Util\Json;
 
 class Bootstrap
 {
@@ -87,4 +90,46 @@ class Bootstrap
 
 		$app->registerCustomBootstrap(new \Bootstrap());
 	}
+
+    public function __initRunAction(Application $app)
+    {
+        $app->serverOn('run_action', function ($request) use ($app) {
+            $router = new Router($request->server['path_info'] ?? '/');
+            $instance = $app->getContainer()->get($router->getController());
+            $instance->data = strtolower($request->server['request_method']) === 'get' ? $request->get : $request->post;
+            if (empty($instance->data)) {
+                $instance->data = Json::decode($request->rawContent());
+            }
+            try {
+                $instance->setTemplate($router->getTemplate());
+                $result = call_user_func(array($instance, $router->getAction()), $app);
+                if ($instance->isDisableView()) {
+                    return array(
+                        'httpCode' => 200,
+                        'header' => array(
+                            'content-type' => 'text/html'
+                        ),
+                        'content' => $result
+                    );
+                }
+
+                return array(
+                    'httpCode' => 200,
+                    'header' => array(
+                        'content-type' => 'text/html'
+                    ),
+                    'content' => $instance->render()
+                );
+            } catch (Exception $e) {
+                return array(
+                    'httpCode' => 200,
+                    'header' => array(
+                        'content-type' => 'text/html'
+                    ),
+                    'content' => $e->getMessage() . PHP_EOL . $e->getTraceAsString(),
+                    'cookie' => array()
+                );
+            }
+        });
+    }
 }

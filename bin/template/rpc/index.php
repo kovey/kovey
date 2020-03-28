@@ -21,14 +21,11 @@ use Kovey\Rpc\App\Bootstrap\Autoload;
 use Kovey\Config\Manager;
 use Kovey\Rpc\Application;
 use Kovey\Rpc\App\Bootstrap\Bootstrap;
-use Kovey\Util\Backup;
 
 $autoload = new Autoload();
 $autoload->register();
 Manager::init(APPLICATION_PATH . '/conf');
 Manager::parse();
-
-Backup::setDir(Manager::get('backup.logger.dir'));
 
 Application::getInstance()
 	->setConfig(Manager::get('server'))

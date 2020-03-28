@@ -24,9 +24,16 @@ class Server implements PortInterface
 	/**
 	 * @description 服务器
 	 *
-	 * @var Swoole\Server
+	 * @var Swoole\Server | Swoole\Http\Server
 	 */
     private $serv;
+
+    /**
+     * @description rpc服务监听
+     *
+     * @var Swoole\Server\Port
+     */
+    private $port;
 
 	/**
 	 * @description 配置
@@ -67,21 +74,86 @@ class Server implements PortInterface
     {
         $this->conf = $conf;
 		$this->isRunDocker = ($this->conf['run_docker'] ?? 'Off') === 'On';
-        $this->serv = new \Swoole\Server($this->conf['host'], $this->conf['port']);
+		$this->initAllowEvents()
+            ->initServer()
+            ->initCallback()
+            ->initLog();
+
+    }
+
+    /**
+     * @description 初始化服务
+     *
+     * @return Server
+     */
+    private function initServer()
+    {
+        if ($this->conf['test_open'] !== 'On') {
+            $this->serv = new \Swoole\Server($this->conf['host'], $this->conf['port']);
+            $this->serv->set(array(
+                'open_length_check' => true,
+                'package_max_length' => Json::MAX_LENGTH,
+                'package_length_type' => Json::PACK_TYPE,
+                'package_length_offset' => Json::LENGTH_OFFSET,
+                'package_body_offset' => Json::BODY_OFFSET,
+                'enable_coroutine' => true,
+                'worker_num' => $this->conf['worker_num'],
+                'max_coroutine' => $this->conf['max_co'],
+                'daemonize' => !$this->isRunDocker,
+                'pid_file' => $this->conf['pid_file'],
+                'log_file' => $this->conf['log_file'],
+            ));
+
+            $this->serv->on('connect', array($this, 'connect'));
+            $this->serv->on('receive', array($this, 'receive'));
+            $this->serv->on('close', array($this, 'close'));
+            return $this;
+        }
+
+        $this->serv = new \Swoole\Http\Server($this->conf['host'], $this->conf['port'] + 10000);
         $this->serv->set(array(
+            'daemonize' => !$this->isRunDocker,
+			'http_compression' => true,
+			'enable_static_handler' => true,
+            'pid_file' => $this->conf['pid_file'],
+            'log_file' => $this->conf['log_file'],
+            'worker_num' => $this->conf['worker_num'],
+			'enable_coroutine' => true,
+			'max_coroutine' => $this->conf['max_co']
+        ));
+        $this->serv->on('request', array($this, 'request'));
+
+        $port = $this->serv->listen($this->conf['host'], $this->conf['port'], SWOOLE_SOCK_TCP);
+        $port->set(array(
             'open_length_check' => true,
             'package_max_length' => Json::MAX_LENGTH,
             'package_length_type' => Json::PACK_TYPE,
             'package_length_offset' => Json::LENGTH_OFFSET,
             'package_body_offset' => Json::BODY_OFFSET,
-			'enable_coroutine' => true,
-			'worker_num' => $this->conf['worker_num'],
+            'enable_coroutine' => true,
+            'worker_num' => $this->conf['worker_num'],
+            'max_coroutine' => $this->conf['max_co'],
             'daemonize' => !$this->isRunDocker,
             'pid_file' => $this->conf['pid_file'],
             'log_file' => $this->conf['log_file'],
         ));
 
+        $port->on('connect', array($this, 'connect'));
+        $port->on('receive', array($this, 'receive'));
+        $port->on('close', array($this, 'close'));
 
+        $this->port = $port;
+
+        return $this;
+    }
+
+    /**
+     * @description 初始化LOG
+     *
+     * @return Server
+     */
+    private function initLog()
+    {
 		$logDir = dirname($this->conf['log_file']);
 		if (!is_dir($logDir)) {
 			mkdir($logDir, 0777, true);
@@ -91,8 +163,7 @@ class Server implements PortInterface
 			mkdir($pidDir, 0777, true);
 		}
 
-		$this->initAllowEvents()
-			->initCallback();
+        return $this;
     }
 
 	/**
@@ -106,7 +177,8 @@ class Server implements PortInterface
 			'handler' => 1,
 			'pipeMessage' => 1,
 			'initPool' => 1,
-			'monitor' => 1
+            'monitor' => 1,
+            'run_action' => 1
 		);
 
 		return $this;
@@ -119,9 +191,6 @@ class Server implements PortInterface
 	 */
     private function initCallback()
     {
-        $this->serv->on('connect', array($this, 'connect'));
-        $this->serv->on('receive', array($this, 'receive'));
-        $this->serv->on('close', array($this, 'close'));
         $this->serv->on('pipeMessage', array($this, 'pipeMessage'));
         $this->serv->on('workerStart', array($this, 'workerStart'));
         $this->serv->on('managerStart', array($this, 'managerStart'));
@@ -437,6 +506,97 @@ class Server implements PortInterface
 			}
 		}
 	}
+
+	/**
+	 * @description 捕捉致命错误
+	 *
+	 * @param Swoole\Http\Response
+	 *
+	 * @return null
+	 */
+	public function handleWebFatal($response)
+	{
+		$error = error_get_last();
+		switch ($error['type'] ?? null) {
+			case E_ERROR :
+			case E_PARSE :
+			case E_CORE_ERROR :
+			case E_COMPILE_ERROR :
+				$response->status(500);
+				$response->end(ErrorTemplate::getContent(500));
+				break;
+		}
+	}
+
+	/**
+	 * @description http 请求
+	 *
+	 * @param Swoole\Http\Request $request
+	 *
+	 * @param Swoole\Http\Response $response
+	 *
+	 * @return null
+	 */
+    public function request($request, $response)
+	{
+		if (!isset($this->events['run_action'])) {
+			$response->status(500);
+			$response->header('content-type', 'text/html');
+			$response->end(ErrorTemplate::getContent(500));
+			return;
+		}
+
+		register_shutdown_function(array($this, 'handleWebFatal'), $response);
+
+		$result = array();
+		try {
+			$result = call_user_func($this->events['run_action'], $request);
+		} catch (\Exception $e) {
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
+			}
+
+			$result = array(
+				'httpCode' => 500,
+				'header' => array(
+					'content-type' => 'text/html'
+				),
+				'content' => ErrorTemplate::getContent(500),
+				'cookie' => array()
+			);
+		} catch (\Throwable $e) {
+			if ($this->isRunDocker) {
+				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+			} else {
+				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
+			}
+			$result = array(
+				'httpCode' => 500,
+				'header' => array(
+					'content-type' => 'text/html'
+				),
+				'content' => ErrorTemplate::getContent(500),
+				'cookie' => array()
+			);
+		}
+
+		$httpCode = $result['httpCode'] ?? 500;
+		$response->status($httpCode);
+
+		$header = $result['header'] ?? array();
+		foreach ($header as $k => $v) {
+			$response->header($k, $v);
+		}
+
+		$cookie = $result['cookie'] ?? array();
+		foreach ($cookie as $cookie) {
+			$response->header('Set-Cookie', $cookie);
+		}
+
+        $response->end($httpCode == 200 ? $result['content'] : ErrorTemplate::getContent($httpCode));
+    }
 
 	/**
 	 * @description 发送数据

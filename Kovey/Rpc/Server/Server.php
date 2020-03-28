@@ -130,12 +130,6 @@ class Server implements PortInterface
             'package_length_type' => Json::PACK_TYPE,
             'package_length_offset' => Json::LENGTH_OFFSET,
             'package_body_offset' => Json::BODY_OFFSET,
-            'enable_coroutine' => true,
-            'worker_num' => $this->conf['worker_num'],
-            'max_coroutine' => $this->conf['max_co'],
-            'daemonize' => !$this->isRunDocker,
-            'pid_file' => $this->conf['pid_file'],
-            'log_file' => $this->conf['log_file'],
         ));
 
         $port->on('connect', array($this, 'connect'));

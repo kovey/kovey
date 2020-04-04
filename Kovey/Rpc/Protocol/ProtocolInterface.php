@@ -16,6 +16,41 @@ namespace Kovey\Rpc\Protocol;
 interface ProtocolInterface
 {
 	/**
+	 * @description 打包类型
+	 *
+	 * @var string
+	 */
+	const PACK_TYPE = 'N';
+
+	/**
+	 * @description 包头长度
+	 *
+	 * @var int
+	 */
+	const HEADER_LENGTH = 4;
+
+	/**
+	 * @description 包最大长度
+	 *
+	 * @var int
+	 */
+	const MAX_LENGTH = 81920;
+
+	/**
+	 * @description 包长度所在位置
+	 *
+	 * @var int
+	 */
+	const LENGTH_OFFSET = 0;
+
+	/**
+	 * @description 包体开始位置
+	 *
+	 * @var int
+	 */
+	const BODY_OFFSET = 4;
+
+	/**
 	 * @description 构造函数
 	 *
 	 * @param string $body

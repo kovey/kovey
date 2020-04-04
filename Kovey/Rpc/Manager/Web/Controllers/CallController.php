@@ -1,8 +1,8 @@
 <?php
 /**
- * @description
+ * @description 服务调用
  *
- * @package
+ * @package Kovey\Rpc\Manager\Web\Controllers
  *
  * @author kovey
  *
@@ -19,6 +19,13 @@ use Kovey\Util\Json;
 
 class CallController extends Controller
 {
+    /**
+     * @description 服务接口
+     *
+     * @param Kovey\Rpc\Application
+     *
+     * @return mixed
+     */
     public function serviceAction($app)
     {
         $this->disableView();
@@ -45,6 +52,11 @@ class CallController extends Controller
         return Code::dump($obj->$method(...$params));
     }
 
+    /**
+     * @description 调用界面
+     *
+     * @return void
+     */
     public function indexAction()
     {
         $this->view->args = empty($this->data['a']) ? array() : Json::decode($this->data['a']);

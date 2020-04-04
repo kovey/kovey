@@ -84,6 +84,10 @@ if (!defined('KOVEY_RPC_CONFIG_ROWS')) {
 	define('KOVEY_RPC_CONFIG_ROWS', 1024);
 }
 
+if (!defined('KOVEY_CONFIG_MAX_ROWS')) {
+    define('KOVEY_CONFIG_MAX_ROWS', 1024);
+}
+
 // 如果未定义应用路径，则默认为上级目录
 if (!defined('APPLICATION_PATH')) {
 	define('APPLICATION_PATH', __DIR__ . '/..');

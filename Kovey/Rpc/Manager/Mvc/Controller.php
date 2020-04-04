@@ -1,8 +1,8 @@
 <?php
 /**
- * @description
+ * @description 控制器
  *
- * @package
+ * @package Kovey\Rpc\Manager\Mvc
  *
  * @author kovey
  *
@@ -15,30 +15,67 @@ namespace Kovey\Rpc\Manager\Mvc;
 
 class Controller
 {
+    /**
+     * @description 视图
+     *
+     * @var View
+     */
     protected $view;
 
+    /**
+     * @description 试图状态
+     *
+     * @var bool
+     */
     protected $viewStatus = false;
 
+    /**
+     * @description 构造函数
+     *
+     * @return Controller
+     */
     final public function __construct()
     {
         $this->view = new View();
     }
 
-    public function setTemplate($template)
+    /**
+     * @description 设置试图模板
+     *
+     * @param string $template
+     *
+     * @return void
+     */
+    public function setTemplate(string $template)
     {
         $this->view->setTemplate($template);
     }
 
+    /**
+     * @description 视图渲染
+     *
+     * @return void
+     */
     public function render()
     {
         return $this->view->render();
     }
 
+    /**
+     * @description 视图是否禁用
+     *
+     * @return bool
+     */
     public function isDisableView()
     {
         return $this->viewStatus;
     }
-
+ 
+    /**
+     * @description 禁用视图
+     *
+     * @return void
+     */
     public function disableView()
     {
         $this->viewStatus = true;

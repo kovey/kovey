@@ -380,4 +380,19 @@ class Application extends AppBase
 
 		$this->server->start();
 	}
+
+    /**
+     * @description 底层服务器事件监听
+     *
+     * @param string $event
+     *
+     * @param callable $callable
+     *
+     * @return Application
+     */
+    public function serverOn(string $event, $callable)
+    {
+        $this->server->on($event, $callable);
+        return $this;
+    }
 }

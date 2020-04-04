@@ -1,8 +1,8 @@
 <?php
 /**
- * @description
+ * @description  路由
  *
- * @package
+ * @package Kovey\Rpc\Manager\Router
  *
  * @author kovey
  *
@@ -15,14 +15,41 @@ namespace Kovey\Rpc\Manager\Router;
 
 class Router
 {
+    /**
+     * @description 控制器
+     *
+     * @var string
+     */
     private $controller;
 
+    /**
+     * @description 行为
+     *
+     * @var string
+     */
     private $action;
 
+    /**
+     * @description 路径
+     *
+     * @var string
+     */
     private $rootLib = 'Kovey\Rpc\Manager\Web\Controllers\\';
 
+    /**
+     * @description 模板
+     *
+     * @var string
+     */
     private $template;
 
+    /**
+     * @description 构造函数
+     *
+     * @param string $path
+     *
+     * @return Router
+     */
     public function __construct($path)
     {
         if ($path === '/') {
@@ -46,16 +73,31 @@ class Router
         }
     }
 
+    /**
+     * @description 获取控制器
+     *
+     * @return string
+     */
     public function getController()
     {
         return $this->controller;
     }
 
+    /**
+     * @description 获取行为
+     *
+     * @return string
+     */
     public function getAction()
     {
         return $this->action;
     }
 
+    /**
+     * @description 获取模板
+     *
+     * @return string
+     */
     public function getTemplate()
     {
         return $this->template;

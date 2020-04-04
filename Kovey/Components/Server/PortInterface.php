@@ -16,6 +16,13 @@ namespace Kovey\Components\Server;
 interface PortInterface
 {
     /**
+     * @description 数据包最大长度
+     *
+     * @var int
+     */
+    const PACKET_MAX_LENGTH = 2097152;
+
+    /**
      * @description 事件监听
      *
      * @param string $event

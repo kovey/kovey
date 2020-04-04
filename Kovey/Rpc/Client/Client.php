@@ -14,9 +14,19 @@
 namespace Kovey\Rpc\Client;
 
 use Kovey\Rpc\Protocol\Json;
+use Kovey\Rpc\Protocol\ProtocolInterface;
 
 class Client
 {
+    const PACKET_MAX_LENGTH = 2097152;
+
+    /**
+     * @description 事件监听
+     *
+     * @var Array
+     */
+    private $events;
+
 	/**
 	 * @description 底层客户端
 	 *
@@ -71,13 +81,31 @@ class Client
         $this->cli = new \Swoole\Coroutine\Client(SWOOLE_SOCK_TCP);
         $this->cli->set(array(
             'open_length_check'     => true,
-            'package_length_type'   => Json::PACK_TYPE,
-            'package_length_offset' => Json::LENGTH_OFFSET,       //第N个字节是包长度的值
-            'package_body_offset'   => Json::BODY_OFFSET,       //第几个字节开始计算长度
-            'package_max_length'    => Json::MAX_LENGTH,  //协议最大长度
+            'package_length_type'   => ProtocolInterface::PACK_TYPE,
+            'package_length_offset' => ProtocolInterface::LENGTH_OFFSET,       //第N个字节是包长度的值
+            'package_body_offset'   => ProtocolInterface::BODY_OFFSET,       //第几个字节开始计算长度
+            'package_max_length'    => self::PACKET_MAX_LENGTH,  //协议最大长度
         ));
 
         $this->configs = $configs;
+        $this->events = array();
+    }
+
+    /**
+     * @description 事件监听
+     *
+     * @param string $event
+     *
+     * @param callable $callable
+     */
+    public function on(string $event, $callable)
+    {
+        if (!is_callable($callable)) {
+            return $this;
+        }
+
+        $this->events[$event] = $callable;
+        return $this;
     }
 
 	/**
@@ -142,7 +170,13 @@ class Client
 	 */
     public function send(Array $data)
     {
-		$data = Json::pack($data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes', true);
+        $data = false;
+        if (isset($this->events['pack'])) {
+            $data = call_user_func($this->events['pack'], $data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes', true);
+        } else {
+            $data = Json::pack($data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes', true);
+        }
+
 		if (!$data) {
 			return false;
 		}
@@ -166,7 +200,12 @@ class Client
 			return array();
 		}
 
-        $packet = Json::unpack($packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes', true);
+        if (isset($this->events['unpack'])) {
+            $packet = call_user_func($this->events['unpack'], $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes', true);
+        } else {
+            $packet = Json::unpack($packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes', true);
+        }
+
         if (!is_array($packet)) {
             return array();
         }

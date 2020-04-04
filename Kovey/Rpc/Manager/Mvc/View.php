@@ -1,8 +1,8 @@
 <?php
 /**
- * @description
+ * @description 视图
  *
- * @package
+ * @package Kovey\Rpc\Manager\Mvc
  *
  * @author kovey
  *
@@ -50,7 +50,7 @@ class View
 	 *
 	 * @return null
 	 */
-	public function setTemplate($template)
+	public function setTemplate(string $template)
 	{
 		$this->template = $template;
 	}

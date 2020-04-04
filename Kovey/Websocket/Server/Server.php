@@ -17,8 +17,9 @@ use Kovey\Components\Logger\Logger;
 use Kovey\Websocket\Protocol\Exception;
 use Google\Protobuf\Internal\Message;
 use Kovey\Components\Exception\CloseConnectionException;
+use Kovey\Components\Server\PortInterface;
 
-class Server
+class Server implements PortInterface
 {
 	/**
 	 * @description 服务器
@@ -207,7 +208,7 @@ class Server
      *
      * @throws Exception
 	 */
-	public function on($event, $call)
+	public function on(string $event, $call) : PortInterface
 	{
 		if (!isset($this->allowEvents[$event])) {
 			return $this;
@@ -372,7 +373,19 @@ class Server
             return;
         }
 
-        $this->serv->push($fd, call_user_func($this->events['pack'], $packet, $action), SWOOLE_WEBSOCKET_OPCODE_BINARY);
+        $data = call_user_func($this->events['pack'], $packet, $action);
+        $len = strlen($data);
+        if ($len <= self::PACKET_MAX_LENGTH) {
+            return $this->serv->push($fd, $data, SWOOLE_WEBSOCKET_OPCODE_BINARY);
+        }
+
+        $sendLen = 0;
+        while ($sendLen < $len) {
+            $this->serv->push($fd, substr($data, $sendLen, self::PACKET_MAX_LENGTH), SWOOLE_WEBSOCKET_OPCODE_BINARY, ($sendLen + self::PACKET_MAX_LENGTH) >= $len);
+            $sendLen += self::PACKET_MAX_LENGTH;
+        }
+
+        return true;
     }
 
 	/**

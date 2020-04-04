@@ -46,10 +46,10 @@ class Manager
 	public static function init($path)
 	{
 		self::$path = $path;
-		self::$keys = new \Swoole\Table(1024);
+		self::$keys = new \Swoole\Table(KOVEY_CONFIG_MAX_ROWS);
 		self::$keys->column('k', \Swoole\Table::TYPE_STRING, 256);
 		self::$keys->create();
-		self::$values = new \Swoole\Table(1024);
+		self::$values = new \Swoole\Table(KOVEY_CONFIG_MAX_ROWS);
 		self::$values->column('v', \Swoole\Table::TYPE_STRING, 512);
 		self::$values->create();
 	}

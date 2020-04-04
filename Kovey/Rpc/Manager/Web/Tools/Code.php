@@ -1,8 +1,8 @@
 <?php
 /**
- * @description
+ * @description 打印类型
  *
- * @package
+ * @package Kovey\Rpc\Manager\Web\Tools
  *
  * @author kovey
  *
@@ -109,6 +109,13 @@ class Code
         return $result . '<p>' . $space . '}</p>';
     }
 
+    /**
+     * @description 获取对象属性类型
+     *
+     * @param mixed $obj
+     *
+     * @return string
+     */
     private static function getType($obj)
     {
         $static = $obj->isStatic() ? 'static:' : '';

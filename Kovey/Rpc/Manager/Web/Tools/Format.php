@@ -1,8 +1,8 @@
 <?php
 /**
- * @description
+ * @description 格式化
  *
- * @package
+ * @package Kovey\Rpc\Manager\Web\Tools
  *
  * @author kovey
  *
@@ -15,6 +15,13 @@ namespace Kovey\Rpc\Manager\Web\Tools;
 
 class Format
 {
+    /**
+     * @description 格式化异常错误
+     *
+     * @param string $message
+     *
+     * @return string
+     */
     public static function exception($message)
     {
         $lines = explode(PHP_EOL, $message);

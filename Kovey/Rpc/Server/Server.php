@@ -92,10 +92,10 @@ class Server implements PortInterface
             $this->serv = new \Swoole\Server($this->conf['host'], $this->conf['port']);
             $this->serv->set(array(
                 'open_length_check' => true,
-                'package_max_length' => Json::MAX_LENGTH,
-                'package_length_type' => Json::PACK_TYPE,
-                'package_length_offset' => Json::LENGTH_OFFSET,
-                'package_body_offset' => Json::BODY_OFFSET,
+                'package_max_length' => ProtocolInterface::MAX_LENGTH,
+                'package_length_type' => ProtocolInterface::PACK_TYPE,
+                'package_length_offset' => ProtocolInterface::LENGTH_OFFSET,
+                'package_body_offset' => ProtocolInterface::BODY_OFFSET,
                 'enable_coroutine' => true,
                 'worker_num' => $this->conf['worker_num'],
                 'max_coroutine' => $this->conf['max_co'],
@@ -126,10 +126,10 @@ class Server implements PortInterface
         $port = $this->serv->listen($this->conf['host'], $this->conf['port'], SWOOLE_SOCK_TCP);
         $port->set(array(
             'open_length_check' => true,
-            'package_max_length' => Json::MAX_LENGTH,
-            'package_length_type' => Json::PACK_TYPE,
-            'package_length_offset' => Json::LENGTH_OFFSET,
-            'package_body_offset' => Json::BODY_OFFSET,
+            'package_max_length' => ProtocolInterface::MAX_LENGTH,
+            'package_length_type' => ProtocolInterface::PACK_TYPE,
+            'package_length_offset' => ProtocolInterface::LENGTH_OFFSET,
+            'package_body_offset' => ProtocolInterface::BODY_OFFSET,
         ));
 
         $port->on('connect', array($this, 'connect'));
@@ -172,7 +172,9 @@ class Server implements PortInterface
 			'pipeMessage' => 1,
 			'initPool' => 1,
             'monitor' => 1,
-            'run_action' => 1
+            'run_action' => 1,
+            'unpack' => 1,
+            'pack' => 1
 		);
 
 		return $this;
@@ -362,7 +364,23 @@ class Server implements PortInterface
 	 */
     public function receive($serv, $fd, $reactor_id, $data)
     {
-		$proto = new Json($data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
+        $proto = null;
+        if (isset($this->allowEvents['unpack'])) {
+            $proto = call_user_func($this->allowEvents['unpack'], $data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
+            if (!$proto instanceof ProtocolInterface) {
+                $this->send(array(
+                    'err' => 'parse data error',
+                    'type' => 'exception',
+                    'code' => 1000,
+                    'packet' => $data
+                ), $fd);
+                $serv->close($fd);
+                return;
+            }
+        } else {
+            $proto = new Json($data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
+        }
+
 		if (!$proto->parse()) {
 			$this->send(array(
 				'err' => 'parse data error',
@@ -603,12 +621,28 @@ class Server implements PortInterface
 	 */
     private function send(Array $packet, $fd)
     {
-		$data = Json::pack($packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
+        $data = false;
+        if (isset($this->allowEvents['pack'])) {
+            $data = call_user_func($this->allowEvents['pack'], $packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
+        } else {
+		    $data = Json::pack($packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
+        }
 		if (!$data) {
 			return false;
 		}
 
-        $this->serv->send($fd, $data);
+        $len = strlen($data);
+        if ($len <= self::PACKET_MAX_LENGTH) {
+            return $this->serv->send($fd, $data);
+        }
+
+        $sendLen = 0;
+        while ($sendLen < $len) {
+            $this->serv->send($fd, substr($data, $sendLen, self::PACKET_MAX_LENGTH));
+            $sendLen += self::PACKET_MAX_LENGTH;
+        }
+
+        return true;
     }
 
 	/**

@@ -1,6 +1,6 @@
 <?php
 /**
- * @description 短连接服务端
+ * @description 长连接服务
  *
  * @package Server
  *
@@ -10,8 +10,10 @@
  *
  * @file kovey/Kovey\Rpc/Server/Server.php
  *
+ * todo
+ *
  */
-namespace Kovey\Rpc\Server;
+namespace Kovey\Tcp\Server;
 
 use Kovey\Tcp\Protocol\Json;
 use Kovey\Tcp\Protocol\ProtocolInterface;

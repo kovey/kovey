@@ -67,6 +67,7 @@ abstract class ServiceAbstract
             'm' => $method,
             'a' => $args
         ))) {
+            $this->cli->close();
 			throw new Exception($this->cli->getError(), 1003, 'send_error');
         }
 

@@ -1,0 +1,12 @@
+[Unit]
+Description=The Kovey Framwork Manager
+
+[Service]
+Type=forking
+PIDFile=~/Documents/php/workspace/platform-api/run/kovey-framework.pid
+ExecStart=/usr/bin/php ~/Documents/php/workspace/platform-api/index.php
+ExecStop=/bin/kill $MAINPID
+ExecReload=/bin/kill -USR1 $MAINPID
+
+[Install]
+WantedBy = multi-user.target

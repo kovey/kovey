@@ -170,7 +170,6 @@ class Client
 	 */
     public function send(Array $data)
     {
-        $data = false;
         if (isset($this->events['pack'])) {
             $data = call_user_func($this->events['pack'], $data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes', true);
         } else {

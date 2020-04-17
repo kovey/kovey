@@ -343,13 +343,30 @@ class Application extends AppBase
 	 *
 	 * @param string $name
 	 *
-	 * @param PoolInterface $pool
+     * @param PoolInterface $pool
+     *
+     * @param string $partition
 	 *
 	 * @return Application
 	 */
-	public function registerPool($name, PoolInterface $pool)
-	{
-		$this->pools[$name] = $pool;
+	public function registerPool($name, PoolInterface $pool, $partition = '')
+    {
+        if (empty($partition)) {
+            $this->pools[$name] = $pool;
+            return $this;
+        }
+
+        if (isset($this->pools[$name][$partition])) {
+            return;
+        }
+
+        if (!isset($this->pools[$name])
+            || !is_array($this->pools[$name])
+        ) {
+            $this->pools[$name] = array();
+        }
+
+		$this->pools[$name][$partition] = $pool;
 		return $this;
 	}
 
@@ -357,12 +374,26 @@ class Application extends AppBase
 	 * @description 获取连接池
 	 *
 	 * @param string $name
+     * 
+     * @param string $partition
 	 *
 	 * @return PoolInterface | bool
 	 */
-	public function getPool($name)
-	{
-		return $this->pools[$name] ?? false;
+	public function getPool($name, $partition = '')
+    {
+        if (empty($partition)) {
+            return $this->pools[$name] ?? false;
+        }
+
+        if (!isset($this->pools[$name][$partition])) {
+            if (!isset($this->events['add_pool'])) {
+                return false;
+            }
+
+            call_user_func($this->events['add_pool'], $this, $name, $partition);
+        }
+
+        return $this->pools[$name][$partition] ?? false;
 	}
 
 	/**

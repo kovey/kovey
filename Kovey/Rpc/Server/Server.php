@@ -365,8 +365,8 @@ class Server implements PortInterface
     public function receive($serv, $fd, $reactor_id, $data)
     {
         $proto = null;
-        if (isset($this->allowEvents['unpack'])) {
-            $proto = call_user_func($this->allowEvents['unpack'], $data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
+        if (isset($this->events['unpack'])) {
+            $proto = call_user_func($this->events['unpack'], $data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
             if (!$proto instanceof ProtocolInterface) {
                 $this->send(array(
                     'err' => 'parse data error',
@@ -622,8 +622,8 @@ class Server implements PortInterface
     private function send(Array $packet, $fd)
     {
         $data = false;
-        if (isset($this->allowEvents['pack'])) {
-            $data = call_user_func($this->allowEvents['pack'], $packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
+        if (isset($this->events['pack'])) {
+            $data = call_user_func($this->events['pack'], $packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
         } else {
 		    $data = Json::pack($packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
         }

@@ -627,11 +627,11 @@ class Application
 	/**
 	 * @description 注册插件
 	 *
-	 * @param PluginInterface $plugin
+	 * @param string $plugin
 	 *
 	 * @return Application
 	 */
-	public function registerPlugin(PluginInterface $plugin)
+	public function registerPlugin(string $plugin)
 	{
 		$this->plugins[$plugin] = $plugin;
 		return $this;

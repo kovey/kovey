@@ -28,7 +28,8 @@ class Create implements CommandInterface
 	private $types = array(
 		'web' => 'Web',
 		'rpc' => 'Rpc',
-		'websocket' => 'Websocket'
+        'websocket' => 'Websocket',
+        'tcp' => 'Tcp'
 	);
 
 	public function __construct($path, $name, $type, $logdir)

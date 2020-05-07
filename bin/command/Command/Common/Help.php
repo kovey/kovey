@@ -32,7 +32,7 @@ class Help implements CommandInterface
 			"--service <name>      named service will be create or del" . PHP_EOL .
 			"--controller <name>   named controller will be create or del" . PHP_EOL .
 			"--path <path>         path to project" . PHP_EOL .
-			"--ptype <name>        project type, only web or rpc or websocket" . PHP_EOL;
+			"--ptype <name>        project type, only web or rpc or websocket or tcp" . PHP_EOL;
 			"--logdir <path>       project logger directory" . PHP_EOL;
 		exit;
 	}

@@ -11,13 +11,13 @@
  */
 namespace Kovey\Components\Connection\Read;
 
-use Pool\Mysql as MQ;
+use Kovey\Components\Pool\Mysql as MQ;
 use Kovey\Components\Connection\Pool;
 
 class Mysql extends Pool
 {
-    public function __construct($partition = 0)
+    public function __construct($app, $partition = 0)
     {
-        parent::__construct(MQ::getReadName(), $partition);
+        parent::__construct($app, MQ::getReadName(), $partition);
     }
 }

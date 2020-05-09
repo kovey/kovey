@@ -27,6 +27,13 @@ class GlobalIdentify
 	 */
 	const GLOBAL_IDENTIFY_KEY = 'global_indentify_key';
 
+    /**
+     * @description 锁
+     *
+     * @var string
+     */
+    const GLOBAL_LOCKER_KEY = 'global_locker_key';
+
 	/**
 	 * @description redis
 	 *
@@ -121,12 +128,16 @@ class GlobalIdentify
 	 */
 	private function giveIdentifiesAgian()
 	{
-		$row = $this->mysql->fetchRow($this->identifyTable, array($this->primaryField => 1), array($this->identifyField));
-		if (!$row) {
-			return false;
-		}
+        if (!$this->lock()) {
+            return false;
+        }
 
 		try {
+            $row = $this->mysql->fetchRow($this->identifyTable, array($this->primaryField => 1), array($this->identifyField));
+            if (!$row) {
+                return false;
+            }
+
 			$up = new Update($this->identifyTable);
 			$up->where(array(
 				$this->primaryField => 1,
@@ -134,15 +145,36 @@ class GlobalIdentify
 			))
 			->addSelf($this->identifyField, 20000);
 			$this->mysql->update($up);
-		} catch (\Throwable $e) {
+		} catch (\Exception $e) {
 			return false;
-		}
+        } finally {
+            $this->unlock();
+        }
 
 		$max = $row[$this->identifyField] + 20000;
+        $ids = array();
 		for ($i = $row[$this->identifyField]; $i < $max; $i ++) {
-			$this->redis->lPush(self::GLOBAL_IDENTIFY_KEY, $id);
+            $ids[] = $i;
+            if (count($ids) >= 100) {
+                $this->redis->lPush(self::GLOBAL_IDENTIFY_KEY, ...$ids);
+                $ids = array();
+            }
 		}
+
+        if (!empty($ids)) {
+            $this->redis->lPush(self::GLOBAL_IDENTIFY_KEY, ...$ids);
+        }
 
 		return true;
 	}
+
+    private function lock()
+    {
+        return $this->redis->setNx(self::GLOBAL_LOCKER_KEY);
+    }
+
+    public function unlock()
+    {
+        return $this->redis->del(self::GLOBAL_LOCKER_KEY);
+    }
 }

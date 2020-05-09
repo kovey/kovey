@@ -51,11 +51,7 @@ class HttpClient
 		}
 
 		$this->client = Client($url['host'], $port, $ssl);
-		$this->headers = [
-			"User-Agent" => 'Chrome/49.0.2587.3',
-			'Accept' => 'text/html,application/xhtml+xml,application/xml,application/json',
-			'Accept-Encoding' => 'gzip',
-		];
+		$this->headers = [];
 	}
 
 	/**

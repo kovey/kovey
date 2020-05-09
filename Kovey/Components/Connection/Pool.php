@@ -11,17 +11,15 @@
  */
 namespace Kovey\Components\Connection;
 
-use Kovey\Rpc\Application;
-
 class Pool
 {
     private $pool;
 
     private $databse;
 
-    public function __construct($name, $partition = 0)
+    public function __construct($app, $name, $partition = 0)
     {
-        $this->pool = Application::getInstance()->getPool($name, $partition);
+        $this->pool = $app->getPool($name, $partition);
         if ($this->pool) {
             $this->databse = $this->pool->getDatabase();
         }

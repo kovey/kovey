@@ -13,21 +13,10 @@
  */
 namespace Kovey\Components\Db\Model;
 
-use Kovey\Components\Db\Sql\Insert;
-use Kovey\Components\Db\Sql\Update;
-use Kovey\Components\Db\Sql\Delete;
-use Kovey\Components\Db\Sql\BatchInsert;
 use Kovey\Components\Db\DbInterface;
 
-abstract class Base
+abstract class Base extends ShardingBase
 {
-	/**
-	 * @description 表名称
-	 *
-	 * @var string
-	 */
-	protected $tableName;
-
 	/**
 	 * @description 插入数据
 	 *
@@ -41,12 +30,7 @@ abstract class Base
 	 */
 	public function insert(Array $data, DbInterface $db)
 	{
-		$insert = new Insert($this->tableName);
-		foreach ($data as $key => $val) {
-			$insert->$key = $val;
-		}
-
-		return $db->insert($insert);
+        return parent::insert($data, $db, -1);
 	}
 
 	/**
@@ -64,13 +48,7 @@ abstract class Base
 	 */
 	public function update(Array $data, Array $condition, DbInterface $db)
 	{
-		$update = new Update($this->tableName);
-		foreach ($data as $key => $val) {
-			$update->$key = $val;
-		}
-
-		$update->where($condition);
-		return $db->update($update);
+        return parent::update($data, $condition, $db, -1);
 	}
 
 	/**
@@ -88,11 +66,7 @@ abstract class Base
 	 */
 	public function fetchRow(Array $condition, Array $columns, DbInterface $db)
 	{
-		if (empty($columns)) {
-			throw new \Exception('selected columns is not empty.'); 
-		}
-
-		return $db->fetchRow($this->tableName, $condition, $columns);
+        return parent::fetchRow($condition, $columns, $db, -1);
 	}
 
 	/**
@@ -110,11 +84,7 @@ abstract class Base
 	 */
 	public function fetchAll(Array $condition, Array $columns, DbInterface $db)
 	{
-		if (empty($columns)) {
-			throw new \Exception('selected columns is not empty.'); 
-		}
-
-		return $db->fetchAll($this->tableName, $condition, $columns);
+        return parent::fetchAll($condition, $columns, $db, -1);
 	}
 
 	/**
@@ -130,21 +100,7 @@ abstract class Base
 	 */
 	public function batchInsert(Array $rows, DbInterface $db)
 	{
-		if (empty($rows)) {
-			throw new \Exception('rows can not empty');
-		}
-
-		$batchInsert = new BatchInsert($this->tableName);
-		foreach ($rows as $row) {
-			$insert = new Insert($this->tableName);
-			foreach ($row as $key => $val) {
-				$insert->$key = $val;
-			}
-
-			$batchInsert->add($insert);
-		}
-
-		return $db->batchInsert($batchInsert);
+        return parent::batchInsert($rows, $db, -1);
 	}
 
 	/**
@@ -162,8 +118,6 @@ abstract class Base
 	 */
 	public function delete(Array $condition, DbInterface $db)
 	{
-		$delete = new Delete($this->tableName);
-		$delete->where($condition);
-		return $db->delete($delete);
+        return parent::delete($condition, $db, -1);
 	}
 }

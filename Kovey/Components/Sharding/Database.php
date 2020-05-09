@@ -29,9 +29,9 @@ class Database
 	 *
 	 * @return Database
 	 */
-	public function __construct()
+	public function __construct($maxCount = 128)
 	{
-		$this->maxCount = 128;
+		$this->maxCount = $maxCount;
 	}
 
 	/**

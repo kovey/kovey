@@ -1,0 +1,23 @@
+<?php
+/**
+ * @description
+ *
+ * @package
+ *
+ * @author kovey
+ *
+ * @time 2020-04-20 16:40:05
+ *
+ */
+namespace Kovey\Components\Connection\Write;
+
+use Pool\Redis as RD;
+use Kovey\Components\Connection\Pool;
+
+class Redis extends Pool
+{
+    public function __construct($partition = 0)
+    {
+        parent::__construct(RD::getWriteName(), $partition);
+    }
+}

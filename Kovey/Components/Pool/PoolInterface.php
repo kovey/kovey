@@ -52,4 +52,18 @@ interface PoolInterface
 	 * @return Array
 	 */
 	public function getErrors();
+
+    /**
+     * @description 获取链接池写名称
+     *
+     * @return string | numbmer
+     */
+    public static function getWriteName();
+ 
+    /**
+     * @description 获取链接池读名称
+     *
+     * @return string | numbmer
+     */
+    public static function getReadName();
 }

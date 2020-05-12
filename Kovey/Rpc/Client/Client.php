@@ -20,6 +20,8 @@ class Client
 {
     const PACKET_MAX_LENGTH = 2097152;
 
+    const TIME_OUT = 30;
+
     /**
      * @description 事件监听
      *
@@ -194,7 +196,7 @@ class Client
 	 */
     public function recv()
     {
-        $packet = $this->cli->recv();
+        $packet = $this->cli->recv(self::TIME_OUT);
 		if (empty($packet)) {
 			return array();
 		}

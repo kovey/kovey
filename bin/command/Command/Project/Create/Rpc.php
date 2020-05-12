@@ -114,7 +114,7 @@ class Rpc
 			'{rpc-name}'
 		), array(
 			$this->logdir . '/server/server.log',
-			$this->logdir . '/run/kovey-rpc',
+			$this->root . '/run/kovey-rpc',
 			$this->name,
 			$this->logdir . '/info',
 			$this->logdir . '/exception',

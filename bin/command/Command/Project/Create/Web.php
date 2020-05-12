@@ -136,7 +136,7 @@ class Web
 			'{project}',
 			'{log_file}'
 		), array(
-			$this->logdir . '/run/kovey-framework',
+			$this->root . '/run/kovey-framework',
 			$this->logdir . '/info',
 			$this->logdir . '/error',
 			$this->logdir . '/warning',

@@ -49,7 +49,13 @@ class CallController extends Controller
             $params[] = Json::decode($arg['value']);
         }
 
-        return Code::dump($obj->$method(...$params));
+        try {
+            return Code::dump($obj->$method(...$params));
+        } catch (\Exception $e) {
+            return Code::dump($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+        } catch (\Throwable $e) {
+            return Code::dump($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+        }
     }
 
     /**

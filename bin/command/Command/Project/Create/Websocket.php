@@ -118,7 +118,7 @@ class Websocket
 			'{websocket-name}'
 		), array(
 			$this->logdir . '/server/server.log',
-			$this->logdir . '/run/kovey-websocket',
+			$this->root . '/run/kovey-websocket',
 			$this->name,
 			$this->logdir . '/info',
 			$this->logdir . '/exception',

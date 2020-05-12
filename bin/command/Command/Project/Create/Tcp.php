@@ -118,7 +118,7 @@ class Tcp
 			'{tcp-name}'
 		), array(
 			$this->logdir . '/server/server.log',
-			$this->logdir . '/run/kovey-tcp',
+			$this->root . '/run/kovey-tcp',
 			$this->name,
 			$this->logdir . '/info',
 			$this->logdir . '/exception',

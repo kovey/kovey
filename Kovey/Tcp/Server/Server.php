@@ -401,6 +401,9 @@ class Server implements PortInterface
 			}
 
             $this->send($result['message'], $result['action'], $fd);
+        } catch (CloseConnectionException $e) {
+            $this->serv->close($fd);
+            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 		} catch (BusiException $e) {
             if (!isset($this->events['error'])) {
                 return;
@@ -485,8 +488,12 @@ class Server implements PortInterface
 	 *
 	 * @return null
 	 */
-    private function send($packet, int $action, $fd)
+    public function send($packet, int $action, $fd)
     {
+        if (!$this->serv->exist($fd)) {
+            return false;
+        }
+
         if (!isset($this->events['pack'])) {
             return false;
         }

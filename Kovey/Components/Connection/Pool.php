@@ -15,29 +15,29 @@ class Pool
 {
     private $pool;
 
-    private $databse;
+    private $database;
 
     public function __construct($app, $name, $partition = 0)
     {
         $this->pool = $app->getPool($name, $partition);
         if ($this->pool) {
-            $this->databse = $this->pool->getDatabase();
+            $this->database = $this->pool->getDatabase();
         }
     }
 
-    public function getDatabse()
+    public function getDatabase()
     {
-        return $this->databse;
+        return $this->database;
     }
 
     public function __destruct()
     {
         if (!$this->pool
-            || empty($this->databse)
+            || empty($this->database)
         ) {
             return;
         }
 
-        $this->pool->put($this->databse);
+        $this->pool->put($this->database);
     }
 }

@@ -117,12 +117,13 @@ class Client
 	 */
     public function connect()
     {
+        $this->error = '';
 		$count = 0;
 		do {
 			$count ++;
 			$conf = $this->getConf();
 			if (empty($conf)) {
-				$this->error = 'connected failure to server, available config not found';
+				$this->error .= 'connected failure to server, available config not found' . PHP_EOL;
 				return false;
 			}
 
@@ -132,7 +133,7 @@ class Client
 				return true;
 			}
 
-			$this->error = sprintf('connected failure to server: %s:%s,error: %s', $this->conf['host'], $this->conf['port'], socket_strerror($this->cli->errCode));
+			$this->error .= sprintf('connected failure to server: %s:%s,error: %s', $this->conf['host'], $this->conf['port'], socket_strerror($this->cli->errCode)) . PHP_EOL;
 			$this->unavailables[$this->current] = 1;
 		} while ($count < 3);
 

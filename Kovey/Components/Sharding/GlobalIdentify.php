@@ -25,14 +25,14 @@ class GlobalIdentify
 	 * @var string
 	 *
 	 */
-	const GLOBAL_IDENTIFY_KEY = 'global_indentify_key';
+	const GLOBAL_IDENTIFY_KEY = 'global_indentify_key_';
 
     /**
      * @description 锁
      *
      * @var string
      */
-    const GLOBAL_LOCKER_KEY = 'global_locker_key';
+    const GLOBAL_LOCKER_KEY = 'global_locker_key_';
 
 	/**
 	 * @description redis
@@ -109,13 +109,13 @@ class GlobalIdentify
 	 */
 	public function getGlobalIdentify()
 	{
-		$id = $this->redis->lPop(self::GLOBAL_IDENTIFY_KEY);
+		$id = $this->redis->lPop(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable);
 		if (!$id) {
 			if (!$this->giveIdentifiesAgian()) {
 				return false;
 			}
 
-			$id = $this->redis->lPop(self::GLOBAL_IDENTIFY_KEY);
+			$id = $this->redis->lPop(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable);
 		}
 
 		return $id;
@@ -156,13 +156,13 @@ class GlobalIdentify
 		for ($i = $row[$this->identifyField]; $i < $max; $i ++) {
             $ids[] = $i;
             if (count($ids) >= 100) {
-                $this->redis->lPush(self::GLOBAL_IDENTIFY_KEY, ...$ids);
+                $this->redis->lPush(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable, ...$ids);
                 $ids = array();
             }
 		}
 
         if (!empty($ids)) {
-            $this->redis->lPush(self::GLOBAL_IDENTIFY_KEY, ...$ids);
+            $this->redis->lPush(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable, ...$ids);
         }
 
 		return true;
@@ -170,11 +170,11 @@ class GlobalIdentify
 
     private function lock()
     {
-        return $this->redis->setNx(self::GLOBAL_LOCKER_KEY);
+        return $this->redis->setNx(self::GLOBAL_LOCKER_KEY . $this->identifyTable, $this->identifyTable);
     }
 
     public function unlock()
     {
-        return $this->redis->del(self::GLOBAL_LOCKER_KEY);
+        return $this->redis->del(self::GLOBAL_LOCKER_KEY . $this->identifyTable);
     }
 }

@@ -24,6 +24,7 @@ use Kovey\Components\Process\UserProcess;
 use Kovey\Components\Logger\Logger;
 use Kovey\Components\Logger\Monitor;
 use Google\Protobuf\Internal\Message;
+use Kovey\Components\Exception\CloseConnectionException;
 
 class App
 {
@@ -299,6 +300,8 @@ class App
 			$result = call_user_func($this->events['run_handler'], $instance, $message['method'], $message['message'], $fd, $ip);
 			$this->sendToMonitor($reqTime, $begin, $ip, 'success', $message);
 			return $result;
+        } catch (CloseConnectionException $e) {
+            throw $e;
 		} catch (\Exception $e) {
 			Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			if (isset($this->events['error'])) {

@@ -275,6 +275,10 @@ class Port extends Base
 	 */
     private function send(Array $packet, $fd)
     {
+        if (!$this->serv->exist($fd)) {
+            return false;
+        }
+
         $data = false;
         if (isset($this->events['pack'])) {
             $data = call_user_func($this->events['pack'], $packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');

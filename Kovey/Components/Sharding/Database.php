@@ -13,7 +13,7 @@
  */
 namespace Kovey\Components\Sharding;
 
-use Kovey\Util;
+use Kovey\Util\Util;
 
 class Database
 {

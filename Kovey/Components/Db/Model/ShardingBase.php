@@ -27,6 +27,14 @@ abstract class ShardingBase
 	 */
 	protected $tableName;
 
+    /**
+     * @description 分库数量
+     *
+     * @var int
+     *
+     */
+    protected $databaseCount = 1;
+
 	/**
 	 * @description 插入数据
 	 *

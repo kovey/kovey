@@ -37,7 +37,6 @@ class Jwt
     public function __construct($key, $expired = 86400)
     {
         $this->expired = $expired;
-        $this->ext = $ext;
         $this->key = $key;
         $this->header = array(
             'alg' => self::JWT_ALG,

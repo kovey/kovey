@@ -275,4 +275,16 @@ class Logger
 			);
 		}, $line, $file, $e);
     }
+
+    /**
+     * @description 设置日志分类
+     *
+     * @param string $category
+     *
+     * @return null
+     */
+    public static function setCategory(string $category)
+    {
+        self::$category = $category;
+    }
 }

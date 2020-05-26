@@ -56,7 +56,7 @@
                             <?php if (!empty($arg['type'])): ?>
                                 <span class="type"><?php echo $arg['type']; ?></span>
                             <?php endif ?>
-                                <code class="parameter"><?php echo $arg['param']; ?></code>
+                                <code class="parameter"><?php echo $arg['param'] . (strlen($arg['default']) > 0 ? (' = ' . $arg['default']) : ''); ?></code>
                             </span>
                             <?php echo $index < $total ? ', ' : ''; ?>
                         <?php endforeach ?>

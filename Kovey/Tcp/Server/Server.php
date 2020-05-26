@@ -491,7 +491,7 @@ class Server implements PortInterface
     public function send($packet, int $action, $fd)
     {
         if (!$this->serv->exist($fd)) {
-            return false;
+            throw new CloseConnectionException('connect is not exist');
         }
 
         if (!isset($this->events['pack'])) {

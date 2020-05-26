@@ -111,11 +111,7 @@ class GlobalIdentify
 	{
 		$id = $this->redis->lPop(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable);
 		if (!$id) {
-			if (!$this->giveIdentifiesAgian()) {
-				return false;
-			}
-
-			$id = $this->redis->lPop(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable);
+            $id = $this->giveIdentifiesAgian();
 		}
 
 		return $id;
@@ -151,21 +147,24 @@ class GlobalIdentify
             $this->unlock();
         }
 
-		$max = $row[$this->identifyField] + 20000;
-        $ids = array();
-		for ($i = $row[$this->identifyField]; $i < $max; $i ++) {
-            $ids[] = $i;
-            if (count($ids) >= 100) {
-                $this->redis->lPush(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable, ...$ids);
-                $ids = array();
+        $id =  $row[$this->identifyField];
+        go (function ($id) {
+            $max = $id + 20000;
+            $ids = array();
+            for ($i = $id + 1; $i < $max; $i ++) {
+                $ids[] = $i;
+                if (count($ids) >= 100) {
+                    $this->redis->lPush(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable, ...$ids);
+                    $ids = array();
+                }
             }
-		}
 
-        if (!empty($ids)) {
-            $this->redis->lPush(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable, ...$ids);
-        }
+            if (!empty($ids)) {
+                $this->redis->lPush(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable, ...$ids);
+            }
+        }, $id);
 
-		return true;
+		return $id;
 	}
 
     private function lock()

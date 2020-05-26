@@ -63,7 +63,7 @@
                                         <?php endif ?>
                                     <?php endforeach ?>
                                 </select>
-                                <input type="text" class="form-control php-params" id="php-args-<?php echo str_replace('$', '', $arg['param'])?>" placeholder="<?php echo $arg['type']; ?>"  style="display:initial;width:84%;">
+                                <input type="text" class="form-control php-params" id="php-args-<?php echo str_replace('$', '', $arg['param'])?>" placeholder="<?php echo $arg['type']; ?>"  style="display:initial;width:84%;" value="<?php echo $arg['default']; ?>">
                             </div>
                           </div>
                       <?php endforeach ?>

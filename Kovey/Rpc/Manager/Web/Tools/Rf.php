@@ -48,19 +48,28 @@ class Rf
                 foreach ($params as $param) {
                     preg_match('/>(.*)]/', $param->__toString(), $match);
                     $p = trim($match[1]);
+                    $tmpInfo = explode('=', $p);
+                    $tlen = count($tmpInfo);
+                    $default = '';
+                    if ($tlen > 1) {
+                        $p = trim($tmpInfo[0]);
+                        $default = trim($tmpInfo[1]);
+                    }
                     $ainfo = explode(' ', $p);
                     $len = count($ainfo);
                     if ($len > 1) {
                         $info['args'][$param->getPosition()] = array(
                             'type' => $ainfo[0],
-                            'param' => $ainfo[$len - 1]
+                            'param' => $ainfo[$len - 1],
+                            'default' => $default
                         );
                         continue;
                     }
 
                     $info['args'][$param->getPosition()] = array(
                         'type' => '',
-                        'param' => $p
+                        'param' => $p,
+                        'default' => $default
                     );
                 }
 

@@ -372,12 +372,12 @@ class Server
 
     private function monitor($begin, $end, $uri, $params, $ip, $time, $code)
     {
-        if (!isset($this->allowEvents['monitor'])) {
+        if (!isset($this->events['monitor'])) {
             return;
         }
 
         try {
-            call_user_func($this->allowEvents['monitor'], array(
+            call_user_func($this->events['monitor'], array(
                 'delay' => round(($end - $begin) * 1000, 2),
                 'path' => $uri,
                 'params' => $params,

@@ -70,8 +70,10 @@ class Bootstrap
 		$app->registerServer(new Server(Manager::get('server.server')))
 			->registerContainer(new Container())
 			->registerRouters(new Routers())
-			->registerMiddleware(new SessionStart())
 			->registerUserProcess(new UserProcess(Manager::get('server.server.worker_num')));
+        if (Manager::get('server.session.open') === 'On') {
+			$app->registerMiddleware(new SessionStart());
+        }
 	}
 
 	/**

@@ -73,6 +73,13 @@ class Mysql implements DbInterface
 	 */
     private $port;
 
+    /**
+     * @description 字符集
+     *
+     * @var string
+     */
+    protected $charset;
+
 	/**
 	 * @description 是否开发环境
 	 *
@@ -87,12 +94,13 @@ class Mysql implements DbInterface
 	 */
     public function __construct(Array $config)
     {
-        $this->dbname = isset($config['dbname']) ? $config['dbname'] : '';
+        $this->dbname = $config['dbname'] ?? '';
         $this->host = $config['host'];
         $this->username = $config['username'];
         $this->password = $config['password'];
         $this->adapter = strtolower($config['adapter']);
         $this->port = $config['port'];
+        $this->charset = $config['charset'] ?? 'utf8';
 		$dev = $config['dev'] ?? 'Off';
 		$this->isDev = $dev === 'On';
 
@@ -112,7 +120,7 @@ class Mysql implements DbInterface
 			'user' => $this->username,
 			'password' => $this->password,
 			'database' => $this->dbname,
-			'charset' => 'utf8',
+			'charset' => $this->charset,
 			'fetch_mode' => true
 		));
     }

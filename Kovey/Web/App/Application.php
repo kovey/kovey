@@ -21,7 +21,6 @@ use Kovey\Web\App\Http\Router\RoutersInterface;
 use Kovey\Web\App\Mvc\Controller\ControllerInterface;
 use Kovey\Web\App\Mvc\View\ViewInterface;
 use Kovey\Components\Process\ProcessAbstract;
-use Kovey\Web\App\Http\SessionInterface;
 use Kovey\Components\Parse\ContainerInterface;
 use Kovey\Components\Middleware\MiddlewareInterface;
 use Kovey\Config\Manager;

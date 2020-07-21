@@ -79,7 +79,7 @@ class Where
     public function __set($name, $val)
     {
         $this->data[] = $val;
-        $this->fields[] = $this->format($name) . '=?';
+        $this->fields[] = $this->format($name) . ' = ?';
     }
 
 	/**
@@ -91,10 +91,10 @@ class Where
 	 *
 	 * @return null
 	 */
-    public function large($name, $val)
+    public function gt($name, $val)
     {
         $this->data[] = $val;
-        $this->fields[] = $this->format($name) . '>?';
+        $this->fields[] = $this->format($name) . ' > ?';
     }
 
 	/**
@@ -106,10 +106,10 @@ class Where
 	 *
 	 * @return null
 	 */
-    public function notEqual($name, $val)
+    public function neq($name, $val)
     {
         $this->data[] = $val;
-        $this->fields[] = $this->format($name) . '<>?';
+        $this->fields[] = $this->format($name) . ' <> ?';
     }
 
 	/**
@@ -121,10 +121,10 @@ class Where
 	 *
 	 * @return null
 	 */
-    public function largeEqual($name, $val)
+    public function ge($name, $val)
     {
         $this->data[] = $val;
-        $this->fields[] = $this->format($name) . '>=?';
+        $this->fields[] = $this->format($name) . ' >= ?';
     }
 
 	/**
@@ -136,10 +136,10 @@ class Where
 	 *
 	 * @return null
 	 */
-    public function little($name, $val)
+    public function lt($name, $val)
     {
         $this->data[] = $val;
-        $this->fields[] = $this->format($name) . '<?';
+        $this->fields[] = $this->format($name) . ' < ?';
     }
 
 	/**
@@ -151,10 +151,10 @@ class Where
 	 *
 	 * @return null
 	 */
-    public function littleEqual($name, $val)
+    public function le($name, $val)
     {
         $this->data[] = $val;
-        $this->fields[] = $this->format($name) . '<=?';
+        $this->fields[] = $this->format($name) . ' <= ?';
     }
 
 	/**
@@ -166,7 +166,7 @@ class Where
 	 *
 	 * @return null
 	 */
-    public function equal($name, $val)
+    public function eq($name, $val)
     {
         $this->__set($name, $val);
     }
@@ -188,7 +188,7 @@ class Where
             $inVals[] = '?';
         }
 
-        $this->fields[] = $this->format($name) . ' IN(' . implode(',', $inVals). ')';
+        $this->fields[] = $this->format($name) . ' IN (' . implode(',', $inVals). ')';
     }
 
 	/**
@@ -200,7 +200,7 @@ class Where
 	 *
 	 * @return null
 	 */
-    public function notIn($name, Array $val)
+    public function nin($name, Array $val)
     {
         $inVals = array();
         foreach ($val as $v) {
@@ -208,7 +208,7 @@ class Where
             $inVals[] = '?';
         }
 
-        $this->fields[] = $this->format($name) . ' NOT IN(' . implode(',', $inVals) . ')';
+        $this->fields[] = $this->format($name) . ' NOT IN (' . implode(',', $inVals) . ')';
     }
 
 	/**
@@ -307,7 +307,7 @@ class Where
 		}
 
 		foreach ($this->data as $needle) {
-			$sql = substr_replace($sql, $needle, strpos($sql, '?'), 1);
+			$sql = substr_replace($sql, '\'' . $needle . '\'', strpos($sql, '?'), 1);
 		}
 		return $sql;
 	}

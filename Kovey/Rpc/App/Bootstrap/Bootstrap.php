@@ -13,7 +13,7 @@
  */
 namespace Kovey\Rpc\App\Bootstrap;
 
-use Kovey\Rpc\Process;
+use Kovey\Components\Process;
 use Kovey\Config\Manager;
 use Kovey\Components\Logger\Logger;
 use Kovey\Components\Logger\Monitor;
@@ -66,9 +66,7 @@ class Bootstrap
 	 */
 	public function __initProcess(Application $app)
 	{
-		$app->registerProcess('config', new Process\Config());
-			//->registerProcess('cron', new Process\Cron())
-			//->registerProcess('logger', new Process\Logger());
+		$app->registerProcess('kovey_config', (new Process\Config())->setProcessName(Manager::get('server.rpc.name') . ' config'));
 	}
 
 	/**

@@ -127,31 +127,6 @@ class Server implements PortInterface
     }
 
 	/**
-	 * @description 致命错误处理
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 *
-	 */
-	public function handleFatal($fd)
-	{
-		$end = microtime(true);
-		$error = error_get_last();
-		switch ($error['type'] ?? null) {
-			case E_ERROR :
-			case E_PARSE :
-			case E_CORE_ERROR :
-            case E_COMPILE_ERROR :
-                if (isset($this->events['error'])) {
-                    $this->send(call_user_func($this->events['error']), 500, $fd);
-                }
-                Logger::writeErrorLog(__LINE__, __FILE__, sprintf('%s in %s on line %s'), $error['message'], $error['file'], $error['line']);
-				break;
-		}
-	}
-
-	/**
 	 * @description manager 启动回调
 	 *
 	 * @param Swoole\Server $serv
@@ -182,12 +157,6 @@ class Server implements PortInterface
 
 		try {
 			call_user_func($this->events['initPool'], $this);
-		} catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-			}
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
@@ -241,13 +210,6 @@ class Server implements PortInterface
 			}
 
 			call_user_func($this->events['pipeMessage'], $data['p'] ?? '', $data['m'] ?? '', $data['a'] ?? array());
-        } catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL .
-					$e->getTraceAsString() . PHP_EOL;
-			}
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
@@ -277,8 +239,6 @@ class Server implements PortInterface
             call_user_func($this->events['open'], $request->fd, empty($request->get) ? $request->post : $request->get);
         } catch (CloseConnectionException $e) {
             $serv->disconnect($request->fd, WebsocketCode::THROW_CLOSE_CONNECTION_EXCEPTION, 'THROW_CLOSE_CONNECTION_EXCEPTION');
-        } catch (\Exception $e) {
-            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         } catch (\Throwable $e) {
             Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         }
@@ -319,8 +279,6 @@ class Server implements PortInterface
 		} catch (Exception $e) {
 			$serv->disconnect($frame->fd, WebsocketCode::PROTOCOL_ERROR, 'PROTOCOL_ERROR');
 			Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-		} catch (\Exception $e) {
-			Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 		} catch (\Throwable $e) {
 			Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 		}
@@ -341,8 +299,6 @@ class Server implements PortInterface
             $this->serv->disconnect($fd, WebsocketCode::NO_HANDLER, 'NO_HANDLER');
             return;
         }
-
-        register_shutdown_function(array($this, 'handleFatal'), $fd);
 
         $result = call_user_func($this->events['handler'], $packet, $fd, $this->serv->getClientInfo($fd)['remote_ip']);
 
@@ -405,8 +361,6 @@ class Server implements PortInterface
 
         try {
             call_user_func($this->events['close'], $fd);
-        } catch (\Exception $e) {
-            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         } catch (\Throwable $e) {
             Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         }

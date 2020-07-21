@@ -38,8 +38,8 @@ class Monitor extends ProcessAbstract
 	 */
     protected function busi()
     {
-		swoole_event_add($this->process->pipe, function ($pipe) {
-			$logger = unserialize($this->process->read());
+		$this->listen(function ($pipe) {
+			$logger = $this->read();
 			if (!is_array($logger)) {
 				return;
 			}

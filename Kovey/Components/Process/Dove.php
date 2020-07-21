@@ -44,7 +44,7 @@ class Dove extends ProcessAbstract
                 continue;
             }
 
-            $this->confTemplates[substr($file, 0, -7)] = file_get_contents($this->confPath . '/' . $file);
+            $this->confTemplates[substr($file, 0, -7)] = $this->confPath . '/' . $file;
         }
     }
 
@@ -55,7 +55,7 @@ class Dove extends ProcessAbstract
 	 */
     protected function busi()
     {
-		swoole_event_add($this->process->pipe, function ($pipe) {});
+		$this->listen(function ($pipe) {});
 
 		Timer::tick(30000, function () {
             $this->getConfigFromCenter();
@@ -83,9 +83,10 @@ class Dove extends ProcessAbstract
      *
      * @param string $template
      */
-    protected function parseConfig($file, $template)
+    protected function parseConfig($file, $filePath)
     {
-		go(function ($file, $template) {
+		go(function ($file, $filePath) {
+            $template = System::readFile($filePath);
             preg_match_all('/#{(.*)}/', $template, $matches);
             if (count($matches) != 2) {
                 return;
@@ -130,6 +131,6 @@ class Dove extends ProcessAbstract
             }
 
             System::writeFile($this->confPath . '/' . $file, $template);
-		}, $file, $template);
+		}, $file, $filePath);
     }
 }

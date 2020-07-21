@@ -13,7 +13,8 @@
  */
 namespace Kovey\Web\App\Bootstrap;
 
-use Kovey\Web\Process;
+use Kovey\Components\Process;
+use Kovey\Web\Process\ClearSession;
 use Kovey\Config\Manager;
 use Kovey\Web\App\Application;
 use Kovey\Web\Server\Server;
@@ -51,7 +52,7 @@ class Bootstrap
 		Monitor::setLogDir(Manager::get('server.logger.monitor'));
 		Db::setLogDir(Manager::get('server.logger.db'));
 
-		if (Manager::get('server.session.type') === 'file') {
+		if (Manager::get('server.session.open') === 'On' && Manager::get('server.session.type') === 'file') {
 			if (!is_dir(Manager::get('server.session.dir'))) {
 				mkdir(Manager::get('server.session.dir'), 0777, true);
 			}
@@ -114,10 +115,9 @@ class Bootstrap
 	 */
 	public function __initProcess(Application $app)
 	{
-		$app->registerProcess('config', new Process\Config());
-
-		if (Manager::get('server.session.type') === 'file') {
-			$app->registerProcess('session', new Process\ClearSession());
+		$app->registerProcess('kovey_config', (new Process\Config())->setProcessName(Manager::get('app.process.name') . ' config'));
+		if (Manager::get('server.session.open') === 'On' && Manager::get('server.session.type') === 'file') {
+			$app->registerProcess('kovey_session', new ClearSession());
 		}
 	}
 

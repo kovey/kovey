@@ -187,27 +187,6 @@ class Server
     }
 
 	/**
-	 * @description 捕捉致命错误
-	 *
-	 * @param Swoole\Http\Response
-	 *
-	 * @return null
-	 */
-	public function handleFatal($response)
-	{
-		$error = error_get_last();
-		switch ($error['type'] ?? null) {
-			case E_ERROR :
-			case E_PARSE :
-			case E_CORE_ERROR :
-			case E_COMPILE_ERROR :
-				$response->status(500);
-				$response->end(ErrorTemplate::getContent(500));
-				break;
-		}
-	}
-
-	/**
 	 * @description 监听进程间通讯
 	 *
 	 * @param Swoole\Http\Server $serv
@@ -234,13 +213,7 @@ class Server
 			} else {
 				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
 			}
-		} catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
-			}
-		}
+        }
     }
 
 	/**
@@ -317,26 +290,9 @@ class Server
         $begin = microtime(true);
         $time = time();
 
-		register_shutdown_function(array($this, 'handleFatal'), $response);
-
 		$result = array();
 		try {
 			$result = call_user_func($this->events['workflow'], $request);
-		} catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
-			}
-
-			$result = array(
-				'httpCode' => 500,
-				'header' => array(
-					'content-type' => 'text/html'
-				),
-				'content' => ErrorTemplate::getContent(500),
-				'cookie' => array()
-			);
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
@@ -387,8 +343,6 @@ class Server
                 'minute' => date('YmdHi', $time),
                 'http_code' => $code
             ));
-        } catch (\Exception $e) {
-            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         } catch (\Throwable $e) {
             Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         }

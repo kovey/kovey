@@ -77,6 +77,11 @@ class Redis
 	 */
 	public function getError()
 	{
-		return sprintf('[%s]%s', $this->connection->errCode, $this->connection->errMsg);
+		return sprintf('[%s]: %s', $this->connection->errCode, $this->connection->errMsg);
 	}
+
+    public function __destruct()
+    {
+        $this->connection->close();
+    }
 }

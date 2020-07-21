@@ -24,7 +24,6 @@ $autoload = new Autoload();
 $autoload->register();
 
 Manager::init(APPLICATION_PATH . '/conf/');
-Manager::parse();
 
 Application::getInstance(Manager::get('framework.app'))
 	->checkConfig()

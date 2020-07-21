@@ -13,6 +13,8 @@
  */
 namespace Kovey\Config;
 
+use Swoole\Coroutine\System;
+
 class Manager
 {
 	/**
@@ -52,6 +54,7 @@ class Manager
 		self::$values = new \Swoole\Table(KOVEY_CONFIG_MAX_ROWS);
 		self::$values->column('v', \Swoole\Table::TYPE_STRING, 512);
 		self::$values->create();
+        self::initParse();
 	}
 
 	/**
@@ -59,8 +62,8 @@ class Manager
 	 *
 	 * @return null
 	 */
-	public static function parse()
-	{
+    private static function initParse()
+    {
 		$files = scandir(self::$path);
 		foreach ($files as $file) 
 		{
@@ -76,6 +79,31 @@ class Manager
 
 			self::writeIntoMemory(str_replace('.ini', '', $file), $content);
 		}
+    }
+
+	/**
+	 * @description 解析配置
+	 *
+	 * @return null
+	 */
+	public static function parse()
+	{
+        go (function () {
+            $files = scandir(self::$path);
+            foreach ($files as $file) {
+                if (substr($file, -3) !== 'ini') {
+                    continue;
+                }
+
+                $filePath = self::$path . '/' . $file;
+                $content = System::readFile($filePath);
+                if (!$content) {
+                    continue;
+                }
+
+                self::writeIntoMemory(str_replace('.ini', '', $file), $content);
+            }
+        });
 	}
 
 	/**

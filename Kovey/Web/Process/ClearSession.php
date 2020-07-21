@@ -16,6 +16,7 @@ namespace Kovey\Web\Process;
 use Kovey\Components\Logger\Logger;
 use Kovey\Config\Manager;
 use Kovey\Components\Process\ProcessAbstract;
+use Swoole\Timer;
 
 class ClearSession extends ProcessAbstract
 {
@@ -36,8 +37,11 @@ class ClearSession extends ProcessAbstract
 	 */
     protected function busi()
     {
-        while (true) {
-			sleep(Manager::get('server.sleep.session'));
+        $this->listen(function ($pipe) {
+            $result = $this->read();
+		});
+
+		Timer::tick(Manager::get('server.sleep.session') * 1000, function () {
 			$sessionPath = Manager::get('server.session.dir');
 			foreach (scandir($sessionPath) as $path) {
 				if ($path == '.' || $path == '..') {
@@ -56,6 +60,6 @@ class ClearSession extends ProcessAbstract
 			}
 
 			Logger::writeInfoLog(__LINE__, __FILE__, 'clear session expired');
-        }
+		});
     }
 }

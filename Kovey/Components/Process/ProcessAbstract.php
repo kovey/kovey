@@ -12,7 +12,9 @@
  * @author      kovey
  */
 namespace Kovey\Components\Process;
+
 use Kovey\Config\Manager;
+use Swoole\Event;
 
 abstract class ProcessAbstract
 {
@@ -72,13 +74,14 @@ abstract class ProcessAbstract
 	 *
 	 * @param Swoole\Server $server
 	 *
-	 * @return null
+	 * @return ProcessAbstract
 	 */
 	public function setServer(\Swoole\Server $server)
 	{
         $this->server = $server;
 		$this->workNum = $this->server->setting['worker_num'];
         $this->server->addProcess($this->process);
+        return $this;
 	}
 
 	/**
@@ -86,11 +89,12 @@ abstract class ProcessAbstract
 	 *
 	 * @param Swoole\Atomic $workerAtomic
 	 *
-	 * @return null
+	 * @return ProcessAbstract
 	 */
 	public function setWorkerAtomic(\Swoole\Atomic $workerAtomic)
 	{
         $this->workerAtomic = $workerAtomic;
+        return $this;
 	}
 
 	/**
@@ -117,6 +121,19 @@ abstract class ProcessAbstract
         ko_change_process_name($this->processName);
 
         $this->busi();
+    }
+
+    /**
+     * @description 设置进程名称
+     *
+     * @param string $processName
+     *
+     * @return ProcessAbstract
+     */
+    public function setProcessName($processName)
+    {
+        $this->processName = $processName;
+        return $this;
     }
 
 	/**
@@ -154,6 +171,29 @@ abstract class ProcessAbstract
 
         $this->workerAtomic->add();
         return $id;
+    }
+
+    /**
+     * @description 监听管道
+     *
+     * @param callable $callback
+     *
+     * @return ProcessAbstract
+     */
+    protected function listen(callable $callback)
+    {
+        Event::add($this->process->pipe, $callback);
+        return $this;
+    }
+
+    /**
+     * @description 从管道中读取数据
+     *
+     * @return mixed
+     */
+    public function read()
+    {
+        return unserialize($this->process->read());
     }
 
 	/**

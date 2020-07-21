@@ -13,7 +13,7 @@
  */
 namespace Kovey\Tcp\App\Bootstrap;
 
-use Kovey\Tcp\Process;
+use Kovey\Components\Process;
 use Kovey\Config\Manager;
 use Kovey\Components\Logger\Logger;
 use Kovey\Components\Logger\Monitor;
@@ -63,7 +63,7 @@ class Bootstrap
 	 */
 	public function __initProcess(App $app)
 	{
-		$app->registerProcess('config', new Process\Config());
+		$app->registerProcess('kovey_config', (new Process\Config())->setProcessName(Manager::get('server.tcp.name') . ' config'));
 	}
 
 	/**

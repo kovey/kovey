@@ -173,33 +173,6 @@ class Server implements PortInterface
     }
 
 	/**
-	 * @description 致命错误处理
-	 *
-	 * @param int $fd
-	 *
-	 * @param ProtocolInterface $packet
-	 *
-	 * @param float $begin
-	 *
-	 * @param int $reqTime
-	 * 
-	 * @return null
-	 */
-	public function handleFatal($fd, $packet, $begin, $reqTime)
-	{
-		$end = microtime(true);
-		$error = error_get_last();
-		switch ($error['type'] ?? null) {
-			case E_ERROR :
-			case E_PARSE :
-			case E_CORE_ERROR :
-			case E_COMPILE_ERROR :
-				$this->monitor($begin, $end, $packet, $reqTime, null, $fd);
-				break;
-		}
-	}
-
-	/**
 	 * @description manager 启动回调
 	 *
 	 * @param Swoole\Server $serv
@@ -230,12 +203,6 @@ class Server implements PortInterface
 
 		try {
 			call_user_func($this->events['initPool'], $this);
-		} catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-			}
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
@@ -290,13 +257,6 @@ class Server implements PortInterface
 
 			call_user_func($this->events['pipeMessage'], $data['p'] ?? '', $data['m'] ?? '', $data['a'] ?? array());
         } catch (\Throwable $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL .
-					$e->getTraceAsString() . PHP_EOL;
-			}
-		} catch (\Exception $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
@@ -365,8 +325,6 @@ class Server implements PortInterface
         } catch (CloseConnectionException $e) {
             $serv->close($fd);
             Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-        } catch (\Exception $e) {
-            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         } catch (\Throwable $e) {
             $serv->close($fd);
             Logger::writeExceptionLog(__LINE__, __FILE__, $e);
@@ -393,8 +351,6 @@ class Server implements PortInterface
 				return;
 			}
 
-			register_shutdown_function(array($this, 'handleFatal'), $fd, $packet, $begin, $reqTime);
-
 			$result = call_user_func($this->events['handler'], $packet->getMessage(), $packet->getAction(), $fd, $this->serv->getClientInfo($fd)['remote_ip']);
 			if (empty($result) || !isset($result['message']) || !isset($result['action'])) {
                 return;
@@ -414,12 +370,6 @@ class Server implements PortInterface
 			}
 
             $this->send($result['message'], $result['action'], $fd);
-        } catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-			}
         } catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
@@ -464,12 +414,6 @@ class Server implements PortInterface
 				'timestamp' => date('Y-m-d H:i:s', $reqTime),
 				'minute' => date('YmdHi', $reqTime),
 			));
-		} catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-			}
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
@@ -534,8 +478,6 @@ class Server implements PortInterface
 
         try {
             call_user_func($this->events['close'], $this, $fd);
-        } catch (\Exception $e) {
-            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         } catch (\Throwable $e) {
             Logger::writeExceptionLog(__LINE__, __FILE__, $e);
         }
@@ -560,4 +502,28 @@ class Server implements PortInterface
 	{
 		return $this->serv;
 	}
+
+    /**
+     * @description 获取远程ID
+     *
+     * @param int $fd
+     *
+     * @return string
+     */
+    public function getRemoteIp($fd)
+    {
+        return $this->serv->getClientInfo($fd)['remote_ip'];
+    }
+
+    /**
+     * @description 获取客户端信息
+     *
+     * @param int $fd
+     *
+     * @return Array
+     */
+    public function getClientInfo($fd)
+    {
+        return $this->serv->getClientInfo($fd);
+    }
 }

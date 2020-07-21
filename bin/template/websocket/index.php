@@ -25,7 +25,6 @@ use Kovey\Websocket\App\Bootstrap\Bootstrap;
 $autoload = new Autoload();
 $autoload->register();
 Manager::init(APPLICATION_PATH . '/conf');
-Manager::parse();
 
 App::getInstance()
 	->setConfig(Manager::get('server'))

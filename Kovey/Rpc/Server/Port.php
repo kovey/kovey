@@ -62,42 +62,6 @@ class Port extends Base
     }
 
 	/**
-	 * @description 致命错误处理
-	 *
-	 * @param int $fd
-	 *
-	 * @param ProtocolInterface $packet
-	 *
-	 * @param float $begin
-	 *
-	 * @param int $reqTime
-	 * 
-	 * @return null
-	 */
-	public function handleFatal($fd, $packet, $begin, $reqTime)
-	{
-		$end = microtime(true);
-		$error = error_get_last();
-		switch ($error['type'] ?? null) {
-			case E_ERROR :
-			case E_PARSE :
-			case E_CORE_ERROR :
-			case E_COMPILE_ERROR :
-				$result = array(
-					'err' => sprintf('%s in %s on line %s', $error['message'], $error['file'], $error['line']),
-					'type' => 'fatal',
-					'code' => 1000,
-					'packet' => $packet->getClear()
-				);
-
-				$this->send($result, $fd);
-				$this->monitor($begin, $end, $packet, $reqTime, $result, $fd);
-				$this->serv->close($fd);
-				break;
-		}
-	}
-
-	/**
 	 * @description 链接回调
 	 *
 	 * @param Swoole\Server $serv
@@ -184,8 +148,6 @@ class Port extends Base
 				return;
 			}
 
-			register_shutdown_function(array($this, 'handleFatal'), $fd, $packet, $begin, $reqTime);
-
 			$result = call_user_func($this->events['handler'], $packet->getPath(), $packet->getMethod(), $packet->getArgs());
 			if ($result['code'] > 0) {
 				$result['packet'] = $packet->getClear();
@@ -195,14 +157,6 @@ class Port extends Base
                 'err' => $e->getMessage(),
                 'type' => 'busi_exception',
                 'code' => $e->getCode(),
-                'packet' => $packet->getClear()
-            );
-        } catch (\Exception $e) {
-            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-            $result = array(
-                'err' => $e->getMessage() . PHP_EOL . $e->getTraceAsString(),
-                'type' => 'exception',
-                'code' => 1000,
                 'packet' => $packet->getClear()
             );
         } catch (\Throwable $e) {
@@ -257,8 +211,6 @@ class Port extends Base
 				'timestamp' => date('Y-m-d H:i:s', $reqTime),
 				'minute' => date('YmdHi', $reqTime),
 			));
-		} catch (\Exception $e) {
-            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 		} catch (\Throwable $e) {
             Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 		}

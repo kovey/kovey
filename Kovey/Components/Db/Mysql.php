@@ -132,7 +132,10 @@ class Mysql implements DbInterface
 	 */
 	public function getError() : string
 	{
-		return $this->connection->errno . $this->connection->error . $this->connection->connect_errno . $this->connection->connect_error;
+        return sprintf(
+            'error code: %s, error msg: %s, connect error code: %s, connect error msg: %s',
+            $this->connection->errno, $this->connection->error, $this->connection->connect_errno, $this->connection->connect_error
+        );
 	}
 
 	/**
@@ -150,7 +153,10 @@ class Mysql implements DbInterface
 			$this->connect();
 		}
 
-		$begin = microtime(true);
+        $begin = 0;
+        if ($this->isDev) {
+            $begin = microtime(true);
+        }
         $result = $this->connection->query($sql);
 		if (!$result) {
 			if ($this->isDisconneted()) {
@@ -351,14 +357,17 @@ class Mysql implements DbInterface
 	{
         $sql = $sqlObj->getPrepareSql();
         if ($sql === false) {
-            throw new \Exception('update sql format error');
+            throw new \Exception('sql format is error');
         }
 
 		if (!$this->connection->connected) {
 			$this->connect();
 		}
 
-		$begin = microtime(true);
+        $begin = 0;
+        if ($this->isDev) {
+            $begin = microtime(true);
+        }
 
         $sth = $this->connection->prepare($sql);
 		if (!$sth) {
@@ -371,7 +380,6 @@ class Mysql implements DbInterface
 			} else {
 				throw new \Exception('prepare sql fail: ' . $this->getError());
 			}
-
 		}
 
 		if (!$sth->execute($sqlObj->getBindData())) {
@@ -438,6 +446,7 @@ class Mysql implements DbInterface
 	{
 		try {
 			$this->connection->close();
+        } catch (\Exception $e) {
 		} catch (\Throwable $e) {
 		}
 	}
@@ -457,7 +466,7 @@ class Mysql implements DbInterface
         $sth = $this->prepare($batchInsert);
         if ($this->connection->affected_rows < 1) {
             throw new \Exception(
-                sprintf('Insert Fail, Effictive Rows: %s', $this->connection->affected_rows)
+                sprintf('Batch Insert Fail, Effictive Rows: %s', $this->connection->affected_rows)
             );
         }
 
@@ -479,7 +488,7 @@ class Mysql implements DbInterface
 
         if ($this->connection->affected_rows < 1) {
             throw new \Exception(
-                sprintf('Update Fail, Effictive Rows: %s', $this->connection->affected_rows)
+                sprintf('Delete Fail, Effictive Rows: %s', $this->connection->affected_rows)
             );
 		}
 

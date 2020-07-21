@@ -282,7 +282,7 @@ class Update implements SqlInterface
 		}
 
 		foreach ($data as $needle) {
-			$sql = substr_replace($sql, $needle, strpos($sql, '?'), 1);
+			$sql = substr_replace($sql, '\'' . $needle . '\'', strpos($sql, '?'), 1);
 		}
 
 		return $sql;

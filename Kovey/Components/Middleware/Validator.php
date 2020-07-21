@@ -77,7 +77,7 @@ class Validator implements MiddlewareInterface
 			$res->setHeader('content-type', 'application/json');
 			$res->setBody(Json::encode(array(
 				'code' => 1000,
-				'msg' => implode(';', $valid->getErros())
+				'msg' => implode(';', $valid->getErrors())
 			)));
 			return $res;
 		}

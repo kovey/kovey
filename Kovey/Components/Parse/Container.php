@@ -160,7 +160,6 @@ class Container implements ContainerInterface
 					continue;
 				}
 
-				$pro = new \ReflectionClass($class);
 				if ($property->isPrivate()
 					|| $property->isProtected()
 				) {

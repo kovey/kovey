@@ -260,12 +260,6 @@ class Server implements PortInterface
 
 		try {
 			call_user_func($this->events['initPool'], $this);
-		} catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-			}
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
@@ -320,13 +314,6 @@ class Server implements PortInterface
 
 			call_user_func($this->events['pipeMessage'], $data['p'] ?? '', $data['m'] ?? '', $data['a'] ?? array());
         } catch (\Throwable $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL .
-					$e->getTraceAsString() . PHP_EOL;
-			}
-		} catch (\Exception $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
@@ -423,8 +410,6 @@ class Server implements PortInterface
 				return;
 			}
 
-			register_shutdown_function(array($this, 'handleFatal'), $fd, $packet, $begin, $reqTime);
-
 			$result = call_user_func($this->events['handler'], $packet->getPath(), $packet->getMethod(), $packet->getArgs());
 			if ($result['code'] > 0) {
 				$result['packet'] = $packet->getClear();
@@ -434,18 +419,6 @@ class Server implements PortInterface
                 'err' => $e->getMessage(),
                 'type' => 'busi_exception',
                 'code' => $e->getCode(),
-                'packet' => $packet->getClear()
-            );
-        } catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-			}
-            $result = array(
-                'err' => $e->getMessage() . PHP_EOL . $e->getTraceAsString(),
-                'type' => 'exception',
-                'code' => 1000,
                 'packet' => $packet->getClear()
             );
         } catch (\Throwable $e) {
@@ -504,39 +477,12 @@ class Server implements PortInterface
 				'timestamp' => date('Y-m-d H:i:s', $reqTime),
 				'minute' => date('YmdHi', $reqTime),
 			));
-		} catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-			}
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
 			} else {
 				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
 			}
-		}
-	}
-
-	/**
-	 * @description 捕捉致命错误
-	 *
-	 * @param Swoole\Http\Response
-	 *
-	 * @return null
-	 */
-	public function handleWebFatal($response)
-	{
-		$error = error_get_last();
-		switch ($error['type'] ?? null) {
-			case E_ERROR :
-			case E_PARSE :
-			case E_CORE_ERROR :
-			case E_COMPILE_ERROR :
-				$response->status(500);
-				$response->end(ErrorTemplate::getContent(500));
-				break;
 		}
 	}
 
@@ -558,26 +504,9 @@ class Server implements PortInterface
 			return;
 		}
 
-		register_shutdown_function(array($this, 'handleWebFatal'), $response);
-
 		$result = array();
 		try {
 			$result = call_user_func($this->events['run_action'], $request);
-		} catch (\Exception $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
-			}
-
-			$result = array(
-				'httpCode' => 500,
-				'header' => array(
-					'content-type' => 'text/html'
-				),
-				'content' => ErrorTemplate::getContent(500),
-				'cookie' => array()
-			);
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {
 				Logger::writeExceptionLog(__LINE__, __FILE__, $e);

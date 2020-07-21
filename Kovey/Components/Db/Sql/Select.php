@@ -479,7 +479,7 @@ class Select implements SqlInterface
             if (empty($sql)) {
                 $sql = $this->orWhere->getPrepareOrWhereSql();
             } else {
-                $sql .= str_replace('WHERE', 'AND', $this->orWhere->getPrepareOrWhereSql());
+                $sql .= str_replace('WHERE', 'OR', $this->orWhere->getPrepareOrWhereSql());
             }
         }
 

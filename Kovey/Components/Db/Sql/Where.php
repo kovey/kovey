@@ -22,7 +22,7 @@ class Where
 	 *
 	 * @var string
 	 */
-    const SQL_FORMAT = ' WHERE %s';
+    const SQL_FORMAT = ' WHERE (%s)';
 
 	/**
 	 * @description 条件数据

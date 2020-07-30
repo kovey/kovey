@@ -255,7 +255,7 @@ class Mysql implements DbInterface
                     continue;
                 }
 
-                $where->equal($key, $val);
+                $where->eq($key, $val);
             }
 
             $select->where($where);
@@ -294,7 +294,7 @@ class Mysql implements DbInterface
                     continue;
                 }
 
-                $where->equal($key, $val);
+                $where->eq($key, $val);
             }
 
             $select->where($where);

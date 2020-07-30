@@ -122,7 +122,7 @@ class AppBase
 	 */
 	public function handler($class, $method, $args)
 	{
-		$instance = $this->container->get($this->config['handler'] . '\\' . ucfirst($class));
+		$instance = $this->container->get($this->config['rpc']['handler'] . '\\' . ucfirst($class));
 		if (!$instance instanceof HandlerAbstract) {
 			return array(
 				'err' => sprintf('%s is not extends HandlerAbstract', ucfirst($class)),

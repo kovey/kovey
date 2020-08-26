@@ -71,6 +71,11 @@ start () {
 }
 
 startOnDocker () {
+    if [ -f $2 ]
+    then
+        rm -rf $2
+    fi
+
     php $1/../index.php
 
 	checkRuning $2 'start'

@@ -65,9 +65,9 @@ class Manager
     private static function initParse()
     {
 		$files = scandir(self::$path);
-		foreach ($files as $file) 
-		{
-			if ($file === '.' || $file === '..') {
+		foreach ($files as $file) {
+            $suffix = substr($file, -3);
+			if ($suffix === false || strtolower($suffix) !== 'ini') {
 				continue;
 			}
 
@@ -91,7 +91,8 @@ class Manager
         go (function () {
             $files = scandir(self::$path);
             foreach ($files as $file) {
-                if (substr($file, -3) !== 'ini') {
+                $suffix = substr($file, -3);
+                if ($suffix === false || strtolower($suffix) !== 'ini') {
                     continue;
                 }
 

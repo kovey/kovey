@@ -167,9 +167,6 @@ class Request implements RequestInterface
 	 */
 	private function parseData()
 	{
-		$_GET = array();
-		$_POST = array();
-
 		$cType = explode(';', $this->req->header['content-type'] ?? '')[0];
 		$method = $this->getMethod();
 		if ($cType === 'application/json') {
@@ -179,25 +176,21 @@ class Request implements RequestInterface
 			}
 			if ($method === 'get') {
 				$this->get = $data;
-				$_GET = $data;
 				return;
 			}
 
 			if ($method === 'post') {
 				$this->post = $data;
-				$_POST = $data;
 				return;
 			}
 
 			if ($method === 'put') {
 				$this->put = $data;
-				$_POST = $data;
 				return;
 			}
 
 			if ($method === 'delete') {
 				$this->delete = $data;
-				$_POST = $data;
 			}
 
 			return;
@@ -205,16 +198,12 @@ class Request implements RequestInterface
 
 		if ($method === 'get') {
 			$this->get = is_array($this->req->get) ? $this->req->get : array(); 
-			$_GET = $this->get;
 		} else if ($method === 'post') {
 			$this->post = is_array($this->req->post) ? $this->req->post : array(); 
-			$_POST = $this->post;
 		} else if ($method === 'put') {
 			$this->put = is_array($this->req->post) ? $this->req->post : array(); 
-			$_POST = $this->put;
 		} else if ($method === 'delete') {
 			$this->delete = is_array($this->req->post) ? $this->req->post : array(); 
-			$_POST = $this->delete;
 		}
 
 	}
@@ -230,11 +219,6 @@ class Request implements RequestInterface
             $_key = 'HTTP_' . strtoupper(str_replace('-', '_', $key));
             $this->server[$_key] = $value;
         }
-
-        $_FILES = $this->req->files == null ? array() : $this->req->files;
-        $_COOKIE = $this->req->cookie == null ? array() : $this->req->cookie;
-        $_SERVER = $this->server;
-        $this->request = $_REQUEST = array_merge($_GET, $_POST, $_COOKIE);
     }
 
 	/**

@@ -225,7 +225,7 @@ class Update implements SqlInterface
                 continue;
             }
 
-            $this->where->equal($key, $val);
+            $this->where->eq($key, $val);
         }
 
 		return $this;

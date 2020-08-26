@@ -91,7 +91,7 @@ class Having
 	 *
 	 * @return null
 	 */
-    public function large($name, $val)
+    public function gt($name, $val)
     {
         $this->data[] = $val;
         $this->fields[] = $this->format($name) . '>?';
@@ -106,7 +106,7 @@ class Having
 	 *
 	 * @return null
 	 */
-    public function notEqual($name, $val)
+    public function neq($name, $val)
     {
         $this->data[] = $val;
         $this->fields[] = $this->format($name) . '<>?';
@@ -121,7 +121,7 @@ class Having
 	 *
 	 * @return null
 	 */
-    public function largeEqual($name, $val)
+    public function ge($name, $val)
     {
         $this->data[] = $val;
         $this->fields[] = $this->format($name) . '>=?';
@@ -136,7 +136,7 @@ class Having
 	 *
 	 * @return null
 	 */
-    public function little($name, $val)
+    public function lt($name, $val)
     {
         $this->data[] = $val;
         $this->fields[] = $this->format($name) . '<?';
@@ -151,7 +151,7 @@ class Having
 	 *
 	 * @return null
 	 */
-    public function littleEqual($name, $val)
+    public function le($name, $val)
     {
         $this->data[] = $val;
         $this->fields[] = $this->format($name) . '<=?';
@@ -166,7 +166,7 @@ class Having
 	 *
 	 * @return null
 	 */
-    public function equal($name, $val)
+    public function eq($name, $val)
     {
         $this->__set($name, $val);
     }

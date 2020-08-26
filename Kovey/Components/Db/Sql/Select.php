@@ -153,7 +153,11 @@ class Select implements SqlInterface
 	 */
     public function __construct($table, $as = false)
     {
-        $this->tableAs = $as;
+        if (empty($as)) {
+            $this->tableAs = false;
+        } else {
+            $this->tableAs = $as;
+        }
 		$info = explode('.', $table);
 		array_walk($info, function (&$row) {
 			$row = $this->format($row);
@@ -341,7 +345,7 @@ class Select implements SqlInterface
                     continue;
                 }
 
-				$this->where->equal($key, $val);
+				$this->where->eq($key, $val);
 			}
 		} else {
 			$this->where = new Where();
@@ -388,7 +392,7 @@ class Select implements SqlInterface
                     continue;
                 }
 
-				$this->having->equal($key, $val);
+				$this->having->eq($key, $val);
 			}
 		} else {
 			$this->having = new Having();

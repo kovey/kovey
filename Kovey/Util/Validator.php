@@ -348,7 +348,7 @@ class Validator
 	 *
 	 * @return bool
 	 */
-    public function gte($data, $val)
+    public function ge($data, $val)
     {
         return $data >= $val;
     }
@@ -376,7 +376,7 @@ class Validator
 	 *
 	 * @return bool
 	 */
-    public function lte($data, $val)
+    public function le($data, $val)
     {
         return $data <= $val;
     }

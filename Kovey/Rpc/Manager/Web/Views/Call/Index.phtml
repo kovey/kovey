@@ -159,6 +159,9 @@
                 },
                 error: function (status, data, xml) {
                     $('#php-run-result').innerHTML = data;
+                },
+                before: function (xhr) {
+                    $('#php-run-result').innerHTML = 'requesting...';
                 }
             });
         }

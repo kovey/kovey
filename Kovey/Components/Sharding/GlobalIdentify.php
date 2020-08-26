@@ -109,7 +109,7 @@ class GlobalIdentify
 	 */
 	public function getGlobalIdentify()
 	{
-		$id = $this->redis->lPop(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable);
+		$id = $this->redis->rPop(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable);
 		if (!$id) {
             $id = $this->giveIdentifiesAgian();
 		}

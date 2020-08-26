@@ -50,7 +50,7 @@ class HttpClient
 			}
 		}
 
-		$this->client = Client($url['host'], $port, $ssl);
+		$this->client = new Client($url['host'], $port, $ssl);
 		$this->headers = [];
 	}
 

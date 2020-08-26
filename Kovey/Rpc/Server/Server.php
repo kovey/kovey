@@ -89,7 +89,7 @@ class Server implements PortInterface
     private function initServer()
     {
         if ($this->conf['test_open'] !== 'On') {
-            $this->serv = new \Swoole\Server($this->conf['host'], $this->conf['port']);
+            $this->serv = new \Swoole\Server($this->conf['host'], $this->conf['port'], SWOOLE_BASE);
             $this->serv->set(array(
                 'open_length_check' => true,
                 'package_max_length' => ProtocolInterface::MAX_LENGTH,
@@ -475,7 +475,8 @@ class Server implements PortInterface
 				'ip' => $this->serv->getClientInfo($fd)['remote_ip'],
 				'time' => $reqTime,
 				'timestamp' => date('Y-m-d H:i:s', $reqTime),
-				'minute' => date('YmdHi', $reqTime),
+                'minute' => date('YmdHi', $reqTime),
+                'result' => $result['result']
 			));
 		} catch (\Throwable $e) {
 			if ($this->isRunDocker) {

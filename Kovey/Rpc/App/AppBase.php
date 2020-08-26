@@ -131,7 +131,7 @@ class AppBase
 			);
 		}
 		if (empty($args)) {
-			$resframework = $instance->$method();
+			$result = $instance->$method();
 			return array(
 				'err' => '',
 				'type' => 'success',

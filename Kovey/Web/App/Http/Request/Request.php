@@ -661,4 +661,9 @@ class Request implements RequestInterface
 	{
 		return $this->session;
 	}
+
+    public function getFiles()
+    {
+        return $this->req->files;
+    }
 }

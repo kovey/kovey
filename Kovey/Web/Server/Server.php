@@ -134,7 +134,8 @@ class Server
             'log_file' => $this->config['log_file'],
             'worker_num' => $this->config['worker_num'],
 			'enable_coroutine' => true,
-			'max_coroutine' => $this->config['max_co']
+            'max_coroutine' => $this->config['max_co'],
+            'package_max_length' => $this->getBytes($this->config['package_max_length'])
         ));
 
 		$this->scanStaticDir();
@@ -145,6 +146,29 @@ class Server
 
         $this->initCallBack();
 		return $this;
+    }
+
+    private function getBytes($num)
+    {
+        $unit = strtoupper(substr($num, -1));
+        $num = intval(substr($num, 0, -1));
+        if ($unit === 'B') {
+            return $num;
+        }
+
+        if ($unit === 'K') {
+            return $num * 1024;
+        }
+
+        if ($unit === 'M') {
+            return $num * 1024 * 1024;
+        }
+
+        if ($unit === 'G') {
+            return $num * 1024 * 1024 * 1024;
+        }
+
+        return 0;
     }
 
 	/**

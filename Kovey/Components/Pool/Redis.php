@@ -13,7 +13,7 @@
  */
 namespace Kovey\Components\Pool;
 
-use Kovey\Components\Cache\Redis as RDS;
+use Kovey\Components\Redis\Redis as RDS;
 use Kovey\Config\Manager;
 
 class Redis implements PoolInterface

@@ -153,6 +153,7 @@ class Web
 
 	private function createVendor()
 	{
+        return $this;
 		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Components', $this->root . '/vendor/Kovey/Components');
 		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Config', $this->root . '/vendor/Kovey/Config');
 		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Util', $this->root . '/vendor/Kovey/Util');

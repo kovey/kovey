@@ -19,7 +19,7 @@
     "require": {
         "php": "^7.3",
         "ext-swoole": "^4.4",
-        "ext-redis": "^4.5"
+        "ext-redis": "^5.3"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3"

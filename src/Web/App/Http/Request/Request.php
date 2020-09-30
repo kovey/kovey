@@ -222,16 +222,6 @@ class Request implements RequestInterface
     }
 
 	/**
-	 * @description 销毁全局参数
-	 *
-	 * @return null
-	 */
-    public function unsetGlobal()
-    {
-        $_REQUEST = $_SESSION = $_COOKIE = $_FILES = $_POST = $_SERVER = $_GET = array();
-    }
-
-	/**
 	 * @description 判断是否是WEBSocket
 	 *
 	 * @return bool
@@ -662,8 +652,45 @@ class Request implements RequestInterface
 		return $this->session;
 	}
 
+    /**
+     * @description get files uploaded from client
+     *
+     * @return array
+     */
     public function getFiles()
     {
         return $this->req->files;
+    }
+
+    /**
+     * @description process cors
+     *
+     * @return null
+     */
+    public function processCors()
+    {
+		switch (strtolower($this->getMethod())) {
+			case 'get':
+                array_walk($this->get, function (&$row) {
+                    $row = htmlspecialchars($row);
+                });
+				break;
+			case 'post':
+                array_walk($this->post, function (&$row) {
+                    $row = htmlspecialchars($row);
+                });
+				break;
+			case 'put':
+                array_walk($this->put, function (&$row) {
+                    $row = htmlspecialchars($row);
+                });
+				break;
+			case 'delete':
+                array_walk($this->delete, function (&$row) {
+                    $row = htmlspecialchars($row);
+                });
+				break;
+			default:
+		}
     }
 }

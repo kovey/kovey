@@ -27,13 +27,6 @@ interface RequestInterface
 	public function __construct(\Swoole\Http\Request $request);
 
 	/**
-	 * @description 销毁全局参数
-	 *
-	 * @return null
-	 */
-    public function unsetGlobal();
-
-	/**
 	 * @description 判断是否是WEBSocket
 	 *
 	 * @return bool
@@ -205,4 +198,18 @@ interface RequestInterface
 	 * @return SessionInterface
 	 */
 	public function getSession();
+
+    /**
+     * @description 获取文件
+     *
+     * @return Array
+     */
+    public function getFiles();
+
+    /**
+     * @description 跨域攻击处理
+     *
+     * @return null
+     */
+    public function processCors();
 }

@@ -47,8 +47,7 @@ class Web
 			->createConf()
 			->createPublic()
 			->createService()
-			->createIndex()
-			->createVendor();
+			->createIndex();
 	}
 
 	private function createPublic()
@@ -148,18 +147,6 @@ class Web
 			$this->logdir . '/server/server.log'
 		), $core);
 		file_put_contents($this->root . '/conf/server.ini', $core);
-		return $this;
-	}
-
-	private function createVendor()
-	{
-        return $this;
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Components', $this->root . '/vendor/Kovey/Components');
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Config', $this->root . '/vendor/Kovey/Config');
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Util', $this->root . '/vendor/Kovey/Util');
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Web', $this->root . '/vendor/Kovey/Web');
-		copy(KOVEY_TOOLS_BIN . '/../kovey.php', $this->root. '/vendor/kovey.php');
-
 		return $this;
 	}
 }

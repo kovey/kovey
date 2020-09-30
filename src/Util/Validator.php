@@ -1,599 +1,166 @@
 <?php
 /**
- *
  * @description 数据验证
  *
- * @package     Util
+ * @package Util
  *
- * @time        Tue Sep 24 08:50:55 2019
+ * @author zhayai
  *
- * @class       vendor/Kovey/Util/Validate.php
+ * @time 2019-11-20 11:24:49
  *
- * @author      kovey
  */
 namespace Kovey\Util;
 
 class Validator
 {
-	/**
-	 * @description 错误
-	 *
-	 * @var Array
-	 */
-    private $errors;
+    private $error = '';
 
-	/**
-	 * @description 待验证的数据
-	 *
-	 * @var Array
-	 */
     private $data;
 
-	/**
-	 * @description 验证规则
-	 *
-	 * @var Array
-	 */
     private $rules;
 
-	/**
-	 * @description 18位身份证正则
-	 *
-	 * @var string
-	 */
-    const PATTERN18  = '/^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/';
-
-	/**
-	 * @description 15位身份证正则
-	 *
-	 * @var string
-	 */
-	const PATTERN15 = '/^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}[0-9Xx]$/';
-
-	/**
-	 * @description 构造函数
-	 *
-	 * @param Array $data
-	 *
-	 * @param Array $rules
-	 *
-	 * @return Validator
-	 */
     public function __construct(Array $data, Array $rules)
     {
         $this->data = $data;
         $this->rules = $rules;
-        $this->errors = array();
     }
 
-	/**
-	 * @description 获取错误
-	 *
-	 * @return Array
-	 */
-    public function getErrors()
-    {
-        return $this->errors;
-    }
-
-	/**
-	 * @description 适用于同一个字段在其依赖字段的不同值的情况下的验证
-	 *
-	 * @param string $key
-	 *
-	 * @param Array $conditions
-	 *
-	 * @return bool
-	 */
-	protected function inlineCondition($key, Array $conditions)
-	{
-		foreach ($conditions as $condition) {
-			foreach ($condition as $field => $rules) {
-				if (count($rules) != 3) {
-					$this->errors[] = 'inline condition format error, example: "feild" => array("inlineCondition" => array("key" => array("opr", "val", array("rule", "rule1")))), opr:>,>=,===,==,<,<=,!=,!==,in_array';
-					return false;
-				}
-
-				if (!in_array($rules[0], array('>','>=', '<', '<=', '==', '===', '!=', '!==', 'in_array'), true)) {
-					$this->errors[] = 'opr is error, opr:>,>=,===,==,<,<=,!=,!==,in_array';
-					return false;
-				}
-
-				if ($rules[0] === 'in_array') {
-					if (!in_array($this->data[$field], $rules[1], true)) {
-						continue;
-					}
-					if (!$this->validRule($key, $info[2])) {
-						return false;
-					}
-
-					continue;
-				}
-
-				eval('$result=' . $this->data[$field] . $rules[0] . $rules[1] . ';');
-				if (!$result) {
-					continue;
-				}
-
-				if (!$this->validRule($key, $rules[2])) {
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * @description 适用于不同字段依赖于同一个字段时的验证
-	 *
-	 * @param string $key
-	 *
-	 * @param Array $ruleInfo
-	 *
-	 * @return bool
-	 */
-	protected function condition($key, Array $ruleInfo)
-	{
-		$condition = $ruleInfo['condition'];
-		unset($ruleInfo['condition']);
-		$needValid = true;
-		foreach ($condition as $k => $info) {
-			if (!isset($this->data[$k])) {
-				$needValid = false;
-				break;
-			}
-
-			if (count($info) !== 2) {
-				$this->errors[] = 'condition format error, example: "feild" => array("condition" => array("key" => array("opr", "val"))), opr:>,>=,===,==,<,<=,!=,!==,in_array';
-				return false;
-			}
-
-			if (!in_array($info[0], array('>','>=', '<', '<=', '==', '===', '!=', '!==', 'in_array'), true)) {
-				$this->errors[] = 'opr is error, opr:>,>=,===,==,<,<=,!=,!==,in_array';
-				return false;
-			}
-
-			if ($info[0] === 'in_array') {
-				if (!in_array($this->data[$k], $info[1], true)) {
-					$needValid = false;
-					break;
-				}
-				continue;
-			}
-
-			eval('$result=' . $this->data[$k] . $info[0] . $info[1] . ';');
-			if (!$result) {
-				$needValid = false;
-				break;
-			}
-		}
-
-		if (!$needValid) {
-			return true;
-		}
-
-		return $this->validRule($key, $ruleInfo);
-	}
-
-	/**
-	 * @description 普通验证
-	 *
-	 * @param string $key
-	 *
-	 * @param Array $ruleInfo
-	 *
-	 * @return bool
-	 */
-	protected function validRule($key, $ruleInfo)
-	{
-		if (in_array('required', $ruleInfo, true)) {
-			if (!isset($this->data[$key])) {
-				$this->errors[] = "$key is not exists";
-				return false;
-			}
-		} else {
-			if (!isset($this->data[$key])
-				|| (!is_numeric($this->data[$key]) && empty($this->data[$key]))
-			) {
-				return true;
-			}
-		}
-
-		if (in_array('canEmpty', $ruleInfo, true)) {
-			if (!is_numeric($this->data[$key]) && empty($this->data[$key])) {
-				return true;
-			}
-		}
-
-		foreach ($ruleInfo as $fun => $params) {
-			if (is_numeric($fun)) {
-				if ($params === 'canEmpty') {
-					continue;
-				}
-
-				if (!$this->$params($this->data[$key])) {
-					$this->errors[] = "$key validate fail with $params, value: [" . $this->formatData($this->data[$key]) . ']';
-					return false;
-				}
-
-				continue;
-			}
-
-			if (!is_array($params)) {
-				if (!$this->$fun($this->data[$key], $params)) {
-					$this->errors[] = "$key validate fail with $fun limit with $params, value: [" . $this->formatData($this->data[$key]) . ']';
-					return false;
-				}
-
-				continue;
-			}
-
-			if ($fun === 'inArray') {
-				if (!$this->inArray($this->data[$key], $params)) {
-					$this->errors[] = "$key validate fail with $fun limit with " . Json::encode($params) . ', value: [' . $this->formatData($this->data[$key]) . ']';
-					return false;
-				}
-
-				continue;
-			}
-
-			if (!$this->$fun($this->data[$key], ...$params)) {
-				$this->errors[] = "$key validate fail with $fun limit with " . implode(',', $params) . ', value: [' . $this->formatData($this->data[$key]) . ']';
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * @description 格式化数据
-	 *
-	 * @param mixed $data
-	 *
-	 * @return string
-	 */
-	private function formatData($data)
-	{
-		return is_array($data) ? Json::encode($data) : $data;
-	}
-
-	/**
-	 * @description 开始验证
-	 * 
-	 * @return bool
-	 */
     public function run()
     {
-        foreach ($this->rules as $key => $ruleInfo) {
-			/**
-			 * 内部条件验证
-			 */
-			if (isset($ruleInfo['inlineCondition'])) {
-				if (!$this->inlineCondition($key, $ruleInfo['inlineCondition'])) {
-					return false;
-				}
+        foreach ($this->rules as $field => $rule) {
+            if (in_array('required', $rule, true)) {
+                if (!isset($this->data[$field])) {
+                    $this->error = "$field is not exists.";
+                    return false;
+                }
+            } else {
+                if (!isset($this->data[$field])) {
+                    continue;
+                }
+            }
 
-				continue;
-			}
+            foreach ($rule as $r => $f) {
+                if ($f === 'required') {
+                    continue;
+                }
 
-			/**
-			 * 条件验证
-			 */
-			if (isset($ruleInfo['condition'])) {
-				if (!$this->condition($key, $ruleInfo)) {
-					return false;
-				}
+                if (is_numeric($r)) {
+                    if (!$this->$f($this->data[$field])) {
+                        $this->error = "$field validate failure with $f, value: " . $this->formatValue($this->data[$field]);
+                        return false;
+                    }
 
-				continue;
-			}
+                    continue;
+                }
 
-			if (!$this->validRule($key, $ruleInfo)) {
-				return false;
-			}
+                if ($r === 'inArray') {
+                    if (!is_array($f)) {
+                        $this->error = "$field validate failure with $r, value: " . $this->formatValue($this->data[$field]);
+                        return false;
+                    }
+
+                    if (!$this->$r($this->data[$field], $f)) {
+                        $this->error = "$field validate failure with $r, condition: " . $this->formatValue($f) . ', value: ' . $this->formatValue($this->data[$field]);
+                        return false;
+                    }
+
+                    continue;
+                }
+
+                if (!is_array($f)) {
+                    $f = array($f);
+                }
+
+                if (!$this->$r($this->data[$field], ...$f)) {
+                    $this->error = "$field validate failure with $r, condition: " . $this->formatValue($f) . ', value: ' . $this->formatValue($this->data[$field]);
+                    return false;
+                }
+            }
         }
 
         return true;
     }
 
-	/**
-	 * @description 最大长度
-	 *
-	 * @param mixed $data
-	 *
-	 * @param int $length
-	 *
-	 * @return bool
-	 */
-    public function maxlength($data, $length)
+    public function formatValue($value)
     {
-        return strlen($data) <= $length;
+        return is_array($value) ? json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : $value;
     }
 
-	/**
-	 * @description 最小长度
-	 *
-	 * @param mixed $data
-	 *
-	 * @param int $length
-	 *
-	 * @return bool
-	 */
-    public function minlength($data, $length)
+    public function number($num)
     {
-        return strlen($data) >= $length;
+        return ctype_digit(strval($num));
     }
 
-	/**
-	 * @description 大于
-	 *
-	 * @param mixed $data
-	 *
-	 * @param int $val
-	 *
-	 * @return bool
-	 */
-    public function gt($data, $val)
+    public function minlength($val, $len)
     {
-        return $data > $val;
+        return strlen($val) >= $len;
     }
 
-	/**
-	 * @description 大于等于
-	 *
-	 * @param mixed $data
-	 *
-	 * @param int $val
-	 *
-	 * @return bool
-	 */
-    public function ge($data, $val)
+    public function maxlength($val, $len)
     {
-        return $data >= $val;
+        return strlen($val) <= $len;
     }
 
-	/**
-	 * @description 小于
-	 *
-	 * @param mixed $data
-	 *
-	 * @param int $val
-	 *
-	 * @return bool
-	 */
-    public function lt($data, $val)
+    public function gt($val, $mixed)
     {
-        return $data < $val;
+        return $val > $mixed;
     }
 
-	/**
-	 * @description 小于等于
-	 *
-	 * @param mixed $data
-	 *
-	 * @param int $val
-	 *
-	 * @return bool
-	 */
-    public function le($data, $val)
+    public function ge($val, $mixed)
     {
-        return $data <= $val;
+        return $val >= $mixed;
     }
 
-	/**
-	 * @description 等于指定长度
-	 *
-	 * @param mixed $data
-	 *
-	 * @param int $length
-	 *
-	 * @return bool
-	 */
-    public function equalsLength($data, $length)
+    public function lt($val, $mixed)
     {
-        return strlen($data) === $length;
+        return $val < $mixed;
     }
 
-	/**
-	 * @description 必填选项
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-    public function required($data)
+    public function le($val, $mixed)
     {
-        return !is_null($data);
+        return $val <= $mixed;
     }
 
-	/**
-	 * @description 数字
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-    public function numberic($data)
+    public function inArray($val, Array $con)
     {
-        return is_numeric($data);
+        return in_array($val, $con, true);
     }
 
-	/**
-	 * @description 金额
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-	public function money($data)
-	{
-		return (bool)preg_match('/^[0-9][0-9]*.[0-9]{2}$/', $data);
-	}
-
-	/**
-	 * @description 比率
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-	public function rate($data)
-	{
-		return (bool)preg_match('/^0.[0-9]{5}$/', $data);
-	}
-
-	/**
-	 * @description 纯数字
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-    public function number($data)
+    public function getError()
     {
-        return ctype_digit($data) || is_int($data);
+        return $this->error;
     }
 
-	/**
-	 * @description 数组
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-    public function isArray($data)
+    public function isArray($val)
     {
-        return is_array($data);
+        return is_array($val);
     }
 
-	/**
-	 * @description 是否在数组中
-	 *
-	 * @param mixed $data
-	 *
-	 * @param Array $val
-	 *
-	 * @return bool
-	 */
-    public function inArray($data, Array $val)
+    public function notEmpty($val)
     {
-		if (is_array($data)) {
-			foreach ($data as $v) {
-				if (!in_array($v, $val, true)) {
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-        return in_array($data, $val, true);
+        return !empty($val);
     }
 
-	/**
-	 * @description 订单号
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-    public function order($data)
+    public function url($val)
     {
-        return (bool)preg_match('/^[a-zA-Z0-9]+$/', $data);
+        return (bool)filter_var($val, FILTER_SANITIZE_URL);
     }
 
-	/**
-	 * @description 微信号
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-    public function wechat($data)
+    public function account($val)
     {
-        return (bool)preg_match('/^[a-zA-Z0-9_-]+$/', $data);
+        return (bool)preg_match('/^[a-zA-Z0-9_]+/', $val);
     }
 
-	/**
-	 * @description 编码
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-    public function code($data)
+    public function equalLength($val, $len)
     {
-        return (bool)preg_match('/^[a-zA-Z]+$/', $data);
+        return strlen($val) == $len;
     }
 
-	/**
-	 * @description YmdHis时间
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-    public function YmdHisDate($data)
+    public function id($val)
     {
-		return $this->dateTime(date('Y-m-d H:i:s', strtotime($data)));
+        return (bool)preg_match('/^[a-f0-9]+/', $val);
     }
 
-	/**
-	 * @description Url
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-    public function url($data)
-    {
-        return (bool)preg_match('/^((ht|f)tps?):\/\/([\w\-]+(\.[\w\-]+)*\/)*[\w\-]+(\.[\w\-]+)*\/?(\?([\w\-\.,@?^=%&:\/~\+#]*)+)?/', $data);
-    }
-
-	/**
-	 * @description 名称
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-    public function name($data)
-    {
-        return (bool)preg_match('/^(?!_)[A-Za-z0-9_\-\x80-\xff]+$/', $data);
-    }
-
-	/**
-	 * @description 手机号
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-	public function  mobile($data)
-	{
-		return (bool)preg_match('/1[3456789]{1}\d{9}$/', $data);
-	}	
-
-	/**
-	 * @description 邮箱
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-	public function email($data)
-	{
-		return filter_var($data, FILTER_VALIDATE_EMAIL) !== false;
-	}
-
-	/**
-	 * @description 日期
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
 	public function date($date)
 	{
         $date = explode('-', $date);
@@ -642,13 +209,6 @@ class Validator
         return true;
 	}
 
-	/**
-	 * @description 时间
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
     public function dateTime($dateTime)
     {
 		$info = explode(' ', $dateTime);
@@ -665,13 +225,6 @@ class Validator
 		return $this->time($time);
     }
 
-	/**
-	 * @description 闰年
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
     public function isLeapYear($year) 
     {
         if (strlen($year) != 4) {
@@ -685,13 +238,6 @@ class Validator
         return false;
     }
 
-	/**
-	 * @description 时间
-	 *
-	 * @param mixed $time
-	 *
-	 * @return bool
-	 */
     public function time($time) 
     {
 		$time = explode(':', $time);
@@ -725,67 +271,23 @@ class Validator
         return true;
     }
 
-	/**
-	 * @description 身份证
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-	public function idCard($data)
-	{
-		return preg_match(self::PATTERN18, $data) || preg_match(self::PATTERN15, $data);
-	}
+    public function mobileOrEmail($data)
+    {
+        return $this->number($data) || $this->email($data);
+    }
 
-	/**
-	 * @description 不为空
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-	public function notEmpty($data)
-	{
-		if (is_array($data)) {
-			return count($data) > 0;
-		}
+    public function email($data)
+    {
+        return (bool)preg_match("/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/", $data);
+    }
 
-		return strlen($data) > 0;
-	}
+    public function money($data)
+    {
+        return (bool)preg_match('/^[0-9]+\.[0-9]{2}/', $data);
+    }
 
-	/**
-	 * @description 雷鸣
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-	public function className($data)
-	{
-		return (bool)preg_match('/^[A-Z][a-zA-Z]+$/', $data);
-	}
-
-	/**
-	 * @description 公司
-	 *
-	 * @param mixed $data
-	 *
-	 * @return bool
-	 */
-	public function mobileCompany($data)
-	{
-		return (bool)preg_match('/^[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$/', $data);
-	}
-
-	/**
-	 * @description 等于某个数
-	 *
-	 * @param Array $data
-	 *
-	 * @return bool
-	 */
-	public function equalCount(Array $data, $count)
-	{
-		return count($data) == $count;
-	}
+    public function numeric($data)
+    {
+        return is_numeric($data);
+    }
 }

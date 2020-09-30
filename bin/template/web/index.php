@@ -11,11 +11,9 @@
  */
 define('APPLICATION_PATH', __DIR__);
 
-require_once APPLICATION_PATH . '/vendor/kovey.php';
-require_once KOVEY_FRAMEWORK_PATH . '/Kovey/Web/App/Bootstrap/Autoload.php';
+require_once APPLICATION_PATH . '/vendor/autoload.php';
 
 use Kovey\Web\App\Bootstrap\Autoload;
-use Kovey\Components\Logger\Logger;
 use Kovey\Config\Manager;
 use Kovey\Web\App\Application;
 use Kovey\Web\App\Bootstrap\Bootstrap;

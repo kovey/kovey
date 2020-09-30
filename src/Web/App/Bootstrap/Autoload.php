@@ -64,30 +64,10 @@ class Autoload
 	 */
 	public function register()
 	{
-		spl_autoload_register(array($this, 'autoloadCore'));
 		spl_autoload_register(array($this, 'autoloadController'));
 		spl_autoload_register(array($this, 'autoloadPlugins'));
 		spl_autoload_register(array($this, 'autoloadUserLib'));
 		spl_autoload_register(array($this, 'autoloadLocal'));
-	}
-
-	/**
-	 * @description 注册核心
-	 *
-	 * @return null
-	 */
-	function autoloadCore($className)
-	{
-		try {
-			$className = KOVEY_FRAMEWORK_PATH . '/' . str_replace('\\', '/', $className) . '.php';
-			if (!is_file($className)) {
-				return;
-			}
-
-			require_once $className;
-		} catch (\Throwable $e) {
-			echo $e->getMessage();
-		}
 	}
 
 	/**

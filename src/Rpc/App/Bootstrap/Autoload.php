@@ -56,29 +56,9 @@ class Autoload
 	 */
 	public function register()
 	{
-		spl_autoload_register(array($this, 'autoloadCore'));
 		spl_autoload_register(array($this, 'autoloadPlugins'));
 		spl_autoload_register(array($this, 'autoloadUserLib'));
 		spl_autoload_register(array($this, 'autoloadLocal'));
-	}
-
-	/**
-	 * @description 核心库路径
-	 *
-	 * @return null
-	 */
-	public function autoloadCore($className)
-	{
-		try {
-			$className = KOVEY_RPC_ROOT . '/' . str_replace('\\', '/', $className) . '.php';
-			if (!is_file($className)) {
-				return;
-			}
-
-			require_once $className;
-		} catch (\Throwable $e) {
-			echo $e->getMessage();
-		}
 	}
 
 	/**

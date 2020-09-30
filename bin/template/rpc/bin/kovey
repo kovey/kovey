@@ -131,6 +131,12 @@ fi
 
 if [ $1 == $pstart ]
 then
+    if [ -z $2 ]
+    then
+        start $runpath $pid
+        exit
+    fi
+
     if [ $2 == $docker ]
     then
         startOnDocker $runpath $pid

@@ -61,7 +61,7 @@ class Code
             case 'resource':
                 return 'resource';
             default:
-                return 'UNKNOWN TYPE';
+                return 'null';
         }
     }
 

@@ -55,7 +55,7 @@ class Router
         if ($path === '/') {
             $this->controller = $this->rootLib . 'IndexController';
             $this->action = 'indexAction';
-            $this->template = KOVEY_RPC_ROOT . '/Kovey/Rpc/Manager/Web/Views/Index/Index.phtml';
+            $this->template = KOVEY_FRAMEWORK_PATH . '/Rpc/Manager/Web/Views/Index/Index.phtml';
             return;
         }
 
@@ -66,10 +66,10 @@ class Router
 
         if (count($info) > 2) {
             $this->action = $info[2] . 'Action';
-            $this->template = KOVEY_RPC_ROOT . '/Kovey/Rpc/Manager/Web/Views/' . ucfirst($info[1]) . '/' . ucfirst($info[2]) . '.phtml';
+            $this->template = KOVEY_FRAMEWORK_PATH . '/Rpc/Manager/Web/Views/' . ucfirst($info[1]) . '/' . ucfirst($info[2]) . '.phtml';
         } else {
             $this->action = 'indexAction';
-            $this->template = KOVEY_RPC_ROOT . '/Kovey/Rpc/Manager/Web/Views/' . ucfirst($info[1]) . '/Index.phtml';
+            $this->template = KOVEY_FRAMEWORK_PATH . '/Rpc/Manager/Web/Views/' . ucfirst($info[1]) . '/Index.phtml';
         }
     }
 

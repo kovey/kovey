@@ -45,7 +45,6 @@ class Web
 
 		$this->createApplication()
 			->createBin()
-			->createCron()
 			->createConf()
 			->createPublic()
 			->createService()
@@ -99,13 +98,6 @@ class Web
 	{
 		Util::copy(KOVEY_TOOLS_BIN . '/template/bin', $this->root . '/bin');
 		chmod($this->root . '/bin/kovey', 0755);
-		return $this;
-	}
-
-	private function createCron()
-	{
-		mkdir($this->root . '/cron', 0755, true);
-		touch($this->root . '/cron/cron');
 		return $this;
 	}
 

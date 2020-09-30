@@ -46,9 +46,9 @@ if (!isset($opt['type'])) {
 	Command::run('help', 'common');
 }
 
-$projectPath = $opt['path'] ?? __DIR__ . '../../../..';
-$path = dirname($projectPath);
-$project = basename($projectPath);
+$projectPath = str_replace('/vendor/kovey/kovey/bin', '', __DIR__);
+$path = $opt['path'] ?? dirname($projectPath);
+$project = $opt['project'] ?? basename($projectPath);
 
 if (isset($opt['handler'])) {
 	Command::run($opt['type'], 'handler',  $path, $project, $opt['handler']);

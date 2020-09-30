@@ -29,10 +29,5 @@
             "Kovey\\": "src/"
         },
         "files": ["src/kovey.php"]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
     }
 }

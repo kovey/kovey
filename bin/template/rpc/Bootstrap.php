@@ -13,6 +13,7 @@
  */
 use Kovey\Components\Pool\Redis;
 use Kovey\Components\Pool\Mysql;
+use Kovey\Config\Manager;
 
 class Bootstrap
 {

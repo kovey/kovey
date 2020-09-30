@@ -39,7 +39,9 @@ class Web
 			mkdir($this->path, 0755, true);
 		}
 
-		mkdir($this->root, 0755, true);
+        if (!is_dir($this->root)) {
+            mkdir($this->root, 0755, true);
+        }
 
 		$this->createApplication()
 			->createBin()

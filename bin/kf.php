@@ -46,36 +46,24 @@ if (!isset($opt['type'])) {
 	Command::run('help', 'common');
 }
 
-$path = $opt['path'] ?? __DIR__ . '/..';
+$projectPath = $opt['path'] ?? __DIR__ . '../../../..';
+$path = dirname($projectPath);
+$project = basename($projectPath);
 
 if (isset($opt['handler'])) {
-	if (!isset($opt['project'])) {
-		Command::run('help', 'common');
-	}
-
-	Command::run($opt['type'], 'handler',  $path, $opt['project'], $opt['handler']);
+	Command::run($opt['type'], 'handler',  $path, $project, $opt['handler']);
 }
 
 if (isset($opt['service'])) {
-	if (!isset($opt['project'])) {
-		Command::run('help', 'common');
-	}
-
-	Command::run($opt['type'], 'service',  $path, $opt['project'], $opt['service']);
+	Command::run($opt['type'], 'service',  $path, $project, $opt['service']);
 }
 
 if (isset($opt['controller'])) {
-	if (!isset($opt['project'])) {
-		Command::run('help', 'common');
-	}
-
-	Command::run($opt['type'], 'controller',  $path, $opt['project'], $opt['controller']);
+	Command::run($opt['type'], 'controller',  $path, $project, $opt['controller']);
 }
 
-if (isset($opt['project'])) {
-	if (!isset($opt['ptype'])) {
-		Command::run('help', 'common');
-	}
-
-	Command::run($opt['type'], 'project', $path, $opt['project'], $opt['ptype'], $opt['logdir'] ?? '');
+if (!isset($opt['ptype'])) {
+    Command::run('help', 'common');
 }
+
+Command::run($opt['type'], 'project', $path, $project, $opt['ptype'], $opt['logdir'] ?? '');

@@ -13,9 +13,7 @@
  */
 define('APPLICATION_PATH', __DIR__);
 
-require_once APPLICATION_PATH . '/vendor/kovey.php';
-
-require_once KOVEY_RPC_ROOT . '/Kovey/Rpc/App/Bootstrap/Autoload.php';
+require_once APPLICATION_PATH . '/vendor/autoload.php';
 
 use Kovey\Rpc\App\Bootstrap\Autoload;
 use Kovey\Config\Manager;
@@ -25,7 +23,6 @@ use Kovey\Rpc\App\Bootstrap\Bootstrap;
 $autoload = new Autoload();
 $autoload->register();
 Manager::init(APPLICATION_PATH . '/conf');
-Manager::parse();
 
 Application::getInstance()
 	->setConfig(Manager::get('server'))

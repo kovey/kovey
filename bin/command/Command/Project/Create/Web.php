@@ -39,16 +39,16 @@ class Web
 			mkdir($this->path, 0755, true);
 		}
 
-		mkdir($this->root, 0755, true);
+        if (!is_dir($this->root)) {
+            mkdir($this->root, 0755, true);
+        }
 
 		$this->createApplication()
 			->createBin()
-			->createCron()
 			->createConf()
 			->createPublic()
 			->createService()
-			->createIndex()
-			->createVendor();
+			->createIndex();
 	}
 
 	private function createPublic()
@@ -101,13 +101,6 @@ class Web
 		return $this;
 	}
 
-	private function createCron()
-	{
-		mkdir($this->root . '/cron', 0755, true);
-		touch($this->root . '/cron/cron');
-		return $this;
-	}
-
 	private function createConf()
 	{
 		Util::copy(KOVEY_TOOLS_BIN . '/template/web/conf', $this->root . '/conf');
@@ -136,7 +129,7 @@ class Web
 			'{project}',
 			'{log_file}'
 		), array(
-			$this->logdir . '/run/kovey-framework',
+			$this->root . '/run/kovey-framework',
 			$this->logdir . '/info',
 			$this->logdir . '/error',
 			$this->logdir . '/warning',
@@ -148,17 +141,6 @@ class Web
 			$this->logdir . '/server/server.log'
 		), $core);
 		file_put_contents($this->root . '/conf/server.ini', $core);
-		return $this;
-	}
-
-	private function createVendor()
-	{
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Components', $this->root . '/vendor/Kovey/Components');
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Config', $this->root . '/vendor/Kovey/Config');
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Util', $this->root . '/vendor/Kovey/Util');
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Web', $this->root . '/vendor/Kovey/Web');
-		copy(KOVEY_TOOLS_BIN . '/../kovey.php', $this->root. '/vendor/kovey.php');
-
 		return $this;
 	}
 }

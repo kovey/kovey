@@ -39,14 +39,15 @@ class Rpc
 			mkdir($this->path, 0755, true);
 		}
 
-		mkdir($this->root, 0755, true);
+        if (!is_dir($this->root)) {
+            mkdir($this->root, 0755, true);
+        }
 
 		$this->createApplication()
 			->createBin()
 			->createConf()
 			->createService()
-			->createIndex()
-			->createVendor();
+			->createIndex();
 	}
 
 	private function createService()
@@ -114,7 +115,7 @@ class Rpc
 			'{rpc-name}'
 		), array(
 			$this->logdir . '/server/server.log',
-			$this->logdir . '/run/kovey-rpc',
+			$this->root . '/run/kovey-rpc',
 			$this->name,
 			$this->logdir . '/info',
 			$this->logdir . '/exception',
@@ -125,17 +126,6 @@ class Rpc
 			$this->name
 		), $core);
 		file_put_contents($this->root . '/conf/server.ini', $core);
-		return $this;
-	}
-
-	private function createVendor()
-	{
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Components', $this->root . '/vendor/Kovey/Components');
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Config', $this->root . '/vendor/Kovey/Config');
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Util', $this->root . '/vendor/Kovey/Util');
-		Util::copy(KOVEY_TOOLS_BIN . '/../Kovey/Rpc', $this->root . '/vendor/Kovey/Rpc');
-		copy(KOVEY_TOOLS_BIN . '/../kovey.php', $this->root. '/vendor/kovey.php');
-
 		return $this;
 	}
 }

@@ -5,6 +5,7 @@ pstop='stop'
 prestart='restart'
 pfinal='final'
 preload='reload'
+docker='docker'
 
 right=4
 failRight=6
@@ -69,6 +70,17 @@ start () {
 	checkRuning $2 'start'
 }
 
+startOnDocker () {
+    if [ -f $2 ]
+    then
+        rm -rf $2
+    fi
+
+    php $1/../index.php
+
+	checkRuning $2 'start'
+}
+
 stop () {
     if [ ! -f $1 ]
     then
@@ -113,12 +125,24 @@ final () {
 if [ -z $1 ]
 then
     echo 'Usage: kovey start|stop|reload|restart|final'
+    echo '  options: docker'
     exit
 fi
 
 if [ $1 == $pstart ]
 then
-    start $runpath $pid
+    if [ -z $2 ]
+    then
+        start $runpath $pid
+        exit
+    fi
+
+    if [ $2 == $docker ]
+    then
+        startOnDocker $runpath $pid
+    else
+        start $runpath $pid
+    fi
     exit
 fi
 
@@ -147,3 +171,4 @@ then
 fi
 
 echo 'Usage: kovey start|stop|reload|restart|final'
+echo '  options: docker'

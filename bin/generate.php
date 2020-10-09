@@ -12,7 +12,17 @@
  * @file kovey/main/generate.php
  *
  */
+if (!extension_loaded('openssl')) {
+    echo 'extension openssl is not found.' . PHP_EOL;
+    exit;
+}
+
 $opt = getopt('s:t:p:');
+
+if (empty($opt['t'])) {
+    showHelp();
+    exit;
+}
 
 $size = intval($opt['s'] ?? 43);
 
@@ -27,7 +37,21 @@ if ($opt['t'] == 'rsa') {
     exit;
 }
 
-secret($size);
+if ($opt['t'] == 'aes') {
+    secret($size);
+    exit;
+}
+
+showHelp();
+
+function showHelp()
+{
+    echo 'Usage: php generate.php <-t rsa | aes>' . PHP_EOL .
+        'Options:' . PHP_EOL .
+        '   -p rsa created in directory, default is current directory' . PHP_EOL .
+        '   -s secret length, default is 43' . PHP_EOL;
+    exit;
+}
 
 function secret($size)
 {
@@ -47,17 +71,23 @@ function secret($size)
         $result .= $chars[random_int(0, $total)];
     }
 
-    echo "$result\n";
+    echo "aes secret: $result" . PHP_EOL;
 }
 
 function rsa($size, $path)
 {
+    if ($size < 384) {
+        echo 'private key length is too short; it needs to be at least 384 bits, not ' . $size . PHP_EOL;
+        return;
+    }
+
     $configs = array(
         'private_key_type' => OPENSSL_KEYTYPE_RSA,
         'private_key_bits' => $size
     );
     $res = openssl_pkey_new($configs);
     if ($res === false) {
+        echo sprintf('rsa keys created failure, error: %s', openssl_error_string()) . PHP_EOL;
         return;
     }
 
@@ -67,5 +97,5 @@ function rsa($size, $path)
     file_put_contents($path . '/private.pem', $priKey);
     file_put_contents($path . '/public.pem', $pubKey['key']);
 
-    echo "success\n";
+    echo "rsa keys created in $path" . PHP_EOL;
 }

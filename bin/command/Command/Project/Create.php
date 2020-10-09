@@ -28,7 +28,8 @@ class Create implements CommandInterface
 	private $types = array(
 		'web' => 'Web',
 		'rpc' => 'Rpc',
-		'websocket' => 'Websocket'
+        'websocket' => 'Websocket',
+        'tcp' => 'Tcp'
 	);
 
 	public function __construct($path, $name, $type, $logdir)
@@ -46,7 +47,7 @@ class Create implements CommandInterface
 			exit;
 		}
 
-		if (file_exists($this->path . '/' . $this->name)) {
+		if (is_file($this->path . '/' . $this->name . '/index.php')) {
 			Show::showFormat('project %s is exists', $this->name);
 			exit;
 		}

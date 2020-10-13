@@ -1,6 +1,6 @@
 {
     "name": "kovey/kovey",
-    "type": "project",
+    "type": "library",
     "description": "The Kovey Framework.",
     "keywords": [
         "framework",
@@ -8,7 +8,7 @@
         "swoole",
         "php"
     ],
-    "license": "Apache",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Kovey",
@@ -18,8 +18,7 @@
     ],
     "require": {
         "php": "^7.3",
-        "ext-swoole": "^4.4",
-        "ext-redis": "^5.3"
+        "ext-swoole": "^4.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3"

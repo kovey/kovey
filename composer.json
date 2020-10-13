@@ -8,7 +8,7 @@
         "swoole",
         "php"
     ],
-    "license": "Apache",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Kovey",

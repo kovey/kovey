@@ -1,8 +1,0 @@
-[Unit]
-Description=Kovey Socket
-
-[Socket]
-ListenStream=9901
-Accept=false
-[Install]
-WantedBy = sockets.target

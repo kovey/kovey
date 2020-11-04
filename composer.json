@@ -26,13 +26,11 @@
         "kovey/rpc-server": "^1.0",
         "kovey/rpc-client": "^1.0",
         "kovey/websocket": "^1.0",
-        "kovey/tcp": "^1.0",
-        "kovey/web": "^1.0",
+        "kovey/tcp-server": "^1.0",
+        "kovey/http-server": "^1.0",
         "kovey/logger": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3"
-    },
-    "autoload": {
     }
 }

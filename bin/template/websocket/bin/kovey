@@ -1,0 +1,174 @@
+#!/bin/bash
+runpath=$(cd `dirname $0`; pwd)
+pstart='start'
+pstop='stop'
+prestart='restart'
+pfinal='final'
+preload='reload'
+docker='docker'
+
+right=4
+failRight=6
+columns=$(tput cols)
+width=`expr $columns - $right - 1`
+failWidth=`expr $columns - $failRight - 1`
+
+getPid() {
+	tmpPid=''
+	while read line
+	do
+		str=${line:0:8}
+		if [ $str == $2 ]
+		then
+			tmpPid=${line:9:${#line}}
+			break;
+		fi
+	done < $1/../conf/server.ini
+
+	echo $tmpPid
+}
+
+pid=`getPid $runpath 'pid_file'`
+
+succ () {
+    printf "%-${width}s %${right}s\n" "server $1" '[ok]'
+}
+
+fail () {
+	printf "%-${failWidth}s %${failRight}s\a\n" "server $1" '[fail]'
+}
+
+checkRuning () {
+	sleep 1
+	if [ -f $1 ]
+	then
+		succ $2
+	else
+		fail $2
+	fi
+}
+
+checkNotRuning () {
+	sleep 1
+	if [ ! -f $1 ]
+	then
+		succ $2
+	else
+		fail $2
+	fi
+}
+
+start () {
+    if [ -f $2 ]
+    then
+        echo 'server is runing.'
+        exit
+    fi
+
+    php $1/../index.php
+
+	checkRuning $2 'start'
+}
+
+startOnDocker () {
+    if [ -f $2 ]
+    then
+        rm -rf $2
+    fi
+
+    php $1/../index.php
+
+	checkRuning $2 'start'
+}
+
+stop () {
+    if [ ! -f $1 ]
+    then
+        echo 'server is not run.'
+        exit
+    fi
+
+    cat $1 | xargs kill -SIGTERM
+
+	checkNotRuning $1 'stop'
+}
+
+reload () {
+    if [ ! -f $1 ]
+    then
+        echo 'server is not run.'
+        exit
+    fi
+
+    cat $1 | xargs kill -SIGUSR1
+
+	checkRuning $1 'reload'
+}
+
+restart () {
+    stop $2
+    start $1 $2
+}
+
+final () {
+    if [ ! -f $1 ]
+    then
+        echo 'server is not run.'
+        exit
+    fi
+
+    cat $1 | xargs kill -9
+
+	checkNotRuning $1 'final'
+}
+
+if [ -z $1 ]
+then
+    echo 'Usage: kovey start|stop|reload|restart|final'
+    echo '  options: docker'
+    exit
+fi
+
+if [ $1 == $pstart ]
+then
+    if [ -z $2 ]
+    then
+        start $runpath $pid
+        exit
+    fi
+
+    if [ $2 == $docker ]
+    then
+        startOnDocker $runpath $pid
+    else
+        start $runpath $pid
+    fi
+    exit
+fi
+
+if [ $1 == $pstop ]
+then
+    stop $pid
+    exit
+fi
+
+if [ $1 == $prestart ]
+then
+    restart $runpath $pid
+    exit
+fi
+
+if [ $1 == $preload ]
+then
+    reload $pid
+    exit
+fi
+
+if [ $1 == $pfinal ]
+then
+    final $pid
+    exit
+fi
+
+echo 'Usage: kovey start|stop|reload|restart|final'
+echo '  options: docker'

@@ -7,16 +7,14 @@
  *
  * @time        2019-11-16 18:14:53
  *
- * @file  /Users/kovey/Documents/php/kovey/websocket/Kovey\Rpc/Protocol/Json.php
- *
  * @author      kovey
  */
 namespace Protocol;
 
-use Kovey\Util\Util;
+use Kovey\Library\Util\Util;
 use Google\Protobuf\Internal\Message;
 use Protocol\Packet;
-use Kovey\Components\Exception\CloseConnectionException;
+use Kovey\Library\Exception\CloseConnectionException;
 
 class Protobuf
 {

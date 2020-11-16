@@ -8,8 +8,6 @@
  *
  * @time 2020-05-06 14:43:53
  *
- * @file kovey/bin/template/tcp/Protocol/Packet.php
- *
  */
 namespace Protocol;
 
@@ -27,12 +25,12 @@ class Packet implements ProtocolInterface
         $this->message = $body;
     }
 
-    public function getAction()
+    public function getAction() : string
     {
         return $this->action;
     }
 
-    public function getMessage()
+    public function getMessage() : string
     {
         return $this->message;
     }

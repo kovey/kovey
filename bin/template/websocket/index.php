@@ -7,8 +7,6 @@
  *
  * @time        2019-11-16 22:23:08
  *
- * @file  /Users/kovey/Documents/php/kovey/rpc/main/index.php
- *
  * @author      kovey
  */
 define('APPLICATION_PATH', __DIR__);
@@ -16,9 +14,12 @@ define('APPLICATION_PATH', __DIR__);
 require_once APPLICATION_PATH . '/vendor/autoload.php';
 
 use Kovey\Websocket\App\Bootstrap\Autoload;
-use Kovey\Config\Manager;
+use Kovey\Library\Config\Manager;
 use Kovey\Websocket\App\App;
 use Kovey\Websocket\App\Bootstrap\Bootstrap;
+use Swoole\Coroutine;
+
+Coroutine::set(array('hook_flags' => SWOOLE_HOOK_ALL));
 
 $autoload = new Autoload();
 $autoload->register();

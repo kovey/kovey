@@ -7,16 +7,17 @@
  *
  * @time        2019-11-16 22:42:00
  *
- * @file  /Users/kovey/Documents/php/kovey/rpc/application/Bootstrap.php
- *
  * @author      kovey
  */
-use Kovey\Components\Exception\BusiException;
+use Kovey\Library\Exception\BusiException;
 use Protobuf\Error;
-use Kovey\Config\Manager;
+use Kovey\Library\Config\Manager;
 use Protocol\Protobuf;
-use Kovey\Components\Pool\Redis;
-use Kovey\Components\Pool\Mysql;
+use Kovey\Connection\Pool\Redis;
+use Kovey\Connection\Pool\Mysql;
+use Kovey\Sharding\Mysql as SM;
+use Kovey\Sharding\Redis as SR;
+use Kovey\Sharding\Sharding\GlobalIdentify;
 
 class Bootstrap
 {
@@ -131,5 +132,31 @@ class Bootstrap
                 $app->registerPool(Mysql::getReadName(), new Mysql($pool, $conf), $name);
             }
         }
+    }
+
+    public function __initEvents($app)
+    {
+        $app->getContainer()
+            ->on('Database', function ($poolName) use ($app) {
+                return $app->getPool($poolName)->getConnection();
+            })
+            ->on('Redis', function ($poolName) use ($app) {
+                return $app->getPool($poolName)->getConnection();
+            })
+            ->on('ShardingDatabase', function ($poolName) use ($app) {
+                return new SM(32, function ($shardingKey) use ($app, $poolName) {
+                    return $app->getPool($poolName, $shardingKey);
+                });
+            })
+            ->on('ShardingRedis', function ($poolName) use ($app) {
+                return new SR(32, function ($shardingKey) use ($app, $poolName) {
+                    return $app->getPool($poolName, $shardingKey);
+                });
+            })
+            ->on('GlobalId', function ($dbPool, $redisPool, $table, $field, $primary) use ($app) {
+                $gl = new GlobalIdentify($app->getPool($redisPool)->getConnection(), $app->getPool($dbPool)->getConnection());
+                $gl->setTableInfo($table, $field, $primary);
+                return $gl->getGlobalIdentify();
+            });
     }
 }

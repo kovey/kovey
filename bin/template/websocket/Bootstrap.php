@@ -18,6 +18,7 @@ use Kovey\Connection\Pool\Mysql;
 use Kovey\Sharding\Mysql as SM;
 use Kovey\Sharding\Redis as SR;
 use Kovey\Sharding\Sharding\GlobalIdentify;
+use Kovey\Connection\Pool;
 
 class Bootstrap
 {
@@ -133,28 +134,28 @@ class Bootstrap
             }
         }
     }
-
+    
     public function __initEvents($app)
     {
         $app->getContainer()
-            ->on('Database', function ($poolName) use ($app) {
-                return $app->getPool($poolName)->getConnection();
+            ->on('database', function ($poolName) use ($app) {
+                return new Pool($app->getPool($poolName));
             })
-            ->on('Redis', function ($poolName) use ($app) {
-                return $app->getPool($poolName)->getConnection();
+            ->on('redis', function ($poolName) use ($app) {
+                return new Pool($app->getPool($poolName));
             })
-            ->on('ShardingDatabase', function ($poolName) use ($app) {
+            ->on('shardingDatabase', function ($poolName) use ($app) {
                 return new SM(32, function ($shardingKey) use ($app, $poolName) {
                     return $app->getPool($poolName, $shardingKey);
                 });
             })
-            ->on('ShardingRedis', function ($poolName) use ($app) {
+            ->on('shardingRedis', function ($poolName) use ($app) {
                 return new SR(32, function ($shardingKey) use ($app, $poolName) {
                     return $app->getPool($poolName, $shardingKey);
                 });
             })
-            ->on('GlobalId', function ($dbPool, $redisPool, $table, $field, $primary) use ($app) {
-                $gl = new GlobalIdentify($app->getPool($redisPool)->getConnection(), $app->getPool($dbPool)->getConnection());
+            ->on('globalId', function ($dbPool, $redisPool, $table, $field, $primary) use ($app) {
+                $gl = new GlobalIdentify((new Pool($app->getPool($redisPool)))->getConnection(), (new Pool($app->getPool($dbPool)))->getConnection());
                 $gl->setTableInfo($table, $field, $primary);
                 return $gl->getGlobalIdentify();
             });

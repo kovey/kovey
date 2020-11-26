@@ -19,10 +19,10 @@ use Kovey\Connection\Pool;
 
 class Bootstrap
 {
-	public function __initRequired($app)
-	{
-		$app->registerLocalLibPath(APPLICATION_PATH . '/application');
-	}
+    public function __initRequired($app)
+    {
+        $app->registerLocalLibPath(APPLICATION_PATH . '/application');
+    }
 
     public function __initPool($app)
     {

@@ -17,11 +17,11 @@ use Protobuf\Hello as PH;
 class Hello extends HandlerAbstract
 {
     public function world($message)
-	{
-		$hello = new PH();
-		$hello->setHello('hello');
-		$hello->setType(5);
-		$hello->setWorld('world');
+    {
+        $hello = new PH();
+        $hello->setHello('hello');
+        $hello->setType(5);
+        $hello->setWorld('world');
         return array(
             'action' => 1000,
             'message' => $hello

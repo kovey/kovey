@@ -26,9 +26,9 @@ $autoload->register();
 Manager::init(APPLICATION_PATH . '/conf');
 
 Application::getInstance()
-	->setConfig(Manager::get('server'))
-	->checkConfig()
-	->registerAutoload($autoload)
-	->registerBootstrap(new Bootstrap())
-	->bootstrap()
-	->run();
+    ->setConfig(Manager::get('server'))
+    ->checkConfig()
+    ->registerAutoload($autoload)
+    ->registerBootstrap(new Bootstrap())
+    ->bootstrap()
+    ->run();

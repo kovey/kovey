@@ -14,18 +14,18 @@ width=`expr $columns - $right - 1`
 failWidth=`expr $columns - $failRight - 1`
 
 getPid() {
-	tmpPid=''
-	while read line
-	do
-		str=${line:0:8}
-		if [ $str == $2 ]
-		then
-			tmpPid=${line:9:${#line}}
-			break;
-		fi
-	done < $1/../conf/server.ini
+    tmpPid=''
+    while read line
+    do
+        str=${line:0:8}
+        if [ $str == $2 ]
+        then
+            tmpPid=${line:9:${#line}}
+            break;
+        fi
+    done < $1/../conf/server.ini
 
-	echo $tmpPid
+    echo $tmpPid
 }
 
 pid=`getPid $runpath 'pid_file'`
@@ -35,27 +35,27 @@ succ () {
 }
 
 fail () {
-	printf "%-${failWidth}s %${failRight}s\a\n" "server $1" '[fail]'
+    printf "%-${failWidth}s %${failRight}s\a\n" "server $1" '[fail]'
 }
 
 checkRuning () {
-	sleep 1
-	if [ -f $1 ]
-	then
-		succ $2
-	else
-		fail $2
-	fi
+    sleep 1
+    if [ -f $1 ]
+    then
+        succ $2
+    else
+        fail $2
+    fi
 }
 
 checkNotRuning () {
-	sleep 1
-	if [ ! -f $1 ]
-	then
-		succ $2
-	else
-		fail $2
-	fi
+    sleep 1
+    if [ ! -f $1 ]
+    then
+        succ $2
+    else
+        fail $2
+    fi
 }
 
 start () {
@@ -67,7 +67,7 @@ start () {
 
     php $1/../index.php
 
-	checkRuning $2 'start'
+    checkRuning $2 'start'
 }
 
 startOnDocker () {
@@ -78,7 +78,7 @@ startOnDocker () {
 
     php $1/../index.php
 
-	checkRuning $2 'start'
+    checkRuning $2 'start'
 }
 
 stop () {
@@ -90,7 +90,7 @@ stop () {
 
     cat $1 | xargs kill -SIGTERM
 
-	checkNotRuning $1 'stop'
+    checkNotRuning $1 'stop'
 }
 
 reload () {
@@ -102,7 +102,7 @@ reload () {
 
     cat $1 | xargs kill -SIGUSR1
 
-	checkRuning $1 'reload'
+    checkRuning $1 'reload'
 }
 
 restart () {
@@ -119,7 +119,7 @@ final () {
 
     cat $1 | xargs kill -9
 
-	checkNotRuning $1 'final'
+    checkNotRuning $1 'final'
 }
 
 if [ -z $1 ]

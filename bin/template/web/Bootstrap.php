@@ -19,10 +19,10 @@ use Kovey\Connection\Pool;
 
 class Bootstrap
 {
-	public function __initLayout($app)
-	{
-		$app->registerPlugin('Layout');
-	}
+    public function __initLayout($app)
+    {
+        $app->registerPlugin('Layout');
+    }
 
     public function __initPool($app)
     {

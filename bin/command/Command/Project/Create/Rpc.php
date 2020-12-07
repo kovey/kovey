@@ -103,13 +103,14 @@ class Rpc
         $core = str_replace(array(
             '{log_file}',
             '{pid_file}',
-               '{name}',    
+            '{name}',    
             '{info}', 
             '{exception}', 
             '{error}', 
             '{warning}', 
             '{db}',
             '{monitor}',
+            '{busi_exception}',
             '{rpc-name}'
         ), array(
             $this->logdir . '/server/server.log',
@@ -121,6 +122,7 @@ class Rpc
             $this->logdir . '/warning',
             $this->logdir . '/db',
             $this->logdir . '/monitor',
+            $this->logdir . '/busi-exception',
             $this->name
         ), $core);
         file_put_contents($this->root . '/conf/server.ini', $core);

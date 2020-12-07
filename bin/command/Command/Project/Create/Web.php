@@ -120,6 +120,7 @@ class Web
             '{session_dir}',
             '{db}',
             '{monitor}',
+            '{busi_exception}',
             '{project}',
             '{log_file}'
         ), array(
@@ -131,6 +132,7 @@ class Web
             $this->logdir . '/session',
             $this->logdir . '/db',
             $this->logdir . '/monitor',
+            $this->logdir . '/busi-exception',
             $this->name,
             $this->logdir . '/server/server.log'
         ), $core);

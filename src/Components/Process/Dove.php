@@ -8,8 +8,6 @@
  *
  * @time 2020-04-20 18:51:37
  *
- * @file gateway/vendor/Kovey/Components/Process/Dove.php
- *
  */
 namespace Kovey\Components\Process;
 
@@ -28,11 +26,11 @@ class Dove extends ProcessAbstract
 
     private $confPath;
 
-	/**
-	 * @description 初始化
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 初始化
+     *
+     * @return null
+     */
     protected function init()
     {
         $this->processName = 'kovey framework dove';
@@ -48,33 +46,33 @@ class Dove extends ProcessAbstract
         }
     }
 
-	/**
-	 * @description 业务处理
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 业务处理
+     *
+     * @return null
+     */
     protected function busi()
     {
-		$this->listen(function ($pipe) {});
+        $this->listen(function ($pipe) {});
 
-		Timer::tick(30000, function () {
+        Timer::tick(30000, function () {
             $this->getConfigFromCenter();
-		});
+        });
 
         $this->getConfigFromCenter();
     }
 
-	/**
-	 * @description 从配置中心拉取配置
-	 *
-	 * @return null
-	 */
-	protected function getConfigFromCenter()
-	{
+    /**
+     * @description 从配置中心拉取配置
+     *
+     * @return null
+     */
+    protected function getConfigFromCenter()
+    {
         foreach ($this->confTemplates as $file => $template) {
             $this->parseConfig($file, $template);
         }
-	}
+    }
 
     /**
      * @description 配置解析，写入配置文件
@@ -85,42 +83,42 @@ class Dove extends ProcessAbstract
      */
     protected function parseConfig($file, $filePath)
     {
-		go(function ($file, $filePath) {
+        go(function ($file, $filePath) {
             $template = System::readFile($filePath);
             preg_match_all('/#{(.*)}/', $template, $matches);
             if (count($matches) != 2) {
                 return;
             }
 
-			$cli = new Client(Manager::get('dove.config'));
-			if (!$cli->connect()) {
-				Logger::writeWarningLog(__LINE__, __FILE__, $cli->getError());
-				return;
-			}
+            $cli = new Client(Manager::get('dove.config'));
+            if (!$cli->connect()) {
+                Logger::writeWarningLog(__LINE__, __FILE__, $cli->getError());
+                return;
+            }
 
-			if (!$cli->send(array(
-				'p' => 'Config',
-				'm' => 'get',
+            if (!$cli->send(array(
+                'p' => 'Config',
+                'm' => 'get',
                 'a' => array($matches[1])
             ))) {
-				$cli->close();
-				Logger::writeWarningLog(__LINE__, __FILE__, $cli->getError());
-				return;
-			}
+                $cli->close();
+                Logger::writeWarningLog(__LINE__, __FILE__, $cli->getError());
+                return;
+            }
 
-			$result = $cli->recv();
-			$cli->close();
+            $result = $cli->recv();
+            $cli->close();
 
-			if (empty($result)) {
-				Logger::writeWarningLog(__LINE__, __FILE__, 'response error');
-				return;
-			}
+            if (empty($result)) {
+                Logger::writeWarningLog(__LINE__, __FILE__, 'response error');
+                return;
+            }
 
-			if ($result['code'] > 0) {
-				if ($result['type'] != 'success') {
-					Logger::writeWarningLog(__LINE__, __FILE__, $result['err']);
-				}
-			}
+            if ($result['code'] > 0) {
+                if ($result['type'] != 'success') {
+                    Logger::writeWarningLog(__LINE__, __FILE__, $result['err']);
+                }
+            }
 
             if (empty($result['result'])) {
                 return;
@@ -131,6 +129,6 @@ class Dove extends ProcessAbstract
             }
 
             System::writeFile($this->confPath . '/' . $file, $template);
-		}, $file, $filePath);
+        }, $file, $filePath);
     }
 }

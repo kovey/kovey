@@ -7,8 +7,6 @@
  *
  * @time        2019-11-16 22:23:08
  *
- * @file  /Users/kovey/Documents/php/kovey/rpc/main/index.php
- *
  * @author      kovey
  */
 define('APPLICATION_PATH', __DIR__);
@@ -25,9 +23,9 @@ $autoload->register();
 Manager::init(APPLICATION_PATH . '/conf');
 
 App::getInstance()
-	->setConfig(Manager::get('server'))
-	->checkConfig()
-	->registerAutoload($autoload)
-	->registerBootstrap(new Bootstrap())
-	->bootstrap()
-	->run();
+    ->setConfig(Manager::get('server'))
+    ->checkConfig()
+    ->registerAutoload($autoload)
+    ->registerBootstrap(new Bootstrap())
+    ->bootstrap()
+    ->run();

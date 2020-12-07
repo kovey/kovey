@@ -29,7 +29,7 @@ $size = intval($opt['s'] ?? 43);
 $path = $opt['p'] ?? __DIR__;
 
 if (!is_dir($path)) {
-	mkdir($path, 0777, true);
+    mkdir($path, 0777, true);
 }
 
 if ($opt['t'] == 'rsa') {

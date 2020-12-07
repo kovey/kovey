@@ -7,8 +7,6 @@
  *
  * @time        Tue Sep 24 09:09:54 2019
  *
- * @class       vendor/Kovey/Components/Remote/Curl.php
- *
  * @author      kovey
  */
 namespace Kovey\Remote;
@@ -19,54 +17,54 @@ use Kovey\Components\Result\Success;
 
 class Curl
 {
-	/**
-	 * @description curl资源
-	 *
-	 * @var Resource
-	 */
+    /**
+     * @description curl资源
+     *
+     * @var Resource
+     */
     private $ch;
 
-	/**
-	 * @description agent
-	 *
-	 * @var string
-	 */
+    /**
+     * @description agent
+     *
+     * @var string
+     */
     private $userAgent;
 
-	/**
-	 * @description content-type
-	 *
-	 * @var string
-	 */
+    /**
+     * @description content-type
+     *
+     * @var string
+     */
     private $contentType;
 
-	/**
-	 * @description 头信息
-	 *
-	 * @var Array
-	 */
-	private $headers;
+    /**
+     * @description 头信息
+     *
+     * @var Array
+     */
+    private $headers;
 
-	/**
-	 * @description 构造函数
-	 */
+    /**
+     * @description 构造函数
+     */
     public function __construct()
     {
         $this->ch = curl_init();
         $this->userAgent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:53.0) Gecko/20100101 Firefox/53.0';
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 5);
-		$this->headers = array();
+        $this->headers = array();
     }
 
-	/**
-	 * @description 发起post请求
-	 *
-	 * @param string $url
-	 *
-	 * @param mixed $params
-	 *
-	 * @return mixed
-	 */
+    /**
+     * @description 发起post请求
+     *
+     * @param string $url
+     *
+     * @param mixed $params
+     *
+     * @return mixed
+     */
     public function post($url, $params)
     {
         curl_setopt($this->ch, CURLOPT_URL, $url);
@@ -78,15 +76,15 @@ class Curl
         return $this->run($url, $params);
     }
 
-	/**
-	 * @description 发起GET请求
-	 *
-	 * @param string $url
-	 *
-	 * @param mixed $params
-	 *
-	 * @return mixed
-	 */
+    /**
+     * @description 发起GET请求
+     *
+     * @param string $url
+     *
+     * @param mixed $params
+     *
+     * @return mixed
+     */
     public function get($url, $params = false)
     {
         if ($params !== false) {
@@ -99,70 +97,70 @@ class Curl
         return $this->run($url, $params);
     }
 
-	/**
-	 * @description 设置content类型
-	 *
-	 * @param string $type
-	 *
-	 * @param string $charset
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 设置content类型
+     *
+     * @param string $type
+     *
+     * @param string $charset
+     *
+     * @return null
+     */
     public function setContentType($type, $charset = 'UTF-8')
     {
-		$this->headers[] = 'Content-Type:' . $type . ';charset=' . $charset;
+        $this->headers[] = 'Content-Type:' . $type . ';charset=' . $charset;
     }
 
-	/**
-	 * @description 添加HEANDER
-	 *
-	 * @param string $key
-	 *
-	 * @param string $val
-	 */
-	public function addHeader($key, $val)
-	{
-		$this->headers[] = $key . ':' . $val;
-	}
+    /**
+     * @description 添加HEANDER
+     *
+     * @param string $key
+     *
+     * @param string $val
+     */
+    public function addHeader($key, $val)
+    {
+        $this->headers[] = $key . ':' . $val;
+    }
 
-	/**
-	 * @description 设置referer
-	 *
-	 * @param string $referer
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 设置referer
+     *
+     * @param string $referer
+     *
+     * @return null
+     */
     public function setReferer($referer)
     {
         curl_setopt($this->ch, CURLOPT_REFERER, $referer);
     }
 
-	/**
-	 * @description 设置请求方式
-	 *
-	 * @param mixed $contentType
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 设置请求方式
+     *
+     * @param mixed $contentType
+     *
+     * @return null
+     */
     public function setReqContentType($contentType)
     {
         $this->contentType = $contentType;
     }
 
-	/**
-	 * @description 执行
-	 *
-	 * @param string $url
-	 *
-	 * @param mixed $param
-	 *
-	 * @return Array
-	 */
+    /**
+     * @description 执行
+     *
+     * @param string $url
+     *
+     * @param mixed $param
+     *
+     * @return Array
+     */
     private function run($url, $params)
     {
-		if (count($this->headers) > 0) {
-			curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->headers);
-		}
+        if (count($this->headers) > 0) {
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->headers);
+        }
 
         $result = curl_exec($this->ch);
         if ($result === false || curl_errno($this->ch) != 0) {
@@ -176,19 +174,19 @@ class Curl
         return Success::getArray($result);
     }
 
-	/**
-	 * @description 设置代理
-	 *
-	 * @param string $url
-	 *
-	 * @param int $port
-	 *
-	 * @param mixed $user
-	 *
-	 * @param mixed $pass
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 设置代理
+     *
+     * @param string $url
+     *
+     * @param int $port
+     *
+     * @param mixed $user
+     *
+     * @param mixed $pass
+     *
+     * @return null
+     */
     public function setProxy($url, $port = 80, $user = false, $pass = false)
     {
         curl_setopt($this->ch, CURLOPT_HTTPPROXYTUNNEL, true);
@@ -199,9 +197,9 @@ class Curl
         }
     }
 
-	/**
-	 * @description 释放资源
-	 */
+    /**
+     * @description 释放资源
+     */
     public function __destruct()
     {
         curl_close($this->ch);

@@ -7,8 +7,6 @@
  *
  * @time        2019-11-16 22:42:00
  *
- * @file  /Users/kovey/Documents/php/kovey/rpc/application/Bootstrap.php
- *
  * @author      kovey
  */
 use Kovey\Components\Exception\BusiException;
@@ -20,28 +18,28 @@ use Kovey\Components\Pool\Mysql;
 
 class Bootstrap
 {
-	public function __initRequired($app)
-	{
-		$app->registerLocalLibPath(APPLICATION_PATH . '/application');
-	}
+    public function __initRequired($app)
+    {
+        $app->registerLocalLibPath(APPLICATION_PATH . '/application');
+    }
 
-	public function __initOn($app)
-	{
-		$app->on('protobuf', function ($packet) {
+    public function __initOn($app)
+    {
+        $app->on('protobuf', function ($packet) {
             $messageName = Manager::get('protocol.' . $packet->getAction() . '.class');
-			$class = new $messageName();
-			$class->mergeFromString($packet->getData());
+            $class = new $messageName();
+            $class->mergeFromString($packet->getData());
 
             return array(
                 'handler' => Manager::get('protocol.' . $action . '.handler'),
                 'method' => Manager::get('protocol.' . $action . '.method'),
                 'message' => $class
             );
-		})
-		->on('run_handler', function ($handler, $method, $message, $fd) {
-			try {
-				return $handler->$method($message, $fd);
-			} catch (BusiException $e) {
+        })
+        ->on('run_handler', function ($handler, $method, $message, $fd) {
+            try {
+                return $handler->$method($message, $fd);
+            } catch (BusiException $e) {
                 $error = new Error();
                 $error->setError($e->getMessage())
                     ->setCode($e->getCode());
@@ -49,19 +47,19 @@ class Bootstrap
                     'action' => 500,
                     'message' => $error
                 );
-			}
+            }
         })
-	    ->on('error', function ($msg) {
-			$error = new Error();
+        ->on('error', function ($msg) {
+            $error = new Error();
             $error->setError($msg)
                 ->setCode(500);
             return array(
                 'action' => 500,
                 'message' => $error
             );
-		})
+        })
         ->serverOn('error', function () {
-			$error = new Error();
+            $error = new Error();
             return $error->setError('Internal Error!')
                 ->setCode(500);
         })
@@ -71,7 +69,7 @@ class Bootstrap
         ->serverOn('unpack', function ($data) {
             return Protobuf::unpack($data);
         });
-	}
+    }
 
     public function __initPool($app)
     {

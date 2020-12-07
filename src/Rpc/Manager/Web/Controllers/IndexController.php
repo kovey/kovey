@@ -8,8 +8,6 @@
  *
  * @time 2020-03-24 20:45:23
  *
- * @file kovey/Kovey/Rpc/Manager/Web/Controllers/Index.php
- *
  */
 namespace Kovey\Rpc\Manager\Web\Controllers;
 

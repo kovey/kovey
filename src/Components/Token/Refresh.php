@@ -4,11 +4,9 @@
  *
  * @package
  *
- * @author zhayai
+ * @author kovey
  *
  * @time 2020-02-12 10:49:18
- *
- * @file jg-api/application/library/App/Token/Refresh.php
  *
  */
 namespace Kovey\Components\Token;

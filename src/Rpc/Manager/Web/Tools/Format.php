@@ -8,8 +8,6 @@
  *
  * @time 2020-03-28 11:09:42
  *
- * @file rpc-test/vendor/Kovey/Rpc/Manager/Web/Tools/Format.php
- *
  */
 namespace Kovey\Rpc\Manager\Web\Tools;
 

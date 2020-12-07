@@ -8,8 +8,6 @@
  *
  * @time 2020-03-24 21:25:42
  *
- * @file kovey/Kovey/Rpc/Manager/Web/Controllers/Call.php
- *
  */
 namespace Kovey\Rpc\Manager\Web\Controllers;
 

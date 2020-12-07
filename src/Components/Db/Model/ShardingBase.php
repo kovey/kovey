@@ -20,12 +20,12 @@ use Kovey\Components\Sharding\Database;
 
 abstract class ShardingBase
 {
-	/**
-	 * @description 表名称
-	 *
-	 * @var string
-	 */
-	protected $tableName;
+    /**
+     * @description 表名称
+     *
+     * @var string
+     */
+    protected $tableName;
 
     /**
      * @description 分库数量
@@ -35,162 +35,162 @@ abstract class ShardingBase
      */
     protected $databaseCount = 1;
 
-	/**
-	 * @description 插入数据
-	 *
-	 * @param Array $data
-	 *
-	 * @param DbInterface $db
+    /**
+     * @description 插入数据
+     *
+     * @param Array $data
+     *
+     * @param DbInterface $db
      *
      * @param mixed $shardingKey
-	 *
-	 * @return int
-	 *
-	 * @throws Exception
-	 */
-	public function insert(Array $data, DbInterface $db, $shardingKey)
-	{
+     *
+     * @return int
+     *
+     * @throws Exception
+     */
+    public function insert(Array $data, DbInterface $db, $shardingKey)
+    {
         $shardingKey = $this->getShardingKey($shardingKey);
-		$insert = new Insert($this->getTableName($shardingKey));
-		foreach ($data as $key => $val) {
-			$insert->$key = $val;
-		}
+        $insert = new Insert($this->getTableName($shardingKey));
+        foreach ($data as $key => $val) {
+            $insert->$key = $val;
+        }
 
-		return $db->insert($insert);
-	}
+        return $db->insert($insert);
+    }
 
-	/**
-	 * @description 更新数据
-	 *
-	 * @param Array $data
-	 *
-	 * @param Array $condition
-	 *
-	 * @param DbInterface $db
+    /**
+     * @description 更新数据
+     *
+     * @param Array $data
+     *
+     * @param Array $condition
+     *
+     * @param DbInterface $db
      *
      * @param mixed $shardingKey
-	 *
-	 * @return int
-	 *
-	 * @throws Exception
-	 */
-	public function update(Array $data, Array $condition, DbInterface $db, $shardingKey)
-	{
+     *
+     * @return int
+     *
+     * @throws Exception
+     */
+    public function update(Array $data, Array $condition, DbInterface $db, $shardingKey)
+    {
         $shardingKey = $this->getShardingKey($shardingKey);
-		$update = new Update($this->getTableName($shardingKey));
-		foreach ($data as $key => $val) {
-			$update->$key = $val;
-		}
+        $update = new Update($this->getTableName($shardingKey));
+        foreach ($data as $key => $val) {
+            $update->$key = $val;
+        }
 
-		$update->where($condition);
-		return $db->update($update);
-	}
+        $update->where($condition);
+        return $db->update($update);
+    }
 
-	/**
-	 * @description 获取一行数据
-	 *
-	 * @param Array $condition
-	 *
-	 * @param Array $columns
-	 *
-	 * @param DbInterface $db
+    /**
+     * @description 获取一行数据
+     *
+     * @param Array $condition
+     *
+     * @param Array $columns
+     *
+     * @param DbInterface $db
      *
      * @param mixed $shardingKey
-	 *
-	 * @return Array
-	 *
-	 * @throws Exception
-	 */
-	public function fetchRow(Array $condition, Array $columns, DbInterface $db, $shardingKey)
-	{
-		if (empty($columns)) {
-			throw new \Exception('selected columns is not empty.'); 
-		}
+     *
+     * @return Array
+     *
+     * @throws Exception
+     */
+    public function fetchRow(Array $condition, Array $columns, DbInterface $db, $shardingKey)
+    {
+        if (empty($columns)) {
+            throw new \Exception('selected columns is not empty.'); 
+        }
 
         $shardingKey = $this->getShardingKey($shardingKey);
-		return $db->fetchRow($this->getTableName($shardingKey), $condition, $columns);
-	}
+        return $db->fetchRow($this->getTableName($shardingKey), $condition, $columns);
+    }
 
-	/**
-	 * @description 获取所有数据
-	 *
-	 * @param Array $condition
-	 *
-	 * @param Array  $columns
-	 *
-	 * @param DbInterface $db
+    /**
+     * @description 获取所有数据
+     *
+     * @param Array $condition
+     *
+     * @param Array  $columns
+     *
+     * @param DbInterface $db
      *
      * @param mixed $shardingKey
-	 *
-	 * @return Array
-	 *
-	 * @throws Exception
-	 */
-	public function fetchAll(Array $condition, Array $columns, DbInterface $db, $shardingKey)
-	{
-		if (empty($columns)) {
-			throw new \Exception('selected columns is not empty.'); 
-		}
+     *
+     * @return Array
+     *
+     * @throws Exception
+     */
+    public function fetchAll(Array $condition, Array $columns, DbInterface $db, $shardingKey)
+    {
+        if (empty($columns)) {
+            throw new \Exception('selected columns is not empty.'); 
+        }
 
         $shardingKey = $this->getShardingKey($shardingKey);
-		return $db->fetchAll($this->getTableName($shardingKey), $condition, $columns);
-	}
+        return $db->fetchAll($this->getTableName($shardingKey), $condition, $columns);
+    }
 
-	/**
-	 * @description 批量插入
-	 *
-	 * @param Array $rows
-	 *
-	 * @param DbInterface $db
+    /**
+     * @description 批量插入
+     *
+     * @param Array $rows
+     *
+     * @param DbInterface $db
      *
      * @param mixed $shardingKey
-	 *
-	 * @return bool
-	 *
-	 * @throws Exception
-	 */
-	public function batchInsert(Array $rows, DbInterface $db, $shardingKey)
-	{
-		if (empty($rows)) {
-			throw new \Exception('rows can not empty');
-		}
+     *
+     * @return bool
+     *
+     * @throws Exception
+     */
+    public function batchInsert(Array $rows, DbInterface $db, $shardingKey)
+    {
+        if (empty($rows)) {
+            throw new \Exception('rows can not empty');
+        }
 
         $shardingKey = $this->getShardingKey($shardingKey);
-		$batchInsert = new BatchInsert($this->getTableName($shardingKey));
-		foreach ($rows as $row) {
-			$insert = new Insert($this->getTableName($shardingKey));
-			foreach ($row as $key => $val) {
-				$insert->$key = $val;
-			}
+        $batchInsert = new BatchInsert($this->getTableName($shardingKey));
+        foreach ($rows as $row) {
+            $insert = new Insert($this->getTableName($shardingKey));
+            foreach ($row as $key => $val) {
+                $insert->$key = $val;
+            }
 
-			$batchInsert->add($insert);
-		}
+            $batchInsert->add($insert);
+        }
 
-		return $db->batchInsert($batchInsert);
-	}
+        return $db->batchInsert($batchInsert);
+    }
 
-	/**
-	 * @description 删除数据
-	 *
-	 * @param Array $data
-	 *
-	 * @param Array $condition
-	 *
-	 * @param DbInterface $db
+    /**
+     * @description 删除数据
+     *
+     * @param Array $data
+     *
+     * @param Array $condition
+     *
+     * @param DbInterface $db
      *
      * @param mixed $shardingKey
-	 *
-	 * @return int
-	 *
-	 * @throws Exception
-	 */
-	public function delete(Array $condition, DbInterface $db, $shardingKey)
-	{
+     *
+     * @return int
+     *
+     * @throws Exception
+     */
+    public function delete(Array $condition, DbInterface $db, $shardingKey)
+    {
         $shardingKey = $this->getShardingKey($shardingKey);
-		$delete = new Delete($this->getTableName($shardingKey));
-		$delete->where($condition);
-		return $db->delete($delete);
-	}
+        $delete = new Delete($this->getTableName($shardingKey));
+        $delete->where($condition);
+        return $db->delete($delete);
+    }
 
     /**
      * @description 获取表名称

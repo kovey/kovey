@@ -7,8 +7,6 @@
  *
  * @time        Tue Sep 24 09:04:25 2019
  *
- * @class       vendor/Kovey/Components/Db/Sql/Select.php
- *
  * @author      kovey
  */
 namespace Kovey\Components\Db\Sql;
@@ -18,116 +16,116 @@ use Kovey\Util\Util;
 
 class Select implements SqlInterface
 {
-	/**
-	 * @description 单条查询
-	 *
-	 * @var int
-	 */
+    /**
+     * @description 单条查询
+     *
+     * @var int
+     */
     const SINGLE = 1;
 
-	/**
-	 * @description 查询全部
-	 *
-	 * @var int
-	 */
+    /**
+     * @description 查询全部
+     *
+     * @var int
+     */
     const ALL = 2;
 
-	/**
-	 * @description 表名
-	 *
-	 * @var string
-	 */
+    /**
+     * @description 表名
+     *
+     * @var string
+     */
     private $table;
 
-	/**
-	 * @description 查询字段
-	 *
-	 * @var Array
-	 */
+    /**
+     * @description 查询字段
+     *
+     * @var Array
+     */
     private $fields = array();
 
-	/**
-	 * @description SQL格式
-	 *
-	 * @var string
-	 */
+    /**
+     * @description SQL格式
+     *
+     * @var string
+     */
     const SQL_FORMAT = 'SELECT %s FROM %s';
 
-	/**
-	 * @description 内联语法
-	 *
-	 * @var string
-	 */
+    /**
+     * @description 内联语法
+     *
+     * @var string
+     */
     const INNER_JOIN_FORMAT = ' INNER JOIN %s AS %s ON %s ';
 
-	/**
-	 * @description 左联语法
-	 *
-	 * @var string
-	 */
+    /**
+     * @description 左联语法
+     *
+     * @var string
+     */
     const LEFT_JOIN_FORMAT = ' LEFT JOIN %s AS %s ON %s ';
 
-	/**
-	 * @description 右联语法
-	 *
-	 * @var string
-	 */
+    /**
+     * @description 右联语法
+     *
+     * @var string
+     */
     const RIGHT_JOIN_FORMAT = ' RIGHT JOIN %s AS %s ON %s ';
 
-	/**
-	 * @description 字段格式化语法
-	 *
-	 * @var string
-	 */
+    /**
+     * @description 字段格式化语法
+     *
+     * @var string
+     */
     const FIELD_FORMAT = '%s.%s as %s';
 
-	/**
-	 * @description 字段常规模式语法
-	 *
-	 * @var string
-	 */
+    /**
+     * @description 字段常规模式语法
+     *
+     * @var string
+     */
     const FIELD_NORMAL_FORMAT = '%s as %s';
 
-	/**
-	 * @description wher条件
-	 *
-	 * @var Where
-	 */
+    /**
+     * @description wher条件
+     *
+     * @var Where
+     */
     private $where;
 
-	/**
-	 * @description OR Where条件
-	 *
-	 * @var Where
-	 */
+    /**
+     * @description OR Where条件
+     *
+     * @var Where
+     */
     private $orWhere;
 
-	/**
-	 * @description join数据
-	 *
-	 * @var Array
-	 */
+    /**
+     * @description join数据
+     *
+     * @var Array
+     */
     private $joins = array();
 
-	/**
-	 * @description limit
-	 *
-	 * @var string
-	 */
+    /**
+     * @description limit
+     *
+     * @var string
+     */
     private $limit;
 
-	/**
-	 * @description 排序
-	 *
-	 * @var string
-	 */
+    /**
+     * @description 排序
+     *
+     * @var string
+     */
     private $order;
 
-	/**
-	 * @description 分组
-	 *
-	 * @var string
-	 */
+    /**
+     * @description 分组
+     *
+     * @var string
+     */
     private $group;
 
     /**
@@ -137,20 +135,20 @@ class Select implements SqlInterface
      */
     private $having;
 
-	/**
-	 * @description 表别名
-	 *
-	 * @var string
-	 */
+    /**
+     * @description 表别名
+     *
+     * @var string
+     */
     private $tableAs;
 
-	/**
-	 * @description 构造函数
-	 *
-	 * @param string $table
-	 *
-	 * @param string | bool $as
-	 */
+    /**
+     * @description 构造函数
+     *
+     * @param string $table
+     *
+     * @param string | bool $as
+     */
     public function __construct($table, $as = false)
     {
         if (empty($as)) {
@@ -158,51 +156,51 @@ class Select implements SqlInterface
         } else {
             $this->tableAs = $as;
         }
-		$info = explode('.', $table);
-		array_walk($info, function (&$row) {
-			$row = $this->format($row);
-		});
+        $info = explode('.', $table);
+        array_walk($info, function (&$row) {
+            $row = $this->format($row);
+        });
 
-		$this->table = implode('.', $info);
+        $this->table = implode('.', $info);
     }
 
-	/**
-	 * @description 格式化字段
-	 *
-	 * @param string $name
-	 *
-	 * @return string
-	 */
-	private function format($name)
-	{
-		$info = explode('.', $name);
-		$len = count($info);
+    /**
+     * @description 格式化字段
+     *
+     * @param string $name
+     *
+     * @return string
+     */
+    private function format($name)
+    {
+        $info = explode('.', $name);
+        $len = count($info);
 
-		if ($len > 1) {
-			$info[$len - 1] = sprintf('`%s`', $info[$len - 1]);
-			return implode('.', $info);
-		}
+        if ($len > 1) {
+            $info[$len - 1] = sprintf('`%s`', $info[$len - 1]);
+            return implode('.', $info);
+        }
 
-		$info = explode(' ', $name);
-		$len = count($info);
+        $info = explode(' ', $name);
+        $len = count($info);
 
-		if ($len > 1) {
-			$info[$len - 1] = sprintf('`%s`', $info[$len - 1]);
-			return implode(' ', $info);
-		}
+        if ($len > 1) {
+            $info[$len - 1] = sprintf('`%s`', $info[$len - 1]);
+            return implode(' ', $info);
+        }
 
-		return sprintf('`%s`', $name);
-	}
+        return sprintf('`%s`', $name);
+    }
 
-	/**
-	 * @description 查询列
-	 *
-	 * @param Array $columns
-	 *
-	 * @param string | bool $tableName
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description 查询列
+     *
+     * @param Array $columns
+     *
+     * @param string | bool $tableName
+     *
+     * @return Select
+     */
     public function columns(Array $columns, $tableName = false)
     {
         $finalTable = $this->table;
@@ -220,13 +218,13 @@ class Select implements SqlInterface
             }
 
             if (preg_match('/\(/', $val)) {
-				$info = explode('(', $val);
-				if (strtoupper(trim($info[0])) == 'COUNT') {
-					$this->fields[] = sprintf(self::FIELD_NORMAL_FORMAT, $val, $key);
-					continue;
-				}
+                $info = explode('(', $val);
+                if (strtoupper(trim($info[0])) == 'COUNT') {
+                    $this->fields[] = sprintf(self::FIELD_NORMAL_FORMAT, $val, $key);
+                    continue;
+                }
 
-				$val = str_replace(array('(', ')'), array('(' . $finalTable . '.`', '`)'), $val);
+                $val = str_replace(array('(', ')'), array('(' . $finalTable . '.`', '`)'), $val);
                 $this->fields[] = sprintf(self::FIELD_NORMAL_FORMAT, $val, $key);
                 continue;
             }
@@ -237,22 +235,22 @@ class Select implements SqlInterface
         return $this;
     }
 
-	/**
-	 * @description 关联
-	 *
-	 * @param Array $tableInfo
-	 *
-	 * @param string $on
-	 *
-	 * @param Array $fields
-	 *
-	 * @param int $type
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description 关联
+     *
+     * @param Array $tableInfo
+     *
+     * @param string $on
+     *
+     * @param Array $fields
+     *
+     * @param int $type
+     *
+     * @return Select
+     */
     private function join(Array $tableInfo, $on, Array $fileds, $type)
     {
-		$on = $this->formatOn($on);
+        $on = $this->formatOn($on);
 
         $as = '';
         $table = '';
@@ -273,140 +271,140 @@ class Select implements SqlInterface
         return $this;
     }
 
-	/**
-	 * @description 内联
-	 *
-	 * @param Array $tableInfo
-	 *
-	 * @param string $on
-	 *
-	 * @param Array $fileds
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description 内联
+     *
+     * @param Array $tableInfo
+     *
+     * @param string $on
+     *
+     * @param Array $fileds
+     *
+     * @return Select
+     */
     public function innerJoin(Array $tableInfo, $on, Array $fileds = array())
     {
         return $this->join($tableInfo, $on, $fileds, self::INNER_JOIN_FORMAT);
     }
 
-	/**
-	 * @description 左联
-	 *
-	 * @param Array $tableInfo
-	 *
-	 * @param string $on
-	 *
-	 * @param Array $fileds
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description 左联
+     *
+     * @param Array $tableInfo
+     *
+     * @param string $on
+     *
+     * @param Array $fileds
+     *
+     * @return Select
+     */
     public function leftJoin(Array $tableInfo, $on, Array $fileds = array())
     {
         return $this->join($tableInfo, $on, $fileds, self::LEFT_JOIN_FORMAT);
     }
 
-	/**
-	 * @description 右联
-	 *
-	 * @param Array $tableInfo
-	 *
-	 * @param string $on
-	 *
-	 * @param Array $fileds
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description 右联
+     *
+     * @param Array $tableInfo
+     *
+     * @param string $on
+     *
+     * @param Array $fileds
+     *
+     * @return Select
+     */
     public function rightJoin(Array $tableInfo, $on, Array $fileds = array())
     {
         return $this->join($tableInfo, $on, $fileds, self::RIGHT_JOIN_FORMAT);
     }
 
-	/**
-	 * @description 查询条件
-	 *
-	 * @param Where | Array $where
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description 查询条件
+     *
+     * @param Where | Array $where
+     *
+     * @return Select
+     */
     public function where($where)
-	{
-		if ($where instanceof Where) {
-        	$this->where = $where;
-		} else if (is_array($where)) {
-			$this->where = new Where();
-			foreach ($where as $key => $val) {
-				if (is_numeric($key)) {
-					$this->where->statement($val);
-					continue;
-				}
+    {
+        if ($where instanceof Where) {
+            $this->where = $where;
+        } else if (is_array($where)) {
+            $this->where = new Where();
+            foreach ($where as $key => $val) {
+                if (is_numeric($key)) {
+                    $this->where->statement($val);
+                    continue;
+                }
 
                 if (is_array($val)) {
                     $this->where->in($key, $val);
                     continue;
                 }
 
-				$this->where->eq($key, $val);
-			}
-		} else {
-			$this->where = new Where();
-			$this->where->statement($where);
-		}
+                $this->where->eq($key, $val);
+            }
+        } else {
+            $this->where = new Where();
+            $this->where->statement($where);
+        }
 
-		return $this;
+        return $this;
     }
 
-	/**
-	 * @description 或条件
-	 *
-	 * @param Where
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description 或条件
+     *
+     * @param Where
+     *
+     * @return Select
+     */
     public function orWhere(Where $where)
     {
         $this->orWhere = $where;
         return $this;
     }
 
-	/**
-	 * @description Having过滤条件
-	 *
-	 * @param Having | Array $having | string
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description Having过滤条件
+     *
+     * @param Having | Array $having | string
+     *
+     * @return Select
+     */
     public function having($having)
-	{
-		if ($having instanceof Having) {
-        	$this->having = $having;
-		} else if (is_array($having)) {
-			$this->having = new Having();
-			foreach ($having as $key => $val) {
-				if (is_numeric($key)) {
-					$this->having->statement($val);
-					continue;
-				}
+    {
+        if ($having instanceof Having) {
+            $this->having = $having;
+        } else if (is_array($having)) {
+            $this->having = new Having();
+            foreach ($having as $key => $val) {
+                if (is_numeric($key)) {
+                    $this->having->statement($val);
+                    continue;
+                }
 
                 if (is_array($val)) {
                     $this->having->in($key, $val);
                     continue;
                 }
 
-				$this->having->eq($key, $val);
-			}
-		} else {
-			$this->having = new Having();
-			$this->having->statement($having);
-		}
+                $this->having->eq($key, $val);
+            }
+        } else {
+            $this->having = new Having();
+            $this->having->statement($having);
+        }
 
-		return $this;
+        return $this;
     }
 
-	/**
-	 * @description 处理表的别名
-	 *
-	 * @return string
-	 */
+    /**
+     * @description 处理表的别名
+     *
+     * @return string
+     */
     private function processAsTable()
     {
         if ($this->tableAs === false) {
@@ -420,11 +418,11 @@ class Select implements SqlInterface
         return sprintf('%s AS %s', $this->table, $this->tableAs);
     }
 
-	/**
-	 * @description 准备语句
-	 *
-	 * @return string
-	 */
+    /**
+     * @description 准备语句
+     *
+     * @return string
+     */
     public function getPrepareSql()
     {
         $finalTable = $this->processAsTable();
@@ -467,11 +465,11 @@ class Select implements SqlInterface
         return $sql;
     }
 
-	/**
-	 * @description 准备查询条件
-	 *
-	 * @return string
-	 */
+    /**
+     * @description 准备查询条件
+     *
+     * @return string
+     */
     private function getPrepareWhere()
     {
         $sql = null;
@@ -490,11 +488,11 @@ class Select implements SqlInterface
         return $sql;
     }
 
-	/**
-	 * @description 获取绑定数据
-	 *
-	 * @return Array
-	 */
+    /**
+     * @description 获取绑定数据
+     *
+     * @return Array
+     */
     public function getBindData()
     {
         $tmp = array();
@@ -513,130 +511,130 @@ class Select implements SqlInterface
         return $tmp;
     }
 
-	/**
-	 * @description 条数限制
-	 *
-	 * @param int $page
-	 *
-	 * @param int $size
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description 条数限制
+     *
+     * @param int $page
+     *
+     * @param int $size
+     *
+     * @return Select
+     */
     public function limit($page, $size = 0)
-	{
-		if ($size <= 0) {
-			$this->limit = sprintf(' LIMIT %s', $page);
-			return $this;
-		}
+    {
+        if ($size <= 0) {
+            $this->limit = sprintf(' LIMIT %s', $page);
+            return $this;
+        }
 
         $this->limit = sprintf(' LIMIT %s,%s', intval(($page - 1) * $size), intval($size));
         return $this;
     }
 
-	/**
-	 * @description 排序
-	 *
-	 * @param string $order
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description 排序
+     *
+     * @param string $order
+     *
+     * @return Select
+     */
     public function order($order)
     {
-		if (!is_array($order)) {
-			$order = array($order);
-		}
+        if (!is_array($order)) {
+            $order = array($order);
+        }
 
-		array_walk($order, function (&$row) {
-			$tmp = explode(' ', trim($row));
-			$tmp[0] = $this->format($tmp[0]);
-			$row = implode(' ', $tmp);
-		});
+        array_walk($order, function (&$row) {
+            $tmp = explode(' ', trim($row));
+            $tmp[0] = $this->format($tmp[0]);
+            $row = implode(' ', $tmp);
+        });
 
         $this->order = sprintf(' ORDER BY %s', implode(',', $order));
         return $this;
     }
 
-	/**
-	 * @description 分组
-	 *
-	 * @param string | Array $group
-	 *
-	 * @return Select
-	 */
+    /**
+     * @description 分组
+     *
+     * @param string | Array $group
+     *
+     * @return Select
+     */
     public function group($group)
     {
         if (!is_array($group)) {
             $group = array($group);
         }
 
-		array_walk($group, function (&$row) {
-			$row = $this->format($row);
-		});
+        array_walk($group, function (&$row) {
+            $row = $this->format($row);
+        });
 
         $this->group = sprintf(' GROUP BY %s', implode(',', $group));
         return $this;
     }
 
-	/**
-	 * @description 格式化ON条件
-	 *
-	 * @param string $on
-	 *
-	 * @return string
-	 */
-	private function formatOn($on)
-	{
-		$info = explode(' ', $on);
-		array_walk($info, function (&$row) {
-			if (empty(trim($row))) {
-				return;
-			}
+    /**
+     * @description 格式化ON条件
+     *
+     * @param string $on
+     *
+     * @return string
+     */
+    private function formatOn($on)
+    {
+        $info = explode(' ', $on);
+        array_walk($info, function (&$row) {
+            if (empty(trim($row))) {
+                return;
+            }
 
-			if (in_array(strtoupper(trim($row)), array('AND', 'OR'))) {
-				return;
-			}
+            if (in_array(strtoupper(trim($row)), array('AND', 'OR'))) {
+                return;
+            }
 
-			$tmp = explode('=', $row);
-			if (count($tmp) != 2) {
-				return;
-			}
+            $tmp = explode('=', $row);
+            if (count($tmp) != 2) {
+                return;
+            }
 
-			array_walk($tmp, function (&$r) {
-				$tt = explode('.', trim($r));
-				$len = count($tt);
-				if ($len < 2) {
-					return;
-				}
+            array_walk($tmp, function (&$r) {
+                $tt = explode('.', trim($r));
+                $len = count($tt);
+                if ($len < 2) {
+                    return;
+                }
 
-				$tt[$len - 1] = sprintf('`%s`', $tt[$len - 1]);
+                $tt[$len - 1] = sprintf('`%s`', $tt[$len - 1]);
 
-				$r = implode('.', $tt);
-			});
+                $r = implode('.', $tt);
+            });
 
-			$row = implode('=', $tmp);
-		});
+            $row = implode('=', $tmp);
+        });
 
-		return implode(' ', $info);
-	}
+        return implode(' ', $info);
+    }
 
-	/**
-	 * @description 格式化SQL语句
-	 *
-	 * @return string
-	 */
-	public function toString()
-	{
-		$sql = $this->getPrepareSql();
-		$data = $this->getBindData();
+    /**
+     * @description 格式化SQL语句
+     *
+     * @return string
+     */
+    public function toString()
+    {
+        $sql = $this->getPrepareSql();
+        $data = $this->getBindData();
 
-		if (count($data) < 1) {
-			return $sql;
-		}
+        if (count($data) < 1) {
+            return $sql;
+        }
 
-		foreach ($data as $needle) {
-			$sql = substr_replace($sql, '\'' . $needle . '\'', strpos($sql, '?'), 1);
-		}
+        foreach ($data as $needle) {
+            $sql = substr_replace($sql, '\'' . $needle . '\'', strpos($sql, '?'), 1);
+        }
 
-		return $sql;
-	}
+        return $sql;
+    }
 }

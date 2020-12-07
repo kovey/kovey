@@ -7,8 +7,6 @@
  *
  * @time        2019-10-18 09:15:37
  *
- * @file  vendor/Kovey/Components/Parse/ContainerInterface.php
- *
  * @author      kovey
  */
 
@@ -16,14 +14,14 @@ namespace Kovey\Components\Parse;
 
 interface ContainerInterface
 {
-	/**
-	 * @description 获取实例
-	 *
-	 * @param string $class
-	 *
-	 * @param ...mixed $args
-	 *
-	 * @return mixed
-	 */
+    /**
+     * @description 获取实例
+     *
+     * @param string $class
+     *
+     * @param ...mixed $args
+     *
+     * @return mixed
+     */
     public function get(string $class, ...$args);
 }

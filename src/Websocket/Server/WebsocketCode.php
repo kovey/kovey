@@ -8,8 +8,6 @@
  *
  * @time 2020-03-18 20:08:13
  *
- * @file kovey/Kovey/Websocket/Server/WebsocketCode.php
- *
  */
 namespace Kovey\Websocket\Server;
 

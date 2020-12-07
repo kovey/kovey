@@ -7,8 +7,6 @@
  *
  * @time        2020-01-18 17:56:17
  *
- * @file  /Users/kovey/Documents/php/kovey/Kovey/Components/Logger/Db.php
- *
  * @author      kovey
  */
 namespace Kovey\Components\Logger;
@@ -17,42 +15,47 @@ use Swoole\Coroutine\System;
 
 class Db
 {
-	/**
-	 * @description 日志mulu
-	 *
-	 * @var string
-	 */
-	private static $logDir;
+    /**
+     * @description 日志mulu
+     *
+     * @var string
+     */
+    private static $logDir;
 
-	/**
-	 * @description 设置日志目录
-	 *
-	 * @param string $logDir
-	 */
-	public static function setLogDir($logDir)
-	{
-		self::$logDir = $logDir;
-		if (!is_dir($logDir)) {
-			mkdir($logDir, 0777, true);
-		}
-	}
+    /**
+     * @description 设置日志目录
+     *
+     * @param string $logDir
+     */
+    public static function setLogDir($logDir)
+    {
+        self::$logDir = $logDir;
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0777, true);
+        }
+    }
 
-	/**
-	 * @description 写入日志
-	 *
-	 * @param string $sql
-	 *
-	 * @param float $spentTime
-	 */
-	public static function write($sql, $spentTime)
-	{
-		$spentTime = round($spentTime * 1000, 2) . 'ms';
-
-		$content = sprintf("Time: %s\nSql: %s\nSpent Time: %s\n", date('Y-m-d H:i:s'), $sql, $spentTime);
-		System::writeFile(
-			self::$logDir . '/' . date('Y-m-d') . '.log',
-			$content,
-			FILE_APPEND
-		);
-	}
+    /**
+     * @description 写入日志
+     *
+     * @param string $sql
+     *
+     * @param float $spentTime
+     */
+    public static function write($sql, $spentTime)
+    {
+        go (function (string $sql, float $spentTime) {
+            $spentTime = round($spentTime * 1000, 2) . 'ms';
+            $content = array(
+                'time' => date('Y-m-d H:i:s'),
+                'sql' => $sql,
+                'delay'  => $spentTime
+            );
+            System::writeFile(
+                self::$logDir . '/' . date('Y-m-d') . '.log',
+                json_encode($content, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL,
+                FILE_APPEND
+            );
+        }, $sql, $spentTime);
+    }
 }

@@ -7,8 +7,6 @@
  *
  * @time        2019-10-13 01:19:20
  *
- * @file  /Users/kovey/Documents/php/kovey/vendor/Kovey\Web/Components/Process/ClearSession.php
- *
  * @author      kovey
  */
 namespace Kovey\Web\Process;
@@ -20,46 +18,46 @@ use Swoole\Timer;
 
 class ClearSession extends ProcessAbstract
 {
-	/**
-	 * @description 初始化
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 初始化
+     *
+     * @return null
+     */
     protected function init()
     {
         $this->processName = Manager::get('app.process.name') . ' core clear session';
     }
 
-	/**
-	 * @description 业务处理
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 业务处理
+     *
+     * @return null
+     */
     protected function busi()
     {
         $this->listen(function ($pipe) {
             $result = $this->read();
-		});
+        });
 
-		Timer::tick(Manager::get('server.sleep.session') * 1000, function () {
-			$sessionPath = Manager::get('server.session.dir');
-			foreach (scandir($sessionPath) as $path) {
-				if ($path == '.' || $path == '..') {
-					continue;
-				}
+        Timer::tick(Manager::get('server.sleep.session') * 1000, function () {
+            $sessionPath = Manager::get('server.session.dir');
+            foreach (scandir($sessionPath) as $path) {
+                if ($path == '.' || $path == '..') {
+                    continue;
+                }
 
-				$file = $sessionPath . '/' . $path;
-				clearstatcache(true, $file);
+                $file = $sessionPath . '/' . $path;
+                clearstatcache(true, $file);
 
-				$time = filemtime($file) + intval(Manager::get('server.session.expire'));
-				if ($time > time()) {
-					continue;
-				}
+                $time = filemtime($file) + intval(Manager::get('server.session.expire'));
+                if ($time > time()) {
+                    continue;
+                }
 
-				unlink($sessionPath . '/' . $path);
-			}
+                unlink($sessionPath . '/' . $path);
+            }
 
-			Logger::writeInfoLog(__LINE__, __FILE__, 'clear session expired');
-		});
+            Logger::writeInfoLog(__LINE__, __FILE__, 'clear session expired');
+        });
     }
 }

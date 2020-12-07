@@ -7,8 +7,6 @@
  *
  * @time        2019-11-16 18:14:53
  *
- * @file  /Users/kovey/Documents/php/kovey/websocket/Kovey\Rpc/Protocol/Json.php
- *
  * @author      kovey
  */
 namespace Protocol;
@@ -20,34 +18,34 @@ use Kovey\Components\Exception\CloseConnectionException;
 
 class Protobuf
 {
-	/**
-	 * @description 打包
-	 *
-	 * @param Protobuf $packet
+    /**
+     * @description 打包
+     *
+     * @param Protobuf $packet
      *
      * @param int $action
-	 *
-	 * @return string
-	 */
-	public static function pack(Message $packet, int $action)
-	{
+     *
+     * @return string
+     */
+    public static function pack(Message $packet, int $action)
+    {
         $body = $packet->serializeToString();
         $header = pack('N', $action) . pack('N', strlen($body));
 
         return $header . $body;
-	}
+    }
 
-	/**
-	 * @description 解包
-	 *
-	 * @param string $data
-	 *
-	 * @return ProtocolInterface
-	 *
-	 * @throws Exception
-	 */
-	public static function unpack(string $data)
-	{
+    /**
+     * @description 解包
+     *
+     * @param string $data
+     *
+     * @return ProtocolInterface
+     *
+     * @throws Exception
+     */
+    public static function unpack(string $data)
+    {
         $header = unpack('Na/Nb', substr($data, 0, Packet::HEADER_LENGTH));
         if (empty($header)) {
             throw new CloseConnectionException('unpack packet header error'); 
@@ -59,5 +57,5 @@ class Protobuf
         }
 
         return new Packet($body, $header['a']);
-	}
+    }
 }

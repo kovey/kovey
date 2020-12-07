@@ -8,8 +8,6 @@
  *
  * @time 2020-03-24 21:59:53
  *
- * @file kovey/Kovey/Rpc/Manager/Web/Tools/Rf.php
- *
  */
 namespace Kovey\Rpc\Manager\Web\Tools;
 

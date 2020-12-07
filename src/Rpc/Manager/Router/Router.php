@@ -8,8 +8,6 @@
  *
  * @time 2020-03-24 20:58:19
  *
- * @file kovey/Kovey/Rpc/Manager/Router/Router.php
- *
  */
 namespace Kovey\Rpc\Manager\Router;
 

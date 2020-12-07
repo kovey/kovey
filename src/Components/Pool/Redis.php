@@ -8,8 +8,6 @@
  *
  * @time 2020-05-09 14:45:07
  *
- * @file /Users/zhayai/Documents/php/workspace/kovey/Kovey/Components/Pool/Redis.php
- *
  */
 namespace Kovey\Components\Pool;
 

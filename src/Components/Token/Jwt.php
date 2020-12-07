@@ -4,11 +4,9 @@
  *
  * @package App\Token
  *
- * @author zhayai
+ * @author kovey
  *
  * @time 2020-02-16 10:56:25
- *
- * @file jg-boss-api/application/library/App/Token/Jwt.php
  *
  */
 namespace Kovey\Components\Token;

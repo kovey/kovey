@@ -8,8 +8,6 @@
  *
  * @time 2020-03-21 20:27:42
  *
- * @file kovey/Kovey/Rpc/Server/Port.php
- *
  */
 namespace Kovey\Rpc\Server;
 
@@ -61,32 +59,32 @@ class Port extends Base
         return isset($this->allowEvents[$event]);
     }
 
-	/**
-	 * @description 链接回调
-	 *
-	 * @param Swoole\Server $serv
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 链接回调
+     *
+     * @param Swoole\Server $serv
+     *
+     * @param int $fd
+     *
+     * @return null
+     */
     public function connect($serv, $fd)
     {
     }
 
-	/**
-	 * @description 接收回调
-	 *
-	 * @param Swoole\Server $serv
-	 *
-	 * @param int $fd
-	 *
-	 * @param int $reactor_id
-	 *
-	 * @param mixed $data
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 接收回调
+     *
+     * @param Swoole\Server $serv
+     *
+     * @param int $fd
+     *
+     * @param int $reactor_id
+     *
+     * @param mixed $data
+     *
+     * @return null
+     */
     public function receive($serv, $fd, $reactor_id, $data)
     {
         $proto = null;
@@ -97,6 +95,7 @@ class Port extends Base
                     'err' => 'parse data error',
                     'type' => 'exception',
                     'code' => 1000,
+                    'trace' => '',
                     'packet' => $data
                 ), $fd);
                 $serv->close($fd);
@@ -106,125 +105,136 @@ class Port extends Base
             $proto = new Json($data, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
         }
 
-		if (!$proto->parse()) {
-			$this->send(array(
-				'err' => 'parse data error',
-				'type' => 'exception',
-				'code' => 1000,
-				'packet' => $data
-			), $fd);
+        if (!$proto->parse()) {
+            $this->send(array(
+                'err' => 'parse data error',
+                'type' => 'exception',
+                'code' => 1000,
+                'trace' => '',
+                'packet' => $data
+            ), $fd);
             $serv->close($fd);
-			return;
-		}
+            return;
+        }
 
         $this->handler($proto, $fd);
 
         $serv->close($fd);
     }
 
-	/**
-	 * @description Hander 处理
-	 *
-	 * @param ProtocolInterface $packet
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 */
+    /**
+     * @description Hander 处理
+     *
+     * @param ProtocolInterface $packet
+     *
+     * @param int $fd
+     *
+     * @return null
+     */
     private function handler(ProtocolInterface $packet, $fd)
     {
-		$begin = microtime(true);
-		$reqTime = time();
-		$result = null;
+        $begin = microtime(true);
+        $reqTime = time();
+        $result = null;
 
         try {
-			if (!isset($this->events['handler'])) {
-				$this->send(array(
-					'err' => 'handler events is not register',
-					'type' => 'exception',
-					'code' => 1000,
-					'packet' => $packet->getClear()
-				), $fd);
-				return;
-			}
+            if (!isset($this->events['handler'])) {
+                $this->send(array(
+                    'err' => 'handler events is not register',
+                    'type' => 'exception',
+                    'code' => 1000,
+                    'trace' => '',
+                    'packet' => $packet->getClear()
+                ), $fd);
+                return;
+            }
 
-			$result = call_user_func($this->events['handler'], $packet->getPath(), $packet->getMethod(), $packet->getArgs());
-			if ($result['code'] > 0) {
-				$result['packet'] = $packet->getClear();
-			}
-		} catch (BusiException $e) {
+            $result = call_user_func($this->events['handler'], $packet->getPath(), $packet->getMethod(), $packet->getArgs(), $packet->getTraceId(), $this->getClientIP($fd));
+            if ($result['code'] > 0) {
+                $result['packet'] = $packet->getClear();
+            }
+        } catch (BusiException $e) {
             $result = array(
                 'err' => $e->getMessage(),
                 'type' => 'busi_exception',
                 'code' => $e->getCode(),
+                'trace' => $e->getTraceAsString(),
                 'packet' => $packet->getClear()
             );
+            Logger::writeExceptionLog(__LINE__, __FILE__, $e, $packet->getTraceId());
         } catch (\Throwable $e) {
-            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+            Logger::writeExceptionLog(__LINE__, __FILE__, $e, $packet->getTraceId());
             $result = array(
-                'err' => $e->getMessage() . PHP_EOL . $e->getTraceAsString(),
+                'err' => $e->getMessage(),
                 'type' => 'exception',
                 'code' => 1000,
+                'trace' => $e->getTraceAsString(),
                 'packet' => $packet->getClear()
             );
         }
 
         $this->send($result, $fd);
-		$end = microtime(true);
-		$this->monitor($begin, $end, $packet, $reqTime, $result, $fd);
+        $end = microtime(true);
+        $this->monitor($begin, $end, $packet, $reqTime, $result, $fd);
     }
 
-	/**
-	 * @description 监控
-	 *
-	 * @param float $begin
-	 *
-	 * @param float $end
-	 *
-	 * @param ProtocolInterface $packet
-	 *
-	 * @param int $reqTime
-	 *
-	 * @param Array $result
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 */
-	private function monitor($begin, $end, $packet, $reqTime, $result, $fd)
-	{
-		if (!isset($this->events['monitor'])) {
-			return;
-		}
+    /**
+     * @description 监控
+     *
+     * @param float $begin
+     *
+     * @param float $end
+     *
+     * @param ProtocolInterface $packet
+     *
+     * @param int $reqTime
+     *
+     * @param Array $result
+     *
+     * @param int $fd
+     *
+     * @return null
+     */
+    private function monitor($begin, $end, $packet, $reqTime, $result, $fd)
+    {
+        if (!isset($this->events['monitor'])) {
+            return;
+        }
 
-		try {
-			call_user_func($this->events['monitor'], array(
-				'delay' => round(($end - $begin) * 1000, 2),
-				'type' => $result['type'],
-				'err' => $result['err'],
-				'service' => $this->conf['name'],
-				'class' => $packet->getPath(),
-				'method' => $packet->getMethod(),
-				'args' => $packet->getArgs(),
-				'ip' => $this->serv->getClientInfo($fd)['remote_ip'],
-				'time' => $reqTime,
-				'timestamp' => date('Y-m-d H:i:s', $reqTime),
-				'minute' => date('YmdHi', $reqTime),
-			));
-		} catch (\Throwable $e) {
+        try {
+            call_user_func($this->events['monitor'], array(
+                'delay' => round(($end - $begin) * 1000, 2),
+                'request_time' => $begin * 10000,
+                'type' => $result['type'],
+                'err' => $result['err'],
+                'trace' => $result['trace'],
+                'service' => $this->conf['name'],
+                'class' => $packet->getPath(),
+                'method' => $packet->getMethod(),
+                'args' => $packet->getArgs(),
+                'ip' => $this->getClientIP($fd),
+                'time' => $reqTime,
+                'timestamp' => date('Y-m-d H:i:s', $reqTime),
+                'minute' => date('YmdHi', $reqTime),
+                'response' => $result['result'] ?? null,
+                'traceId'=>  $packet->getTraceId(),
+                'from' => $packet->getFrom(),
+                'end' => $end * 10000
+            ));
+        } catch (\Throwable $e) {
             Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-		}
-	}
+        }
+    }
 
-	/**
-	 * @description 发送数据
-	 *
-	 * @param Array $packet
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 发送数据
+     *
+     * @param Array $packet
+     *
+     * @param int $fd
+     *
+     * @return null
+     */
     private function send(Array $packet, $fd)
     {
         if (!$this->serv->exist($fd)) {
@@ -238,9 +248,9 @@ class Port extends Base
             $data = Json::pack($packet, $this->conf['secret_key'], $this->conf['encrypt_type'] ?? 'aes');
         }
 
-		if (!$data) {
-			return false;
-		}
+        if (!$data) {
+            return false;
+        }
 
         $len = strlen($data);
         if ($len <= self::PACKET_MAX_LENGTH) {
@@ -256,16 +266,22 @@ class Port extends Base
         return true;
     }
 
-	/**
-	 * @description 关闭链接
-	 *
-	 * @param Swoole\Server $serv
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 关闭链接
+     *
+     * @param Swoole\Server $serv
+     *
+     * @param int $fd
+     *
+     * @return null
+     */
     public function close($serv, $fd)
     {
+    }
+
+    public function getClientIP($fd)
+    {
+        $clientInfo = $this->serv->getClientInfo($fd);
+        return $clientInfo['remote_ip'] ?? '';
     }
 }

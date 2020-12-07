@@ -8,8 +8,6 @@
  *
  * @time 2020-03-21 20:09:02
  *
- * @file kovey/Kovey/Components/Server/Base.php
- *
  */
 namespace Kovey\Components\Server;
 

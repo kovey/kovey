@@ -8,8 +8,6 @@
  *
  * @time 2020-03-24 21:11:37
  *
- * @file kovey/Kovey/Rpc/Manager/Mvc/Controller.php
- *
  */
 namespace Kovey\Rpc\Manager\Mvc;
 

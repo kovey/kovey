@@ -7,7 +7,7 @@ message Error {
 }
 
 message Hello {
-	string hello=1;
-	int32 type=2;
-	string world=3;
+    string hello=1;
+    int32 type=2;
+    string world=3;
 }

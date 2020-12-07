@@ -8,8 +8,6 @@
  *
  * @time 2019-11-13 14:43:19
  *
- * @file kovey/Kovey\Tcp/Server/Server.php
- *
  */
 namespace Kovey\Tcp\Server;
 
@@ -21,53 +19,53 @@ use Kovey\Components\Server\PortInterface;
 
 class Server implements PortInterface
 {
-	/**
-	 * @description 服务器
-	 *
-	 * @var Swoole\Server
-	 */
+    /**
+     * @description 服务器
+     *
+     * @var Swoole\Server
+     */
     private $serv;
 
-	/**
-	 * @description 配置
-	 *
-	 * @var Array
-	 */
+    /**
+     * @description 配置
+     *
+     * @var Array
+     */
     private $conf;
 
-	/**
-	 * @description 事件
-	 *
-	 * @var Array
-	 */
-	private $events;
+    /**
+     * @description 事件
+     *
+     * @var Array
+     */
+    private $events;
 
-	/**
-	 * @description 允许的事件
-	 *
-	 * @var Array
-	 */
-	private $allowEvents;
+    /**
+     * @description 允许的事件
+     *
+     * @var Array
+     */
+    private $allowEvents;
 
-	/**
-	 * @description 是否运行在docker中
-	 *
-	 * @var bool
-	 */
-	private $isRunDocker;
+    /**
+     * @description 是否运行在docker中
+     *
+     * @var bool
+     */
+    private $isRunDocker;
 
-	/**
-	 * @description 构造函数
-	 *
-	 * @param Array $conf
-	 *
-	 * @return Server
-	 */
+    /**
+     * @description 构造函数
+     *
+     * @param Array $conf
+     *
+     * @return Server
+     */
     public function __construct(Array $conf)
     {
         $this->conf = $conf;
-		$this->isRunDocker = ($this->conf['run_docker'] ?? 'Off') === 'On';
-		$this->initAllowEvents()
+        $this->isRunDocker = ($this->conf['run_docker'] ?? 'Off') === 'On';
+        $this->initAllowEvents()
             ->initServer()
             ->initCallback()
             ->initLog();
@@ -124,29 +122,29 @@ class Server implements PortInterface
      */
     private function initLog()
     {
-		$logDir = dirname($this->conf['log_file']);
-		if (!is_dir($logDir)) {
-			mkdir($logDir, 0777, true);
-		}
-		$pidDir = dirname($this->conf['pid_file']);
-		if (!is_dir($pidDir)) {
-			mkdir($pidDir, 0777, true);
-		}
+        $logDir = dirname($this->conf['log_file']);
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0777, true);
+        }
+        $pidDir = dirname($this->conf['pid_file']);
+        if (!is_dir($pidDir)) {
+            mkdir($pidDir, 0777, true);
+        }
 
         return $this;
     }
 
-	/**
-	 * @description 初始化允许的事件
-	 *
-	 * @return Server
-	 */
-	private function initAllowEvents()
-	{
-		$this->allowEvents = array(
-			'handler' => 1,
-			'pipeMessage' => 1,
-			'initPool' => 1,
+    /**
+     * @description 初始化允许的事件
+     *
+     * @return Server
+     */
+    private function initAllowEvents()
+    {
+        $this->allowEvents = array(
+            'handler' => 1,
+            'pipeMessage' => 1,
+            'initPool' => 1,
             'monitor' => 1,
             'run_action' => 1,
             'unpack' => 1,
@@ -154,127 +152,127 @@ class Server implements PortInterface
             'connect' => 1,
             'close' => 1, 
             'error' => 1
-		);
+        );
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @description 初始化回调
-	 *
-	 * @return Server
-	 */
+    /**
+     * @description 初始化回调
+     *
+     * @return Server
+     */
     private function initCallback()
     {
         $this->serv->on('pipeMessage', array($this, 'pipeMessage'));
         $this->serv->on('workerStart', array($this, 'workerStart'));
         $this->serv->on('managerStart', array($this, 'managerStart'));
-		return $this;
+        return $this;
     }
 
-	/**
-	 * @description manager 启动回调
-	 *
-	 * @param Swoole\Server $serv
-	 *
-	 * @return null
-	 */
+    /**
+     * @description manager 启动回调
+     *
+     * @param Swoole\Server $serv
+     *
+     * @return null
+     */
     public function managerStart($serv)
     {
         ko_change_process_name($this->conf['name'] . ' master');
     }
 
-	/**
-	 * @description worker 启动回调
-	 *
-	 * @param Swoole\Server $serv
-	 *
-	 * @param int $workerId
-	 *
-	 * @return null
-	 */
+    /**
+     * @description worker 启动回调
+     *
+     * @param Swoole\Server $serv
+     *
+     * @param int $workerId
+     *
+     * @return null
+     */
     public function workerStart($serv, $workerId)
     {
         ko_change_process_name($this->conf['name'] . ' worker');
 
-		if (!isset($this->events['initPool'])) {
-			return;
-		}
+        if (!isset($this->events['initPool'])) {
+            return;
+        }
 
-		try {
-			call_user_func($this->events['initPool'], $this);
-		} catch (\Throwable $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-			}
-		}
+        try {
+            call_user_func($this->events['initPool'], $this);
+        } catch (\Throwable $e) {
+            if ($this->isRunDocker) {
+                Logger::writeExceptionLog(__LINE__, __FILE__, $e);
+            } else {
+                echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
+            }
+        }
     }
 
-	/**
-	 * @description 添加事件
-	 *
-	 * @param string $events
-	 *
-	 * @param callable $cal
-	 *
+    /**
+     * @description 添加事件
+     *
+     * @param string $events
+     *
+     * @param callable $cal
+     *
      * @return PortInterface
      *
      * @throws Exception
-	 */
-	public function on(string $event, $call) : PortInterface
-	{
-		if (!isset($this->allowEvents[$event])) {
+     */
+    public function on(string $event, $call) : PortInterface
+    {
+        if (!isset($this->allowEvents[$event])) {
             throw new \Exception('event: "' . $event . '" is not allow');
-		}
+        }
 
-		if (!is_callable($call)) {
+        if (!is_callable($call)) {
             throw new \Exception('callback is not callable');
-		}
+        }
 
-		$this->events[$event] = $call;
-		return $this;
-	}
+        $this->events[$event] = $call;
+        return $this;
+    }
 
-	/**
-	 * @description 管道事件回调
-	 *
-	 * @param Swoole\Server $serv
-	 *
-	 * @param int $workerId
-	 *
-	 * @param mixed $data
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 管道事件回调
+     *
+     * @param Swoole\Server $serv
+     *
+     * @param int $workerId
+     *
+     * @param mixed $data
+     *
+     * @return null
+     */
     public function pipeMessage($serv, $workerId, $data)
     {
         try {
-			if (!isset($this->events['pipeMessage'])) {
-				return;
-			}
+            if (!isset($this->events['pipeMessage'])) {
+                return;
+            }
 
-			call_user_func($this->events['pipeMessage'], $data['p'] ?? '', $data['m'] ?? '', $data['a'] ?? array());
+            call_user_func($this->events['pipeMessage'], $data['p'] ?? '', $data['m'] ?? '', $data['a'] ?? array(), $data['t'] ?? '');
         } catch (\Throwable $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL .
-					$e->getTraceAsString() . PHP_EOL;
-			}
-		}
+            if ($this->isRunDocker) {
+                Logger::writeExceptionLog(__LINE__, __FILE__, $e, $data['t'] ?? '');
+            } else {
+                echo $e->getMessage() . PHP_EOL .
+                    $e->getTraceAsString() . PHP_EOL;
+            }
+        }
     }
 
-	/**
-	 * @description 链接回调
-	 *
-	 * @param Swoole\Server $serv
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 链接回调
+     *
+     * @param Swoole\Server $serv
+     *
+     * @param int $fd
+     *
+     * @return null
+     */
     public function connect($serv, $fd)
     {
         if (!isset($this->events['connect'])) {
@@ -293,19 +291,19 @@ class Server implements PortInterface
         }
     }
 
-	/**
-	 * @description 接收回调
-	 *
-	 * @param Swoole\Server $serv
-	 *
-	 * @param int $fd
-	 *
-	 * @param int $reactor_id
-	 *
-	 * @param mixed $data
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 接收回调
+     *
+     * @param Swoole\Server $serv
+     *
+     * @param int $fd
+     *
+     * @param int $reactor_id
+     *
+     * @param mixed $data
+     *
+     * @return null
+     */
     public function receive($serv, $fd, $reactor_id, $data)
     {
         if (!isset($this->events['unpack'])) {
@@ -331,107 +329,116 @@ class Server implements PortInterface
         }
     }
 
-	/**
-	 * @description Hander 处理
-	 *
-	 * @param ProtocolInterface $packet
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 */
+    /**
+     * @description Hander 处理
+     *
+     * @param ProtocolInterface $packet
+     *
+     * @param int $fd
+     *
+     * @return null
+     */
     private function handler(ProtocolInterface $packet, $fd)
     {
-		$begin = microtime(true);
-		$reqTime = time();
-		$result = null;
+        $begin = microtime(true);
+        $reqTime = time();
+        $result = null;
+        $traceId = hash('sha256', uniqid($fd, true) . random_int(1000000, 9999999));
 
         try {
-			if (!isset($this->events['handler'])) {
-				return;
-			}
-
-			$result = call_user_func($this->events['handler'], $packet->getMessage(), $packet->getAction(), $fd, $this->serv->getClientInfo($fd)['remote_ip']);
-			if (empty($result) || !isset($result['message']) || !isset($result['action'])) {
+            if (!isset($this->events['handler'])) {
                 return;
-			}
+            }
+
+            $result = call_user_func($this->events['handler'], $packet->getMessage(), $packet->getAction(), $fd, $this->getClientIP($fd), $traceId);
+            if (empty($result) || !isset($result['message']) || !isset($result['action'])) {
+                return;
+            }
 
             $this->send($result['message'], $result['action'], $fd);
         } catch (CloseConnectionException $e) {
             $this->serv->close($fd);
-            Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-		} catch (BusiException $e) {
+            Logger::writeExceptionLog(__LINE__, __FILE__, $e, $traceId);
+        } catch (BusiException $e) {
             if (!isset($this->events['error'])) {
                 return;
             }
             $result = call_user_func($this->events['error'], $e);
-			if (empty($result) || !isset($result['message']) || !isset($result['action'])) {
+            if (empty($result) || !isset($result['message']) || !isset($result['action'])) {
                 return;
-			}
+            }
 
             $this->send($result['message'], $result['action'], $fd);
         } catch (\Throwable $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-			}
+            if ($this->isRunDocker) {
+                Logger::writeExceptionLog(__LINE__, __FILE__, $e, $traceId);
+            } else {
+                echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
+            }
         } finally {
             $end = microtime(true);
-            $this->monitor($begin, $end, $packet, $reqTime, $result, $fd);
+            $this->monitor($begin, $end, $packet, $reqTime, $result, $fd, $traceId);
         }
     }
 
-	/**
-	 * @description 监控
-	 *
-	 * @param float $begin
-	 *
-	 * @param float $end
-	 *
-	 * @param ProtocolInterface $packet
-	 *
-	 * @param int $reqTime
-	 *
-	 * @param Array $result
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 */
-	private function monitor($begin, $end, $packet, $reqTime, $result, $fd)
-	{
-		if (!isset($this->events['monitor'])) {
-			return;
-		}
+    /**
+     * @description 监控
+     *
+     * @param float $begin
+     *
+     * @param float $end
+     *
+     * @param ProtocolInterface $packet
+     *
+     * @param int $reqTime
+     *
+     * @param Array $result
+     *
+     * @param int $fd
+     *
+     * @return null
+     */
+    private function monitor($begin, $end, $packet, $reqTime, $result, $fd, $traceId)
+    {
+        if (!isset($this->events['monitor'])) {
+            return;
+        }
 
-		try {
-			call_user_func($this->events['monitor'], array(
-				'delay' => round(($end - $begin) * 1000, 2),
-				'action' => $packet->getAction(),
-				'ip' => $this->serv->getClientInfo($fd)['remote_ip'],
-				'time' => $reqTime,
-				'timestamp' => date('Y-m-d H:i:s', $reqTime),
-				'minute' => date('YmdHi', $reqTime),
-			));
-		} catch (\Throwable $e) {
-			if ($this->isRunDocker) {
-				Logger::writeExceptionLog(__LINE__, __FILE__, $e);
-			} else {
-				echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-			}
-		}
-	}
+        try {
+            call_user_func($this->events['monitor'], array(
+                'delay' => round(($end - $begin) * 1000, 2),
+                'request_time' => $begin * 10000,
+                'action' => $packet->getAction(),
+                'packet' => base64_encode($packet->getMessage()),
+                'ip' => $this->serv->getClientInfo($fd)['remote_ip'],
+                'time' => $reqTime,
+                'timestamp' => date('Y-m-d H:i:s', $reqTime),
+                'minute' => date('YmdHi', $reqTime),
+                'class' => '',
+                'method' => '',
+                'service' => $this->conf['name'],
+                'from' => $this->conf['name'],
+                'traceId' => $traceId,
+                'end' => $end * 10000
+            ));
+        } catch (\Throwable $e) {
+            if ($this->isRunDocker) {
+                Logger::writeExceptionLog(__LINE__, __FILE__, $e, $traceId);
+            } else {
+                echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
+            }
+        }
+    }
 
-	/**
-	 * @description 发送数据
-	 *
-	 * @param mixed $packet
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 发送数据
+     *
+     * @param mixed $packet
+     *
+     * @param int $fd
+     *
+     * @return null
+     */
     public function send($packet, int $action, $fd)
     {
         if (!$this->serv->exist($fd)) {
@@ -443,9 +450,9 @@ class Server implements PortInterface
         }
 
         $data = call_user_func($this->events['pack'], $packet, $action);
-		if (!$data) {
-			return false;
-		}
+        if (!$data) {
+            return false;
+        }
 
         $len = strlen($data);
         if ($len <= self::PACKET_MAX_LENGTH) {
@@ -461,15 +468,15 @@ class Server implements PortInterface
         return true;
     }
 
-	/**
-	 * @description 关闭链接
-	 *
-	 * @param Swoole\Server $serv
-	 *
-	 * @param int $fd
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 关闭链接
+     *
+     * @param Swoole\Server $serv
+     *
+     * @param int $fd
+     *
+     * @return null
+     */
     public function close($serv, $fd)
     {
         if (!isset($this->events['close'])) {
@@ -483,25 +490,25 @@ class Server implements PortInterface
         }
     }
 
-	/**
-	 * @description 启动服务
-	 *
-	 * @return null
-	 */
+    /**
+     * @description 启动服务
+     *
+     * @return null
+     */
     public function start()
     {
         $this->serv->start();
     }
 
-	/**
-	 * @description 获取底层服务
-	 *
-	 * @return Swoole\Server
-	 */
-	public function getServ()
-	{
-		return $this->serv;
-	}
+    /**
+     * @description 获取底层服务
+     *
+     * @return Swoole\Server
+     */
+    public function getServ()
+    {
+        return $this->serv;
+    }
 
     /**
      * @description 获取远程ID

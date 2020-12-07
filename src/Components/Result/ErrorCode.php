@@ -7,8 +7,6 @@
  *
  * @time        Tue Sep 24 09:11:38 2019
  *
- * @class       vendor/Kovey/Components/Result/ErrorCode.php
- *
  * @author      kovey
  */
 namespace Kovey\Components\Result;

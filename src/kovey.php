@@ -7,15 +7,13 @@
  *
  * @time        Tue Sep 24 00:27:20 2019
  *
- * @class       vendor/kovey.php
- *
  * @author      kovey
  */
 if (!extension_loaded('swoole')) {
-	echo PHP_EOL . 'swoole extension not install!' . PHP_EOL
-		. 'kovey framwork base on swoole 4.4.x!' . PHP_EOL
-		. 'please install swoole-4.4.x first!' . PHP_EOL;
-	exit;
+    echo PHP_EOL . 'swoole extension not install!' . PHP_EOL
+        . 'kovey framwork base on swoole 4.4.x!' . PHP_EOL
+        . 'please install swoole-4.4.x first!' . PHP_EOL;
+    exit;
 }
 
 /**
@@ -27,9 +25,9 @@ if (!extension_loaded('swoole')) {
  */
 function ko_change_process_name($name)
 {
-	if (ko_os_is_macos()) {
-		return;
-	}
+    if (ko_os_is_macos()) {
+        return;
+    }
 
     swoole_set_process_name($name);
 }
@@ -41,7 +39,7 @@ function ko_change_process_name($name)
  */
 function ko_os_is_macos()
 {
-	return stristr(PHP_OS, 'DAR') !== false;
+    return stristr(PHP_OS, 'DAR') !== false;
 }
 
 /**
@@ -51,7 +49,7 @@ function ko_os_is_macos()
  */
 function ko_os_is_linux()
 {
-	return stristr(PHP_OS, 'LINUX') !== false;
+    return stristr(PHP_OS, 'LINUX') !== false;
 }
 
 /**
@@ -61,17 +59,17 @@ function ko_os_is_linux()
  */
 function ko_os_is_windows()
 {
-	return !ko_os_is_macos() && stristr(PHP_OS, 'WIN') !== false;
+    return !ko_os_is_macos() && stristr(PHP_OS, 'WIN') !== false;
 }
 
 // 定义框架路径
 if (!defined('KOVEY_FRAMEWORK_PATH')) {
-	define('KOVEY_FRAMEWORK_PATH', __DIR__);
+    define('KOVEY_FRAMEWORK_PATH', __DIR__);
 }
 
 // 定义配置ROW
 if (!defined('KOVEY_FRAMEWORK_CONFIG_ROWS')) {
-	define('KOVEY_FRAMEWORK_CONFIG_ROWS', 1024);
+    define('KOVEY_FRAMEWORK_CONFIG_ROWS', 1024);
 }
 
 if (!defined('KOVEY_CONFIG_MAX_ROWS')) {
@@ -80,5 +78,5 @@ if (!defined('KOVEY_CONFIG_MAX_ROWS')) {
 
 // 如果未定义应用路径，则默认为上级目录
 if (!defined('APPLICATION_PATH')) {
-	define('APPLICATION_PATH', __DIR__ . '/..');
+    define('APPLICATION_PATH', __DIR__ . '/..');
 }

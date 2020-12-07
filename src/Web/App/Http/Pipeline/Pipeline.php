@@ -7,8 +7,6 @@
  *
  * @time        2019-10-19 12:34:45
  *
- * @file  vendor/Kovey\Web/Components/Middleware/Middleware.php
- *
  * @author      kovey
  */
 namespace Kovey\Web\App\Http\Pipeline;
@@ -19,159 +17,167 @@ use Kovey\Components\Parse\ContainerInterface;
 
 class Pipeline implements PipelineInterface
 {
-	/**
-	 * @description 请求对象
-	 *
-	 * @var RequestInterface
-	 */
-	private $request;
+    /**
+     * @description 请求对象
+     *
+     * @var RequestInterface
+     */
+    private $request;
 
-	/**
-	 * @description 方法
-	 *
-	 * @var string
-	 */
-	private $method;
+    /**
+     * @description 方法
+     *
+     * @var string
+     */
+    private $method;
 
-	/**
-	 * @description 容器
-	 *
-	 * @var ContainerInterface
-	 */
-	private $container;
+    /**
+     * @description 容器
+     *
+     * @var ContainerInterface
+     */
+    private $container;
 
-	/**
-	 * @description 相应对象
-	 *
-	 * @var ResponseInterface
-	 */
-	private $response;
+    /**
+     * @description 相应对象
+     *
+     * @var ResponseInterface
+     */
+    private $response;
 
-	/**
-	 * @description 构造
-	 *
-	 * @param ContainerInterface $container
-	 *
-	 * @return Pipeline
-	 */
-	public function __construct(ContainerInterface $container)
-	{
-		$this->container = $container;
-	}
+    /**
+     * @description trace id
+     *
+     * @var string
+     */
+    private $traceId;
 
-	/**
-	 * @description 设置请求对象和相应对象
-	 *
-	 * @param RequestInterface $request
-	 *
-	 * @param ResponseInterface $response
-	 *
-	 * @return Pipeline
-	 */
-	public function send(RequestInterface $request, ResponseInterface $response)
-	{
-		$this->request = $request;
-		$this->response = $response;
-		return $this;
-	}
+    /**
+     * @description 构造
+     *
+     * @param ContainerInterface $container
+     *
+     * @return Pipeline
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
 
-	/**
-	 * @description 设置中间件
-	 *
-	 * @param Array $middlewares
-	 *
-	 * @return Pipeline
-	 */
-	public function through(Array $middlewares)
-	{
-		$this->middlewares = $middlewares;
-		return $this;
-	}
+    /**
+     * @description 设置请求对象和相应对象
+     *
+     * @param RequestInterface $request
+     *
+     * @param ResponseInterface $response
+     *
+     * @return Pipeline
+     */
+    public function send(RequestInterface $request, ResponseInterface $response, $traceId)
+    {
+        $this->request = $request;
+        $this->response = $response;
+        $this->traceId = $traceId;
+        return $this;
+    }
 
-	/**
-	 * @description 设置方法
-	 *
-	 * @param string $method
-	 *
-	 * @return Pipeline
-	 */
-	public function via(string $method)
-	{
-		$this->method = $method;
-		return $this;
-	}
+    /**
+     * @description 设置中间件
+     *
+     * @param Array $middlewares
+     *
+     * @return Pipeline
+     */
+    public function through(Array $middlewares)
+    {
+        $this->middlewares = $middlewares;
+        return $this;
+    }
 
-	/**
-	 * @description 处理函数
-	 *
-	 * @param callable $description
-	 *
-	 * @return mixed
-	 */
-	public function then(callable $destination)
-	{
-		$pipeline = array_reduce(
+    /**
+     * @description 设置方法
+     *
+     * @param string $method
+     *
+     * @return Pipeline
+     */
+    public function via(string $method)
+    {
+        $this->method = $method;
+        return $this;
+    }
+
+    /**
+     * @description 处理函数
+     *
+     * @param callable $description
+     *
+     * @return mixed
+     */
+    public function then(callable $destination)
+    {
+        $pipeline = array_reduce(
             array_reverse($this->middlewares), $this->carry(), $this->prepareDestination($destination)
         );
 
-        return $pipeline($this->request, $this->response);
-	}
+        return $pipeline($this->request, $this->response, $this->traceId);
+    }
 
-	/**
-	 * @description 构造处理函数
-	 *
-	 * @return callable
-	 */
-	protected function carry()
-	{
-		return function ($stack, $pipe) {
-            return function ($request, $response) use ($stack, $pipe) {
+    /**
+     * @description 构造处理函数
+     *
+     * @return callable
+     */
+    protected function carry()
+    {
+        return function ($stack, $pipe) {
+            return function ($request, $response, $traceId) use ($stack, $pipe) {
                 if (is_callable($pipe)) {
-                    return call_user_func($pipe, $request, $response, $stack);
+                    return call_user_func($pipe, $request, $response, $stack, $traceId);
                 } elseif (! is_object($pipe)) {
                     list($name, $parameters) = $this->parsePipeString($pipe);
 
-                    $pipe = $this->container->get($name);
+                    $pipe = $this->container->get($name, $traceId);
 
-                    $parameters = array_merge([$request, $response, $stack], $parameters);
+                    $parameters = array_merge([$request, $response, $stack, $traceId], $parameters);
                 } else {
-                    $parameters = [$request, $response, $stack];
+                    $parameters = [$request, $response, $stack, $traceId];
                 }
 
                 return $pipe->{$this->method}(...$parameters);
             };
         };
-	}
+    }
 
-	/**
-	 * @description 构造下一个
-	 *
-	 * @param callable $description
-	 *
-	 * @return callable
-	 */
-	protected function prepareDestination(callable $destination)
+    /**
+     * @description 构造下一个
+     *
+     * @param callable $description
+     *
+     * @return callable
+     */
+    protected function prepareDestination(callable $destination)
     {
-        return function ($request, $response) use ($destination) {
-            return call_user_func($destination, $request, $response);
+        return function ($request, $response, $traceId) use ($destination) {
+            return call_user_func($destination, $request, $response, $traceId);
         };
     }
 
-	/**
-	 * @description 解析参数
-	 *
-	 * @param string $pipe
-	 *
-	 * @return Array
-	 */
-	protected function parsePipeString($pipe)
-	{
-		list($name, $parameters) = array_pad(explode(':', $pipe, 2), 2, []);
+    /**
+     * @description 解析参数
+     *
+     * @param string $pipe
+     *
+     * @return Array
+     */
+    protected function parsePipeString($pipe)
+    {
+        list($name, $parameters) = array_pad(explode(':', $pipe, 2), 2, []);
 
-		if (is_string($parameters)) {
-			$parameters = explode(',', $parameters);
-		}
+        if (is_string($parameters)) {
+            $parameters = explode(',', $parameters);
+        }
 
-		return [$name, $parameters];
-	}
+        return [$name, $parameters];
+    }
 }

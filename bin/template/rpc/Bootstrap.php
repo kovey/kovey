@@ -7,8 +7,6 @@
  *
  * @time        2019-11-16 22:42:00
  *
- * @file  /Users/kovey/Documents/php/kovey/rpc/application/Bootstrap.php
- *
  * @author      kovey
  */
 use Kovey\Components\Pool\Redis;
@@ -17,10 +15,10 @@ use Kovey\Config\Manager;
 
 class Bootstrap
 {
-	public function __initRequired($app)
-	{
-		$app->registerLocalLibPath(APPLICATION_PATH . '/application');
-	}
+    public function __initRequired($app)
+    {
+        $app->registerLocalLibPath(APPLICATION_PATH . '/application');
+    }
 
     public function __initPool($app)
     {

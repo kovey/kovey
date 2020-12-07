@@ -23,5 +23,5 @@ interface ContainerInterface
      *
      * @return mixed
      */
-    public function get(string $class, ...$args);
+    public function get(string $class, string $traceId, ...$args);
 }

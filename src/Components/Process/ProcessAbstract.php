@@ -64,7 +64,7 @@ abstract class ProcessAbstract
     final public function __construct()
     {
         $this->init();
-        $this->process = new \Swoole\Process(array($this, 'callBack'));
+        $this->process = new \Swoole\Process(array($this, 'callBack'), false, SOCK_DGRAM);
     }
 
     /**

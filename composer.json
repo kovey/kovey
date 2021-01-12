@@ -1,6 +1,6 @@
 {
     "name": "kovey/kovey",
-    "type": "project",
+    "type": "library",
     "description": "The Kovey Framework.",
     "keywords": [
         "framework",
@@ -28,10 +28,5 @@
             "Kovey\\": "src/"
         },
         "files": ["src/kovey.php"]
-    },
-    "scripts": {
-        "post-create-project-cmd": [
-            "@php ./bin/kf.php"
-        ]
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "kovey/kovey",
-    "type": "library",
+    "type": "project",
     "description": "The Kovey Framework.",
     "keywords": [
         "framework",
@@ -17,8 +17,8 @@
         }
     ],
     "require": {
-        "php": ">=7.3",
-        "ext-swoole": ">=4.4"
+        "php": "^7.3",
+        "ext-swoole": "^4.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3"
@@ -28,5 +28,10 @@
             "Kovey\\": "src/"
         },
         "files": ["src/kovey.php"]
+    },
+    "scripts": {
+        "post-create-project-cmd": [
+            "@php ./bin/kf.php"
+        ]
     }
 }
